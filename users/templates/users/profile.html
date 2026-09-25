@@ -10873,10 +10873,10 @@
                     {
                         title: 'Shelter Management',
                         links: [
-                            { id: 'dashboard', label: 'Shelter Care Hub', icon: 'home', badgeVal: 'Kochi', badgeClass: 'bg-emerald-500/20 text-emerald-300' },
-                            { id: 'pets', label: 'Shelter Pets', icon: 'paw-print', badgeVal: 'Registry', badgeClass: 'bg-emerald-500/20 text-emerald-400' },
+                            { id: 'dashboard', label: 'Dashboard', icon: 'home' },
+                            { id: 'pets', label: 'Shelter Pets', icon: 'paw-print' },
                             { id: 'delivery-logistics', label: 'Delivery Fleet', icon: 'truck' },
-                            { id: 'applications', label: 'Adoption Screenings', icon: 'user-check', badgeVal: '1 Active', badgeClass: 'bg-amber-500/20 text-amber-400' },
+                            { id: 'applications', label: 'Adoption Screenings', icon: 'user-check' },
                             { id: 'my-pets', label: 'Resident Animals', icon: 'heart-handshake' }
                         ]
                     },
@@ -12595,7 +12595,7 @@
                 const status = s.verificationStatus || s.status || 'Pending Verification';
                 const isVerified = status.toLowerCase().includes('verif');
                 const isRejected = status.toLowerCase().includes('reject');
-                const isActive = (s.accountStatus === 'Active') || (s.is_active !== false);
+                const isActive = s.accountStatus ? (s.accountStatus === 'Active') : (s.is_active !== false && s.is_active !== undefined);
 
                 const statusBadgeClass = isVerified
                     ? 'badge-status-approved'
@@ -15403,7 +15403,7 @@
                             c.accountStatus = data.accountStatus;
                         }
                     }
-                    if (typeof renderVerifiedShelters === 'function') renderVerifiedShelters();
+                    if (typeof renderAdminSheltersTable === 'function') renderAdminSheltersTable();
                     if (typeof renderAdminCustomersTable === 'function') renderAdminCustomersTable();
                 } else {
                     showToast(data.error || 'Failed to update account status');
