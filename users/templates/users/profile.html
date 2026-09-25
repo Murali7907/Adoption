@@ -1947,10 +1947,10 @@
 
                             <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5 sm:gap-4 items-stretch">
 
-                                <!-- Card 1: Total Pets -->
-                                <div class="dash-card p-4 rounded-2xl flex flex-col justify-between h-[126px] cursor-pointer hover:border-purple-500/40 hover:-translate-y-0.5 transition-all duration-200 group bg-[#121620]/90 border border-white/10 shadow-sm" onclick="switchDashboardTab('pets')">
+                                <!-- Card 1: Total Pets (Shelter Network) -->
+                                <div class="dash-card p-4 rounded-2xl flex flex-col justify-between h-[126px] cursor-pointer hover:border-purple-500/40 hover:-translate-y-0.5 transition-all duration-200 group bg-[#121620]/90 border border-white/10 shadow-sm" onclick="switchDashboardTab('shelters')">
                                     <div class="flex items-center justify-between gap-2 text-slate-400">
-                                        <span class="text-[10px] font-bold font-mono uppercase tracking-wider text-slate-400 truncate">Total Pets</span>
+                                        <span class="text-[10px] font-bold font-mono uppercase tracking-wider text-slate-400 truncate">Shelter Pets</span>
                                         <div class="w-7 h-7 rounded-lg bg-purple-500/15 flex items-center justify-center text-purple-400 shrink-0 group-hover:scale-110 transition-transform">
                                             <i data-lucide="paw-print" class="w-3.5 h-3.5"></i>
                                         </div>
@@ -1959,12 +1959,12 @@
                                         <div class="text-2xl sm:text-3xl font-extrabold text-white font-heading tracking-tight leading-none" id="kpi-total-pets">18</div>
                                     </div>
                                     <div class="flex items-center text-[11px] text-purple-300 font-medium truncate" id="kpi-total-pets-sub">
-                                        10 In-Process &bull; 8 Free
+                                        Partner Shelter Network
                                     </div>
                                 </div>
 
-                                <!-- Card 2: Available Pets -->
-                                <div class="dash-card p-4 rounded-2xl flex flex-col justify-between h-[126px] cursor-pointer hover:border-emerald-500/40 hover:-translate-y-0.5 transition-all duration-200 group bg-[#121620]/90 border border-white/10 shadow-sm" onclick="switchDashboardTab('pets')">
+                                <!-- Card 2: Available Pets (Shelter Facilities) -->
+                                <div class="dash-card p-4 rounded-2xl flex flex-col justify-between h-[126px] cursor-pointer hover:border-emerald-500/40 hover:-translate-y-0.5 transition-all duration-200 group bg-[#121620]/90 border border-white/10 shadow-sm" onclick="switchDashboardTab('shelters')">
                                     <div class="flex items-center justify-between gap-2 text-slate-400">
                                         <span class="text-[10px] font-bold font-mono uppercase tracking-wider text-slate-400 truncate">Available Pets</span>
                                         <div class="w-7 h-7 rounded-lg bg-emerald-500/15 flex items-center justify-center text-emerald-400 shrink-0 group-hover:scale-110 transition-transform">
@@ -4407,10 +4407,10 @@
                                         <div class="text-xs font-bold text-white group-hover:text-emerald-300">Partner Shelters</div>
                                         <div class="text-[10px] text-slate-400">6 facilities audited</div>
                                     </button>
-                                    <button type="button" onclick="switchDashboardTab('pets')" class="p-3 rounded-xl bg-white/[0.02] border border-white/10 hover:border-[#FF8F1C]/40 text-left transition-all group cursor-pointer">
-                                        <i data-lucide="paw-print" class="w-4 h-4 text-[#FF8F1C] mb-1.5"></i>
-                                        <div class="text-xs font-bold text-white group-hover:text-[#FF8F1C]">Pets Inventory</div>
-                                        <div class="text-[10px] text-slate-400">18 companion profiles</div>
+                                    <button type="button" onclick="switchDashboardTab('adoption-orders')" class="p-3 rounded-xl bg-white/[0.02] border border-white/10 hover:border-[#FF8F1C]/40 text-left transition-all group cursor-pointer">
+                                        <i data-lucide="shopping-bag" class="w-4 h-4 text-[#FF8F1C] mb-1.5"></i>
+                                        <div class="text-xs font-bold text-white group-hover:text-[#FF8F1C]">Adoption Orders</div>
+                                        <div class="text-[10px] text-slate-400">Manage adoption workflow</div>
                                     </button>
                                 </div>
                             </div>
