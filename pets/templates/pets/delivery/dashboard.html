@@ -1,0 +1,998 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KindHeart | Delivery Staff Dashboard</title>
+    <meta name="description" content="KindHeart Delivery & Logistics Dashboard — Manage animal transport orders, telematics, and milestones.">
+    <link rel="icon" type="image/png" href="/scroll_up_logo.png">
+
+    <!-- Google Fonts: Outfit, Plus Jakarta Sans, JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS v4 Browser Build -->
+    <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style type="text/css">
+        :root {
+            --font-heading: "Outfit", -apple-system, BlinkMacSystemFont, sans-serif;
+            --font-body: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, sans-serif;
+            --font-mono: "JetBrains Mono", monospace;
+            --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+            color-scheme: dark;
+        }
+
+        html.light {
+            color-scheme: light;
+        }
+
+        body {
+            font-family: var(--font-body);
+            background-color: #0A0A0B;
+            color: #F8FAFC;
+            transition: background-color 0.3s var(--ease-out), color 0.3s var(--ease-out);
+            overflow-x: hidden;
+        }
+
+        html.light body {
+            background-color: #F8FAFC;
+            color: #0F172A;
+        }
+
+        .font-heading {
+            font-family: var(--font-heading);
+        }
+
+        .font-mono {
+            font-family: var(--font-mono);
+        }
+
+        /* SCROLLBAR CUSTOMIZATION */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 999px;
+        }
+        html.light ::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.15);
+        }
+
+        /* KINDHEART BUTTONS */
+        .btn-apple-primary {
+            background: linear-gradient(135deg, #FF8F1C 0%, #E06000 100%) !important;
+            color: #FFFFFF !important;
+            font-family: var(--font-heading) !important;
+            font-weight: 700 !important;
+            font-size: 0.8125rem !important;
+            letter-spacing: 0.01em !important;
+            padding: 0.7rem 1.4rem !important;
+            border-radius: 14px !important;
+            box-shadow: 0 8px 20px rgba(255, 143, 28, 0.35) !important;
+            transition: all 0.25s var(--ease-out) !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            gap: 0.5rem !important;
+            border: none !important;
+            cursor: pointer !important;
+            white-space: nowrap !important;
+            text-decoration: none !important;
+        }
+        .btn-apple-primary:hover {
+            background: linear-gradient(135deg, #FF9B2E 0%, #EA580C 100%) !important;
+            transform: translateY(-2px) scale(1.01) !important;
+            box-shadow: 0 12px 26px rgba(255, 143, 28, 0.45) !important;
+        }
+
+        .btn-apple-secondary {
+            background: rgba(255, 255, 255, 0.06) !important;
+            color: #FFFFFF !important;
+            font-family: var(--font-heading) !important;
+            font-weight: 600 !important;
+            font-size: 0.8125rem !important;
+            padding: 0.7rem 1.3rem !important;
+            border-radius: 14px !important;
+            border: 1px solid rgba(255, 255, 255, 0.14) !important;
+            backdrop-filter: blur(16px) !important;
+            -webkit-backdrop-filter: blur(16px) !important;
+            transition: all 0.25s var(--ease-out) !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            gap: 0.5rem !important;
+            cursor: pointer !important;
+            white-space: nowrap !important;
+            text-decoration: none !important;
+        }
+        .btn-apple-secondary:hover {
+            background: rgba(255, 255, 255, 0.14) !important;
+            border-color: rgba(255, 143, 28, 0.6) !important;
+            color: #FF8F1C !important;
+            transform: translateY(-1px) !important;
+        }
+        html.light .btn-apple-secondary {
+            background: #FFFFFF !important;
+            color: #0F172A !important;
+            border: 1px solid #E2E8F0 !important;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
+        }
+        html.light .btn-apple-secondary:hover {
+            background: #F1F5F9 !important;
+            border-color: #EA580C !important;
+            color: #EA580C !important;
+        }
+
+        /* LIGHT MODE ADAPTATIONS (MATCHING PROFILE.HTML) */
+        .keep-white, html.light .keep-white {
+            color: #FFFFFF !important;
+        }
+        html.light .text-white:not(.keep-white) {
+            color: #0F172A !important;
+        }
+        html.light .text-slate-200,
+        html.light .text-slate-300 {
+            color: #334155 !important;
+        }
+        html.light .text-slate-400 {
+            color: #64748B !important;
+        }
+        html.light .border-white\/10,
+        html.light .border-white\/15,
+        html.light .border-white\/20,
+        html.light .border-white\/5 {
+            border-color: #E2E8F0 !important;
+        }
+        html.light .bg-white\/5,
+        html.light .bg-white\/10,
+        html.light .bg-white\/\[0\.02\],
+        html.light .bg-white\/\[0\.03\],
+        html.light .bg-white\/\[0\.04\] {
+            background-color: #F8FAFC !important;
+        }
+        html.light .text-blue-300,
+        html.light .text-blue-400 {
+            color: #1D4ED8 !important;
+        }
+        html.light .text-emerald-300,
+        html.light .text-emerald-400 {
+            color: #047857 !important;
+        }
+        html.light .text-amber-300,
+        html.light .text-amber-400 {
+            color: #B45309 !important;
+        }
+        html.light .text-purple-300,
+        html.light .text-purple-400 {
+            color: #6D28D9 !important;
+        }
+        html.light .bg-purple-500\/15 {
+            background-color: rgba(109, 40, 217, 0.1) !important;
+        }
+        html.light .border-purple-500\/25 {
+            border-color: rgba(109, 40, 217, 0.25) !important;
+        }
+        html.light .bg-amber-500\/20 {
+            background-color: #FEF3C7 !important;
+            border-color: #FDE68A !important;
+            color: #92400E !important;
+        }
+        html.light .bg-emerald-500\/15 {
+            background-color: #D1FAE5 !important;
+            color: #065F46 !important;
+        }
+
+        /* CARD SYSTEM */
+        .dash-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 22px;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            transition: all 0.3s var(--ease-out);
+        }
+        .dash-card:hover {
+            border-color: rgba(255, 255, 255, 0.15);
+        }
+        html.light .dash-card {
+            background: #FFFFFF !important;
+            border: 1px solid #E2E8F0 !important;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04) !important;
+        }
+        html.light .dash-card:hover {
+            border-color: #CBD5E1 !important;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.07) !important;
+        }
+        html.light .dash-hero-card {
+            background: linear-gradient(135deg, #FFF7ED 0%, #FFFFFF 100%) !important;
+            border-color: #FED7AA !important;
+        }
+
+        /* SIDEBAR STYLING */
+        .sidebar-panel {
+            background-color: #0D1117;
+            border-color: rgba(255, 255, 255, 0.08);
+        }
+        html.light .sidebar-panel {
+            background-color: #FFFFFF !important;
+            border-color: #E2E8F0 !important;
+        }
+
+        .nav-sidebar-link {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            width: 100%;
+            height: 42px;
+            min-height: 42px;
+            padding: 0 0.95rem;
+            border-radius: 12px;
+            font-size: 0.8125rem;
+            font-weight: 600;
+            color: #94A3B8;
+            transition: all 0.2s var(--ease-out);
+            cursor: pointer;
+            text-decoration: none;
+            position: relative;
+            box-sizing: border-box;
+        }
+        .nav-sidebar-link:hover {
+            color: #FFFFFF;
+            background: rgba(255, 255, 255, 0.06);
+        }
+        .nav-sidebar-link.is-active {
+            color: #FFFFFF;
+            background: rgba(255, 143, 28, 0.14);
+            border: 1px solid rgba(255, 143, 28, 0.3);
+        }
+        .nav-sidebar-link.is-active .nav-icon {
+            color: #FF8F1C;
+        }
+        .nav-sidebar-link.is-active::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 20%;
+            bottom: 20%;
+            width: 3px;
+            background: #FF8F1C;
+            border-radius: 999px;
+        }
+        html.light .nav-sidebar-link {
+            color: #64748B !important;
+        }
+        html.light .nav-sidebar-link:hover {
+            color: #0F172A !important;
+            background: #F1F5F9 !important;
+        }
+        html.light .nav-sidebar-link.is-active {
+            color: #0F172A !important;
+            background: rgba(234, 88, 12, 0.08) !important;
+            border: 1px solid rgba(234, 88, 12, 0.22) !important;
+        }
+        html.light .nav-sidebar-link.is-active .nav-icon {
+            color: #EA580C !important;
+        }
+        html.light .nav-sidebar-link.is-active::before {
+            background: #EA580C !important;
+        }
+
+        .pet-photo-zoom {
+            transition: transform 0.4s var(--ease-out);
+        }
+        .pet-photo-zoom:hover {
+            transform: scale(1.03);
+        }
+
+        /* COLLAPSIBLE SIDEBAR & USER DROPDOWN (MATCHING PROFILE.HTML) */
+        #dash-sidebar,
+        #dash-sidebar *,
+        #sidebar-nav-container,
+        #sidebar-nav-container * {
+            scrollbar-width: none !important;
+            -ms-overflow-style: none !important;
+        }
+        #dash-sidebar::-webkit-scrollbar,
+        #dash-sidebar *::-webkit-scrollbar,
+        #sidebar-nav-container::-webkit-scrollbar,
+        #sidebar-nav-container *::-webkit-scrollbar {
+            display: none !important;
+            width: 0 !important;
+            height: 0 !important;
+            background: transparent !important;
+        }
+
+        #dash-sidebar.is-collapsed {
+            width: 4.75rem !important;
+            cursor: pointer;
+        }
+        #dash-sidebar.is-collapsed .sidebar-brand-text,
+        #dash-sidebar.is-collapsed .sidebar-section-title,
+        #dash-sidebar.is-collapsed .nav-sidebar-link span {
+            display: none !important;
+        }
+
+        .sidebar-arrow-row {
+            padding: 0.5rem 0.85rem 0.25rem 0.85rem;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        @media (max-width: 1023px) {
+            .sidebar-arrow-row {
+                display: none !important;
+            }
+        }
+        .sidebar-arrow-btn {
+            width: 32px;
+            height: 32px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            color: #94A3B8;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .sidebar-arrow-btn:hover {
+            color: #FFFFFF;
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(255, 255, 255, 0.2);
+            transform: scale(1.06);
+        }
+        .sidebar-arrow-icon {
+            transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1) !important;
+            transform: rotate(0deg);
+        }
+        #dash-sidebar.is-collapsed .sidebar-arrow-row {
+            justify-content: center !important;
+            padding-left: 0 !important;
+            padding-right: 0 !important;
+        }
+        #dash-sidebar.is-collapsed .sidebar-arrow-icon {
+            transform: rotate(180deg) !important;
+        }
+        html.light .sidebar-arrow-btn {
+            color: #64748B;
+            background: #F1F5F9;
+            border-color: #E2E8F0;
+        }
+        html.light .sidebar-arrow-btn:hover {
+            color: #0F172A;
+            background: #E2E8F0;
+            border-color: #CBD5E1;
+        }
+        #dash-sidebar.is-collapsed .sidebar-header-container {
+            padding-left: 0 !important;
+            padding-right: 0 !important;
+            justify-content: center !important;
+        }
+        #dash-sidebar.is-collapsed .sidebar-brand-link {
+            justify-content: center !important;
+            margin: 0 auto;
+        }
+        #dash-sidebar.is-collapsed #sidebar-nav-container {
+            padding-left: 0.35rem !important;
+            padding-right: 0.35rem !important;
+        }
+        #dash-sidebar.is-collapsed .nav-sidebar-link {
+            justify-content: center !important;
+            padding: 0 !important;
+            height: 42px !important;
+            min-height: 42px !important;
+            width: 42px !important;
+            margin: 0.25rem auto !important;
+            border-radius: 12px !important;
+        }
+        #dash-sidebar.is-collapsed .nav-sidebar-link::before {
+            display: none !important;
+        }
+        #dash-sidebar.is-collapsed .sidebar-footer-container {
+            padding: 0.75rem 0.25rem !important;
+        }
+
+        #dash-sidebar {
+            border: none !important;
+            border-right: none !important;
+            box-shadow: none !important;
+            transition: width 0.28s cubic-bezier(0.16, 1, 0.3, 1) !important;
+        }
+
+        html.light #user-dropdown {
+            background-color: #FFFFFF !important;
+            border-color: #E2E8F0 !important;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.12) !important;
+        }
+        html.light #user-dropdown .text-white {
+            color: #0F172A !important;
+        }
+    </style>
+</head>
+<body class="min-h-screen font-sans transition-colors duration-300">
+
+    <div class="flex min-h-screen">
+        
+        <!-- MATCHING SIDEBAR -->
+        <aside id="dash-sidebar" onclick="if (isSidebarCollapsed()) toggleSidebarCollapse(event)"
+            class="fixed inset-y-0 left-0 z-[150] w-64 bg-[#0D0E12] lg:bg-[#0A0A0B]/90 border-0 border-none flex flex-col transition-all duration-300 ease-out -translate-x-full lg:translate-x-0 lg:static backdrop-blur-2xl shadow-none shrink-0">
+            
+            <!-- Brand Header -->
+            <div class="h-18 min-h-[72px] flex items-center justify-between px-5 border-b border-white/10 shrink-0 sidebar-header-container">
+                <a href="{% url 'home' %}" onclick="if (isSidebarCollapsed()) { toggleSidebarCollapse(event); return false; }"
+                    class="flex items-center gap-3 group sidebar-brand-link min-w-0" title="KindHeart">
+                    <div class="w-8 h-8 flex items-center justify-center shrink-0">
+                        <img src="/kindheart_icon_dark.png" alt="KindHeart Logo" class="w-full h-full object-contain block light:hidden" onerror="this.src='/scroll_up_logo.png'" />
+                        <img src="/kindheart_icon_light.png" alt="KindHeart Logo" class="w-full h-full object-contain hidden light:block" onerror="this.src='/scroll_up_logo.png'" />
+                    </div>
+                    <span class="font-heading font-extrabold text-lg tracking-tight text-white sidebar-brand-text truncate">Kind<span class="text-[#FF8F1C]">Heart</span></span>
+                </a>
+                <button onclick="toggleSidebar(false)" class="lg:hidden p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-white/10 shrink-0" aria-label="Close sidebar">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <!-- Dynamic Rotating Arrow Toggle (Above all icons, below brand name & brand icon) -->
+            <div class="sidebar-arrow-row hidden lg:flex">
+                <button type="button" onclick="toggleSidebarCollapse(event)" id="sidebar-arrow-btn"
+                    class="sidebar-arrow-btn"
+                    aria-label="Toggle sidebar width" title="Collapse sidebar">
+                    <i id="sidebar-arrow-icon" data-lucide="chevron-left" class="w-4 h-4 sidebar-arrow-icon"></i>
+                </button>
+            </div>
+
+            <!-- Navigation Links -->
+            <div id="sidebar-nav-container" class="flex-1 overflow-y-auto px-3 py-1 space-y-1" style="scrollbar-width: none; -ms-overflow-style: none;">
+                <div class="px-3 pb-2 text-[10px] font-mono font-bold uppercase tracking-wider text-slate-500 sidebar-section-title">Transport Portal</div>
+                
+                <a href="{% url 'delivery_dashboard' %}" class="nav-sidebar-link is-active" title="My Deliveries">
+                    <i data-lucide="package" class="nav-icon w-4 h-4"></i>
+                    <span>My Deliveries</span>
+                    <span class="ml-auto px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-[#FF8F1C]/20 text-[#FF8F1C]">1</span>
+                </a>
+                <a href="{% url 'delivery_tracking' %}" class="nav-sidebar-link" title="Delivery Tracking">
+                    <i data-lucide="navigation" class="nav-icon w-4 h-4"></i>
+                    <span>Delivery Tracking</span>
+                </a>
+                <a href="{% url 'delivery_confirmation' %}" class="nav-sidebar-link" title="Delivery Confirmation">
+                    <i data-lucide="camera" class="nav-icon w-4 h-4"></i>
+                    <span>Delivery Confirmation</span>
+                </a>
+                <a href="{% url 'profile' %}" class="nav-sidebar-link" title="My Profile">
+                    <i data-lucide="user" class="nav-icon w-4 h-4"></i>
+                    <span>My Profile</span>
+                </a>
+            </div>
+
+            <!-- Footer Links -->
+            <div class="p-3 border-t border-white/10 space-y-1 sidebar-footer-container">
+                <a href="{% url 'home' %}" class="nav-sidebar-link" title="Main Website">
+                    <i data-lucide="globe" class="nav-icon w-4 h-4"></i>
+                    <span>Main Website</span>
+                </a>
+                <a href="{% url 'login' %}" class="nav-sidebar-link hover:!bg-red-500/10 hover:!text-red-400 text-red-400" title="Logout">
+                    <i data-lucide="log-out" class="nav-icon w-4 h-4 text-red-400"></i>
+                    <span>Logout</span>
+                </a>
+            </div>
+        </aside>
+
+        <!-- Mobile Drawer Backdrop -->
+        <div id="sidebar-backdrop" onclick="toggleSidebar(false)" class="fixed inset-0 z-[140] bg-black/60 backdrop-blur-sm hidden lg:hidden"></div>
+
+        <!-- MAIN VIEWPORT CONTAINER -->
+        <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
+            
+            <!-- MATCHING STICKY TOP HEADER -->
+            <header class="sticky top-0 z-[60] relative h-18 min-h-[72px] px-4 sm:px-8 bg-[#0A0A0B]/90 backdrop-blur-2xl flex items-center justify-between shrink-0 border-b border-white/10">
+                <!-- Left: Mobile Menu Toggle & Title -->
+                <div class="flex items-center gap-3">
+                    <button onclick="toggleSidebar(true)" class="lg:hidden p-2 text-slate-300 hover:text-white rounded-lg hover:bg-white/10" aria-label="Open navigation">
+                        <i data-lucide="menu" class="w-5 h-5"></i>
+                    </button>
+                    <div>
+                        <h1 class="text-base sm:text-lg font-bold text-white font-heading tracking-tight">Delivery Staff Dashboard</h1>
+                        <div class="text-[11px] text-slate-400 font-mono hidden sm:block">Transport Operations &bull; Assigned Deliveries</div>
+                    </div>
+                </div>
+
+                <!-- Right: Theme Toggle & Working Profile Dropdown -->
+                <div class="flex items-center gap-2 sm:gap-3">
+                    <!-- Theme Toggle -->
+                    <button type="button" onclick="toggleTheme()" class="btn-apple-secondary p-2 rounded-full !w-9 !h-9 !p-0 flex items-center justify-center cursor-pointer" title="Toggle Light / Dark Mode">
+                        <i id="theme-icon" data-lucide="sun" class="w-4 h-4"></i>
+                    </button>
+                    
+                    <!-- Dynamic User Profile Dropdown -->
+                    <div class="relative z-[70] pl-2 border-l border-white/10 light:border-slate-300" id="user-dropdown-container">
+                        <button type="button" onclick="toggleUserDropdown(event)" id="header-user-btn"
+                            class="flex items-center gap-2 hover:opacity-90 transition-all cursor-pointer focus:outline-none p-1.5 rounded-xl hover:bg-white/5 light:hover:bg-slate-100"
+                            aria-label="User account menu" aria-haspopup="true">
+                            <div id="header-user-avatar"
+                                class="w-8 h-8 rounded-full bg-gradient-to-br from-[#FF8F1C] to-[#E06000] flex items-center justify-center font-bold text-white text-xs font-heading shadow-md shrink-0">
+                                JD
+                            </div>
+                            <span class="hidden md:inline text-xs font-bold text-white light:text-slate-900 font-heading">John Driver</span>
+                            <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-slate-400 transition-transform duration-200" id="user-dropdown-arrow"></i>
+                        </button>
+
+                        <!-- Profile Dropdown Panel -->
+                        <div id="user-dropdown"
+                            class="absolute right-0 mt-2 w-72 sm:w-80 rounded-2xl bg-[#121620] light:bg-white border border-white/15 light:border-slate-200 shadow-2xl p-4 hidden z-[80]">
+                            
+                            <!-- User Header Card -->
+                            <div class="flex items-center gap-3 pb-3.5 border-b border-white/10">
+                                <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-[#FF8F1C] to-[#E06000] flex items-center justify-center font-black text-white text-sm font-heading shadow-lg shrink-0">
+                                    JD
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <div class="font-heading font-bold text-sm text-white truncate">John Driver</div>
+                                    <div class="text-[11px] text-slate-400 font-mono truncate">courier@kindheart.org</div>
+                                    <div class="flex items-center gap-1.5 mt-1">
+                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold font-mono bg-[#FF8F1C]/20 text-[#FF8F1C] border border-[#FF8F1C]/30">
+                                            <i data-lucide="truck" class="w-3 h-3 text-[#FF8F1C]"></i>
+                                            <span>Transport Staff</span>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Navigation Links -->
+                            <div class="py-2.5 space-y-1 text-xs font-medium">
+                                <a href="{% url 'delivery_dashboard' %}" class="flex items-center justify-between px-3 py-2 rounded-xl text-slate-300 hover:text-white hover:bg-white/5 transition-colors group">
+                                    <div class="flex items-center gap-2.5">
+                                        <i data-lucide="package" class="w-4 h-4 text-[#FF8F1C]"></i>
+                                        <span>My Deliveries</span>
+                                    </div>
+                                    <span class="text-[10px] text-slate-400 font-mono group-hover:text-white">&rarr;</span>
+                                </a>
+                                <a href="{% url 'delivery_tracking' %}" class="flex items-center justify-between px-3 py-2 rounded-xl text-slate-300 hover:text-white hover:bg-white/5 transition-colors group">
+                                    <div class="flex items-center gap-2.5">
+                                        <i data-lucide="navigation" class="w-4 h-4 text-blue-400"></i>
+                                        <span>Delivery Tracking</span>
+                                    </div>
+                                    <span class="text-[10px] text-slate-400 font-mono group-hover:text-white">&rarr;</span>
+                                </a>
+                                <a href="{% url 'delivery_confirmation' %}" class="flex items-center justify-between px-3 py-2 rounded-xl text-slate-300 hover:text-white hover:bg-white/5 transition-colors group">
+                                    <div class="flex items-center gap-2.5">
+                                        <i data-lucide="camera" class="w-4 h-4 text-emerald-400"></i>
+                                        <span>Delivery Confirmation</span>
+                                    </div>
+                                    <span class="text-[10px] text-slate-400 font-mono group-hover:text-white">&rarr;</span>
+                                </a>
+                                <a href="{% url 'profile' %}" class="flex items-center justify-between px-3 py-2 rounded-xl text-slate-300 hover:text-white hover:bg-white/5 transition-colors group">
+                                    <div class="flex items-center gap-2.5">
+                                        <i data-lucide="user" class="w-4 h-4 text-purple-400"></i>
+                                        <span>My Profile</span>
+                                    </div>
+                                    <span class="text-[10px] text-slate-400 font-mono group-hover:text-white">&rarr;</span>
+                                </a>
+                            </div>
+
+                            <!-- Sign Out -->
+                            <div class="pt-2 border-t border-white/10">
+                                <a href="{% url 'login' %}"
+                                    class="flex items-center gap-2 px-3 py-2 rounded-xl text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-colors text-xs font-semibold">
+                                    <i data-lucide="log-out" class="w-4 h-4"></i>
+                                    <span>Sign Out</span>
+                                </a>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- MAIN BODY -->
+            <main class="flex-1 p-6 sm:p-8 lg:p-10 overflow-y-auto max-w-7xl mx-auto w-full">
+
+                <!-- HERO WELCOME BANNER -->
+                <section class="dash-card dash-hero-card p-6 sm:p-7 relative overflow-hidden bg-gradient-to-br from-[#1A1F2C]/80 via-[#121620]/90 to-transparent border border-white/10 mb-8">
+                    <div class="relative z-10 max-w-3xl">
+                        <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full text-[11px] font-mono font-semibold bg-[#FF8F1C]/15 text-[#FF8F1C] border border-[#FF8F1C]/30 mb-3">
+                            <i data-lucide="shield-check" class="w-3.5 h-3.5"></i>
+                            <span>Humane Transport Protocol Activated</span>
+                        </div>
+                        <h2 class="text-xl sm:text-2xl lg:text-3xl font-extrabold text-white font-heading tracking-tight">
+                            Active Dispatch: Companion Transport Order
+                        </h2>
+                        <p class="text-xs sm:text-sm text-slate-300 mt-2 leading-relaxed font-light">
+                            Real-time animal transport logistics, live crate climate monitoring, and automated delivery milestone verification. Safe, temperature-monitored transition from partner shelter to adopter's residence.
+                        </p>
+                    </div>
+                    <!-- Ambient orange glow -->
+                    <div class="absolute -right-16 -top-16 w-64 h-64 rounded-full bg-[#FF8F1C]/10 blur-[90px] pointer-events-none"></div>
+                </section>
+
+                <!-- OPERATIONAL OVERVIEW SECTION (Tags removed, renamed per request) -->
+                <section class="mb-8">
+                    <div class="flex items-center justify-between mb-3 px-0.5">
+                        <h3 class="text-xs font-mono font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
+                            <i data-lucide="activity" class="w-3.5 h-3.5 text-[#FF8F1C]"></i>
+                            <span>Delivery Operations Overview</span>
+                        </h3>
+                    </div>
+
+                    <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4 items-stretch">
+                        
+                        <!-- KPI 1: Assigned Deliveries -->
+                        <div class="dash-card p-4 rounded-2xl flex flex-col justify-between h-[126px] hover:border-[#FF8F1C]/40 hover:-translate-y-0.5 transition-all duration-200 group">
+                            <div class="flex items-center justify-between gap-2 text-slate-400">
+                                <span class="text-[10px] font-bold font-mono uppercase tracking-wider text-slate-400 truncate">Assigned Deliveries</span>
+                                <div class="w-7 h-7 rounded-lg bg-[#FF8F1C]/15 flex items-center justify-center text-[#FF8F1C] shrink-0 group-hover:scale-110 transition-transform">
+                                    <i data-lucide="package" class="w-3.5 h-3.5"></i>
+                                </div>
+                            </div>
+                            <div class="my-auto py-0.5">
+                                <div class="text-2xl sm:text-3xl font-extrabold text-white font-heading tracking-tight leading-none">1</div>
+                            </div>
+                            <div class="flex items-center text-[11px] text-[#FF8F1C] font-medium truncate">
+                                Order #DEL-1024 Queued
+                            </div>
+                        </div>
+
+                    <!-- KPI 2: Route Distance -->
+                    <div class="dash-card p-4 rounded-2xl flex flex-col justify-between h-[126px] hover:border-blue-500/40 hover:-translate-y-0.5 transition-all duration-200 group">
+                        <div class="flex items-center justify-between gap-2 text-slate-400">
+                            <span class="text-[10px] font-bold font-mono uppercase tracking-wider text-slate-400 truncate">Route Distance</span>
+                            <div class="w-7 h-7 rounded-lg bg-blue-500/15 flex items-center justify-center text-blue-400 shrink-0 group-hover:scale-110 transition-transform">
+                                <i data-lucide="map-pin" class="w-3.5 h-3.5"></i>
+                            </div>
+                        </div>
+                        <div class="my-auto py-0.5">
+                            <div class="text-2xl sm:text-3xl font-extrabold text-white light:text-slate-900 font-heading tracking-tight leading-none">14.2 <span class="text-sm font-normal text-slate-400">km</span></div>
+                        </div>
+                        <div class="flex items-center text-[11px] text-blue-400 font-medium truncate">
+                            ~35 Mins Est. Travel
+                        </div>
+                    </div>
+
+                    <!-- KPI 3: Crate Climate -->
+                    <div class="dash-card p-4 rounded-2xl flex flex-col justify-between h-[126px] hover:border-emerald-500/40 hover:-translate-y-0.5 transition-all duration-200 group">
+                        <div class="flex items-center justify-between gap-2 text-slate-400">
+                            <span class="text-[10px] font-bold font-mono uppercase tracking-wider text-slate-400 truncate">Crate Climate</span>
+                            <div class="w-7 h-7 rounded-lg bg-emerald-500/15 flex items-center justify-center text-emerald-400 shrink-0 group-hover:scale-110 transition-transform">
+                                <i data-lucide="thermometer" class="w-3.5 h-3.5"></i>
+                            </div>
+                        </div>
+                        <div class="my-auto py-0.5">
+                            <div class="text-2xl sm:text-3xl font-extrabold text-emerald-400 font-heading tracking-tight leading-none">21.8°C</div>
+                        </div>
+                        <div class="flex items-center text-[11px] text-slate-400 font-medium truncate">
+                            Optimal Comfort Range
+                        </div>
+                    </div>
+
+                    <!-- KPI 4: Completion Rate -->
+                    <div class="dash-card p-4 rounded-2xl flex flex-col justify-between h-[126px] hover:border-purple-500/40 hover:-translate-y-0.5 transition-all duration-200 group">
+                        <div class="flex items-center justify-between gap-2 text-slate-400">
+                            <span class="text-[10px] font-bold font-mono uppercase tracking-wider text-slate-400 truncate">Courier Safety</span>
+                            <div class="w-7 h-7 rounded-lg bg-purple-500/15 flex items-center justify-center text-purple-400 shrink-0 group-hover:scale-110 transition-transform">
+                                <i data-lucide="award" class="w-3.5 h-3.5"></i>
+                            </div>
+                        </div>
+                        <div class="my-auto py-0.5">
+                            <div class="text-2xl sm:text-3xl font-extrabold text-white light:text-slate-900 font-heading tracking-tight leading-none">100%</div>
+                        </div>
+                        <div class="flex items-center text-[11px] text-purple-300 font-medium truncate">
+                            14 Safe Deliveries MTD
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- ASSIGNED DELIVERIES CARDS -->
+            <section class="space-y-4">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
+                    <div>
+                        <h3 class="text-lg sm:text-xl font-bold font-heading text-white light:text-slate-900">Assigned Deliveries Today</h3>
+                        <p class="text-xs text-slate-400 light:text-slate-500">Active transit assignments requiring courier milestone updates.</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold bg-white/[0.04] light:bg-slate-200 text-slate-300 light:text-slate-700 border border-white/10 light:border-slate-300">
+                            Showing 1 Active Order
+                        </span>
+                    </div>
+                </div>
+
+                <!-- ORDER CARD #DEL-1024 -->
+                <div class="dash-card p-6 sm:p-8 rounded-3xl space-y-6 shadow-xl relative overflow-hidden">
+                    
+                    <!-- Top Status & ID Bar -->
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-white/10 light:border-slate-200">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-[#FF8F1C]/15 text-[#FF8F1C] flex items-center justify-center shrink-0">
+                                <i data-lucide="package" class="w-5 h-5"></i>
+                            </div>
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-xs font-mono font-bold text-[#FF8F1C] uppercase tracking-wider">Delivery #DEL-1024</span>
+                                    <span class="text-slate-400 text-xs">&bull;</span>
+                                    <span class="text-[11px] font-mono text-slate-400">Order Ref: KH-ORD-8821</span>
+                                </div>
+                                <h4 class="text-xl sm:text-2xl font-bold font-heading text-white light:text-slate-900 mt-0.5">
+                                    Pet: Bruno <span class="text-sm sm:text-base font-normal text-slate-400">(Golden Retriever)</span>
+                                </h4>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-2">
+                            <span class="px-3 py-1 bg-amber-500/20 text-amber-300 border border-amber-500/30 font-mono font-bold text-xs rounded-full flex items-center gap-1.5">
+                                <span class="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span>
+                                Assigned &bull; Ready for Pickup
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Pet Photo & Metadata Grid -->
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
+                        
+                        <!-- Left: Realistic Pet Image -->
+                        <div class="md:col-span-4 relative group">
+                            <div class="w-full h-48 sm:h-56 rounded-2xl overflow-hidden border border-white/10 light:border-slate-300 relative shadow-lg bg-black/40">
+                                <img src="{% static 'pets/images/bruno_landscape.jpg' %}" 
+                                     alt="Bruno - Golden Retriever" 
+                                     class="w-full h-full object-cover pet-photo-zoom"
+                                     onerror="this.src='/static/kindheart_bruno.jpg'; this.onerror=function(){this.src='https://images.unsplash.com/photo-1552053831-71594a27632d?auto=format&fit=crop&w=800&q=80'};">
+                                
+                                <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none"></div>
+                                
+                                <div class="absolute bottom-3 left-3 right-3 flex items-center justify-between text-[11px] font-mono text-white keep-white font-medium">
+                                    <span class="px-2 py-0.5 rounded-md bg-black/60 backdrop-blur-md border border-white/20 text-white keep-white">
+                                        Golden Retriever &bull; 2 Yrs
+                                    </span>
+                                    <span class="px-2 py-0.5 rounded-md bg-emerald-500/80 backdrop-blur-md text-white keep-white font-bold flex items-center gap-1">
+                                        <i data-lucide="check" class="w-3 h-3 text-white keep-white"></i>
+                                        <span class="text-white keep-white">Vet Cleared</span>
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-2.5 flex items-center justify-between text-[11px] font-mono text-slate-400 px-1">
+                                <span>Chip: #98514100293</span>
+                                <span>Weight: 28 kg (Large Crate)</span>
+                            </div>
+                        </div>
+
+                        <!-- Right: Pickup & Drop Location Details -->
+                        <div class="md:col-span-8 space-y-4">
+                            
+                            <!-- Location Cards -->
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                
+                                <!-- Pickup Location -->
+                                <div class="p-4 rounded-2xl bg-white/[0.02] light:bg-slate-50 border border-white/10 light:border-slate-200">
+                                    <div class="flex items-center gap-2 text-xs font-mono font-bold text-slate-400 light:text-slate-500 mb-1.5">
+                                        <i data-lucide="building" class="w-3.5 h-3.5 text-purple-400"></i>
+                                        <span>PICKUP LOCATION</span>
+                                    </div>
+                                    <div class="text-sm font-bold text-white light:text-slate-900">ABC Animal Shelter</div>
+                                    <div class="text-xs text-slate-300 light:text-slate-600 mt-0.5 flex items-start gap-1.5">
+                                        <i data-lucide="map-pin" class="w-3.5 h-3.5 text-purple-400 shrink-0 mt-0.5"></i>
+                                        <span>45 Rescue Lane, Bangalore East</span>
+                                    </div>
+                                    <div class="mt-3 pt-2.5 border-t border-white/10 light:border-slate-200 text-[11px] text-slate-400 flex items-center justify-between">
+                                        <span>Contact: Dr. Ananya Roy</span>
+                                        <span class="text-emerald-400 font-mono font-bold">Shelter Cleared</span>
+                                    </div>
+                                </div>
+
+                                <!-- Drop Location -->
+                                <div class="p-4 rounded-2xl bg-white/[0.02] light:bg-slate-50 border border-white/10 light:border-slate-200">
+                                    <div class="flex items-center gap-2 text-xs font-mono font-bold text-slate-400 light:text-slate-500 mb-1.5">
+                                        <i data-lucide="home" class="w-3.5 h-3.5 text-[#FF8F1C]"></i>
+                                        <span>DROP DESTINATION</span>
+                                    </div>
+                                    <div class="text-sm font-bold text-white light:text-slate-900">Customer: Rahul Sharma</div>
+                                    <div class="text-xs text-slate-300 light:text-slate-600 mt-0.5 flex items-start gap-1.5">
+                                        <i data-lucide="map-pin" class="w-3.5 h-3.5 text-[#FF8F1C] shrink-0 mt-0.5"></i>
+                                        <span>124 Palm St, Indiranagar, Bangalore</span>
+                                    </div>
+                                    <div class="mt-3 pt-2.5 border-t border-white/10 light:border-slate-200 text-[11px] text-slate-400 flex items-center justify-between">
+                                        <span>Recipient: +91 98765 43210</span>
+                                        <span class="text-blue-400 font-mono font-bold">Escrow Confirmed</span>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <!-- Live Telematics & Transport Notes -->
+                            <div class="p-3.5 rounded-xl bg-white/[0.02] light:bg-slate-50 border border-white/10 light:border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+                                <div class="flex items-center gap-3">
+                                    <span class="px-2 py-1 rounded-md bg-emerald-500/15 text-emerald-400 font-mono font-bold text-[11px] flex items-center gap-1">
+                                        <i data-lucide="thermometer" class="w-3.5 h-3.5"></i>
+                                        Telemetry: 21.8°C (Optimal)
+                                    </span>
+                                    <span class="text-slate-400 text-[11px] flex items-center gap-1">
+                                        <i data-lucide="clock" class="w-3.5 h-3.5"></i>
+                                        Target Delivery Window: 04:30 PM Today
+                                    </span>
+                                </div>
+                                <div class="text-[11px] text-slate-400 font-mono">
+                                    Vehicle: Climate Van #04
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <!-- Bottom Action Buttons -->
+                    <div class="pt-4 border-t border-white/10 light:border-slate-200 flex flex-col sm:flex-row gap-3 items-center">
+                        <a href="{% url 'delivery_tracking' %}" class="btn-apple-primary w-full sm:flex-1 py-3 px-6 shadow-md text-center">
+                            <i data-lucide="truck" class="w-4 h-4"></i>
+                            <span>Accept &amp; Start Transport</span>
+                            <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                        </a>
+                        <a href="{% url 'delivery_confirmation' %}" class="btn-apple-secondary w-full sm:w-auto py-3 px-6 text-center">
+                            <i data-lucide="camera" class="w-4 h-4"></i>
+                            <span>Upload Proof</span>
+                        </a>
+                    </div>
+
+                </div>
+
+            </section>
+
+            <!-- REGULATORY & PROTOCOL FOOTER -->
+            <footer class="mt-10 p-5 rounded-2xl bg-white/[0.02] light:bg-slate-100 border border-white/10 light:border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-400">
+                <div class="flex items-center gap-2">
+                    <i data-lucide="shield-check" class="w-4 h-4 text-emerald-400"></i>
+                    <span>KindHeart Animal Welfare Logistics Standard &bull; GPS &amp; Temperature Audited</span>
+                </div>
+                <div class="font-mono text-[11px]">
+                    Helpline: 1800-KINDHEART &bull; Emergency Dispatch Support
+                </div>
+            </footer>
+
+        </main>
+    </div>
+</div>
+
+    <!-- SCRIPT & THEME HANDLER -->
+    <script>
+        // Lucide Icons Initialization
+        if (typeof lucide !== 'undefined') {
+            lucide.createIcons();
+        }
+
+        // Mobile Sidebar Toggle
+        function toggleSidebar(open) {
+            const sidebar = document.getElementById('dash-sidebar');
+            const backdrop = document.getElementById('sidebar-backdrop');
+            if (!sidebar) return;
+            if (open) {
+                sidebar.classList.remove('-translate-x-full');
+                if (backdrop) backdrop.classList.remove('hidden');
+            } else {
+                sidebar.classList.add('-translate-x-full');
+                if (backdrop) backdrop.classList.add('hidden');
+            }
+        }
+
+        // Collapsible Sidebar Controller (Matches profile.html)
+        function toggleSidebarCollapse(event) {
+            if (event && event.stopPropagation) {
+                event.stopPropagation();
+            }
+            const sidebar = document.getElementById('dash-sidebar');
+            if (!sidebar) return;
+
+            const willCollapse = !sidebar.classList.contains('is-collapsed');
+            if (willCollapse) {
+                sidebar.classList.add('is-collapsed');
+                try { localStorage.setItem('kindheart_sidebar_collapsed', 'true'); } catch(e) {}
+            } else {
+                sidebar.classList.remove('is-collapsed');
+                try { localStorage.setItem('kindheart_sidebar_collapsed', 'false'); } catch(e) {}
+            }
+
+            const arrowBtn = document.getElementById('sidebar-arrow-btn');
+            if (arrowBtn) {
+                arrowBtn.setAttribute('title', willCollapse ? 'Expand sidebar' : 'Collapse sidebar');
+            }
+        }
+
+        function isSidebarCollapsed() {
+            const sidebar = document.getElementById('dash-sidebar');
+            return sidebar ? sidebar.classList.contains('is-collapsed') : false;
+        }
+
+        // Dynamic User Profile Dropdown Controller
+        function toggleUserDropdown(event, forceState) {
+            if (event && event.stopPropagation) {
+                event.stopPropagation();
+            }
+            const dropdown = document.getElementById('user-dropdown');
+            const arrow = document.getElementById('user-dropdown-arrow');
+            if (!dropdown) return;
+
+            let shouldOpen = typeof forceState === 'boolean' ? forceState : dropdown.classList.contains('hidden');
+            if (shouldOpen) {
+                dropdown.classList.remove('hidden');
+                if (arrow) arrow.classList.add('rotate-180');
+            } else {
+                dropdown.classList.add('hidden');
+                if (arrow) arrow.classList.remove('rotate-180');
+            }
+        }
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(e) {
+            const container = document.getElementById('user-dropdown-container');
+            const dropdown = document.getElementById('user-dropdown');
+            const arrow = document.getElementById('user-dropdown-arrow');
+            if (dropdown && !dropdown.classList.contains('hidden')) {
+                if (container && !container.contains(e.target)) {
+                    dropdown.classList.add('hidden');
+                    if (arrow) arrow.classList.remove('rotate-180');
+                }
+            }
+        });
+
+        // Theme Toggle (Compatible with KindHeart Profile system)
+        function toggleTheme() {
+            const htmlEl = document.documentElement;
+            const isLight = htmlEl.classList.contains('light');
+            
+            if (isLight) {
+                htmlEl.classList.remove('light');
+                htmlEl.classList.add('dark');
+                localStorage.setItem('kindheart_theme', 'dark');
+                localStorage.setItem('theme', 'dark');
+                updateThemeUI(false);
+            } else {
+                htmlEl.classList.remove('dark');
+                htmlEl.classList.add('light');
+                localStorage.setItem('kindheart_theme', 'light');
+                localStorage.setItem('theme', 'light');
+                updateThemeUI(true);
+            }
+        }
+
+        function updateThemeUI(isLight) {
+            const icon = document.getElementById('theme-icon');
+            if (icon) {
+                icon.setAttribute('data-lucide', isLight ? 'sun' : 'moon');
+                icon.className = isLight ? 'w-4 h-4 text-amber-500' : 'w-4 h-4 text-amber-400';
+            }
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+        }
+
+        // Initialize Theme & Sidebar State from localStorage
+        (function() {
+            const savedTheme = localStorage.getItem('kindheart_theme') || localStorage.getItem('theme');
+            if (savedTheme === 'light') {
+                document.documentElement.classList.remove('dark');
+                document.documentElement.classList.add('light');
+                updateThemeUI(true);
+            } else {
+                document.documentElement.classList.add('dark');
+                document.documentElement.classList.remove('light');
+                updateThemeUI(false);
+            }
+
+            if (localStorage.getItem('kindheart_sidebar_collapsed') === 'true' && window.innerWidth >= 1024) {
+                const sidebar = document.getElementById('dash-sidebar');
+                if (sidebar) sidebar.classList.add('is-collapsed');
+            }
+        })();
+    </script>
+</body>
+</html>

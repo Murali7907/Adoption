@@ -1,0 +1,1263 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notification Management - Admin Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style type="text/css">
+        @import "tailwindcss";
+
+        body {
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        /* 🌙 DARK MODE STYLES */
+        .dark body { background-color: #111A15 !important; color: #F4EDE2 !important; }
+        .dark .apple-glass { 
+            background: rgba(27, 41, 33, 0.85) !important; 
+            backdrop-filter: blur(25px); 
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid rgba(168, 216, 185, 0.22) !important; 
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.45) !important;
+        }
+        .dark .sidebar-bg { 
+            background: rgba(14, 22, 18, 0.90) !important; 
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            border-right: 1px solid rgba(168, 216, 185, 0.15) !important; 
+        }
+        .dark .theme-card-bg {
+            background: rgba(22, 34, 28, 0.65);
+            border: 1px solid rgba(91, 140, 118, 0.18);
+        }
+        .dark .theme-table-header {
+            background: rgba(13, 20, 16, 0.85);
+            color: #A8D8B9;
+        }
+        .dark .input-box {
+            background: rgba(17, 26, 21, 0.9);
+            border: 1px solid rgba(91, 140, 118, 0.3);
+            color: #F4EDE2;
+        }
+        .dark .text-muted { color: #8EA89B; }
+
+        /* ☀️ LIGHT MODE STYLES */
+        html:not(.dark) body { background-color: #F4EDE2 !important; color: #111A15 !important; }
+        html:not(.dark) .apple-glass { 
+            background: rgba(255, 255, 255, 0.88) !important; 
+            backdrop-filter: blur(25px); 
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid rgba(91, 140, 118, 0.3) !important; 
+            box-shadow: 0 15px 35px rgba(91, 140, 118, 0.12) !important; 
+        }
+        html:not(.dark) .sidebar-bg { 
+            background: rgba(244, 237, 226, 0.95) !important; 
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            border-right: 1px solid rgba(91, 140, 118, 0.25) !important; 
+        }
+        html:not(.dark) .theme-card-bg {
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(91, 140, 118, 0.25);
+        }
+        html:not(.dark) .theme-table-header {
+            background: rgba(235, 243, 238, 0.95);
+            color: #2D4A3E;
+        }
+        html:not(.dark) .input-box {
+            background: #FFFFFF;
+            border: 1px solid rgba(91, 140, 118, 0.35);
+            color: #111A15;
+        }
+        html:not(.dark) .text-muted { color: #5B8C76; }
+
+        /* ACTIVE NAV & BUTTONS */
+        .nav-item-active {
+            background: linear-gradient(135deg, #5B8C76 0%, #3D6B56 100%) !important;
+            color: #FFFFFF !important;
+            box-shadow: 0 8px 20px rgba(91, 140, 118, 0.4) !important;
+        }
+
+        .nav-item-hover-transform {
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .nav-item-hover-transform:hover {
+            background: rgba(91, 140, 118, 0.2);
+            transform: translateX(4px);
+        }
+
+        .tab-btn-active {
+            background: #5B8C76 !important;
+            color: #FFFFFF !important;
+            box-shadow: 0 4px 14px rgba(91, 140, 118, 0.35);
+        }
+
+        /* CUSTOM SCROLLBAR REMOVAL SYSTEM-WIDE */
+        * { scrollbar-width: none !important; }
+        *::-webkit-scrollbar { display: none !important; }
+
+        /* 🔘 BUTTON DESIGN SYSTEM (HIGH-EXPERIENCE TACTILE HOVER & ACTIVE FEEDBACK) */
+        .btn-ui-primary {
+            background: linear-gradient(135deg, #5B8C76 0%, #3D6B56 100%) !important;
+            color: #FFFFFF !important;
+            font-weight: 800 !important;
+            font-size: 0.75rem !important;
+            padding: 0.5rem 1.1rem !important;
+            border-radius: 0.85rem !important;
+            border: 1px solid rgba(168, 216, 185, 0.3) !important;
+            box-shadow: 0 4px 14px rgba(91, 140, 118, 0.35) !important;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+            cursor: pointer !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            gap: 0.375rem !important;
+            white-space: nowrap !important;
+            text-decoration: none !important;
+        }
+        .btn-ui-primary:hover {
+            transform: translateY(-2px) scale(1.02) !important;
+            box-shadow: 0 8px 22px rgba(91, 140, 118, 0.55) !important;
+            background: linear-gradient(135deg, #689D85 0%, #44745E 100%) !important;
+            border-color: rgba(168, 216, 185, 0.6) !important;
+            text-decoration: none !important;
+        }
+        .btn-ui-primary:active {
+            transform: translateY(0) scale(0.97) !important;
+            box-shadow: 0 2px 8px rgba(91, 140, 118, 0.3) !important;
+        }
+
+        .btn-ui-secondary {
+            background-color: rgba(91, 140, 118, 0.18) !important;
+            color: #A8D8B9 !important;
+            border: 1px solid rgba(168, 216, 185, 0.3) !important;
+            font-weight: 800 !important;
+            font-size: 0.75rem !important;
+            padding: 0.5rem 1.1rem !important;
+            border-radius: 0.85rem !important;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+            cursor: pointer !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            gap: 0.375rem !important;
+            white-space: nowrap !important;
+            text-decoration: none !important;
+        }
+        .btn-ui-secondary:hover {
+            background-color: rgba(91, 140, 118, 0.35) !important;
+            transform: translateY(-2px) scale(1.02) !important;
+            border-color: rgba(168, 216, 185, 0.5) !important;
+            box-shadow: 0 6px 18px rgba(91, 140, 118, 0.25) !important;
+            text-decoration: none !important;
+        }
+        .btn-ui-secondary:active {
+            transform: translateY(0) scale(0.97) !important;
+        }
+
+        /* MATCHING UI HOVER GLOW FOR ALL LINKS & BUTTONS (NO UNDERLINE) */
+        a, button, .name-hover-link {
+            text-decoration: none !important;
+        }
+        .name-hover-link {
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+            cursor: pointer !important;
+            text-decoration: none !important;
+            display: inline-block !important;
+        }
+        .name-hover-link:hover {
+            text-decoration: none !important;
+            transform: translateY(-1px) scale(1.01) !important;
+            color: #A8D8B9 !important;
+            text-shadow: 0 0 10px rgba(168, 216, 185, 0.4) !important;
+        }
+
+        /* TOAST ANIMATION */
+        @keyframes toastSlideIn {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .toast-animate {
+            animation: toastSlideIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+    </style>
+</head>
+<body class="min-h-screen font-sans transition-colors duration-300">
+
+    <!-- 🔔 PROFESSIONAL TOAST NOTIFICATION CONTAINER -->
+    <div id="toast-container" class="fixed bottom-6 right-6 z-50 flex flex-col gap-3 pointer-events-none"></div>
+
+    <div class="flex min-h-screen">
+        
+        <!-- 🚀 HORIZON STANDARDIZED SIDEBAR -->
+        <aside class="w-64 sidebar-bg flex flex-col justify-between p-6 sticky top-0 h-screen z-30 overflow-y-auto">
+            <div>
+                <!-- BRAND HEADER -->
+                <div class="flex items-center gap-3 mb-8 px-2">
+                    <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#5B8C76] to-[#A8D8B9] flex items-center justify-center font-extrabold text-xl text-[#111A15] shadow-md">
+                        👨‍💼
+                    </div>
+                    <div>
+                        <span class="font-extrabold text-lg tracking-tight block">HORIZON <span class="text-[#5B8C76] dark:text-[#A8D8B9]">UI</span></span>
+                        <span class="text-[10px] theme-accent-text font-extrabold uppercase tracking-widest">Pet Adoption Suite</span>
+                    </div>
+                </div>
+
+                <!-- NAVIGATION -->
+                <nav class="space-y-1 text-xs font-bold">
+                    <a href="{% url 'admin_dashboard' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>📊</span> Dashboard Overview</a>
+                    <a href="{% url 'admin_users' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>👥</span> User Management</a>
+                    
+                    <div class="space-y-1 my-2 py-2 border-y border-[#5B8C76]/25">
+                        <a href="{% url 'admin_shelters' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>🏠</span> Shelter Management</a>
+                        <a href="{% url 'admin_pets' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>🐶</span> Pet Management</a>
+                        <a href="{% url 'admin_requests' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>🐾</span> Adoption Requests</a>
+                        <a href="{% url 'admin_payments' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>💳</span> Payments</a>
+                        <a href="{% url 'admin_deliveries' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>🚚</span> Delivery Control</a>
+                        <a href="{% url 'admin_audit_logs' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>🔍</span> Audit Logs</a>
+                        <a href="{% url 'admin_revenue' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>💰</span> Revenue & Profit</a>
+                    </div>
+
+                    <a href="{% url 'admin_reports' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>📈</span> Reports & Analytics</a>
+                    <a href="{% url 'admin_notifications' %}" class="nav-item-active flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>🔔</span> Notifications</a>
+                    <a href="{% url 'admin_announcements' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>📢</span> Announcements</a>
+                    <a href="{% url 'admin_health' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>🩺</span> Pet Health</a>
+                    <a href="{% url 'admin_settings' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>⚙️</span> System Settings</a>
+                    <a href="{% url 'admin_roles' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>🔐</span> Roles & Permissions</a>
+                </nav>
+            </div>
+
+            <!-- FOOTER LINKS -->
+            <div class="pt-4 border-t border-[#5B8C76]/25 space-y-1">
+                <a href="{% url 'home' %}" class="flex items-center gap-3 px-4 py-2 hover:bg-[#5B8C76]/20 rounded-2xl text-xs font-bold"><span>🌐</span> Main Website</a>
+                <a href="{% url 'login' %}" class="flex items-center gap-3 px-4 py-2 hover:bg-red-500/20 text-red-500 rounded-2xl text-xs font-bold"><span>🚪</span> Logout</a>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT CONTAINER -->
+        <main class="flex-1 p-6 md:p-8 overflow-y-auto space-y-7 max-w-7xl mx-auto">
+            
+            <!-- 🚀 TOP HEADER NAVBAR -->
+            <header class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2 border-b border-[#5B8C76]/15">
+                <div>
+                    <div class="text-xs text-muted font-bold mb-1 flex items-center gap-1.5">
+                        <span>Pages</span> / <span class="text-[#5B8C76] dark:text-[#A8D8B9] font-extrabold">Notifications</span>
+                    </div>
+                    <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight">Notification Management 🔔</h1>
+                    <p class="text-xs text-muted font-medium mt-1">Audit, trigger, configure, and automate notifications across the adoption lifecycle.</p>
+                </div>
+
+                <!-- TOP QUICK ACTION CONTROLS -->
+                <div class="apple-glass rounded-full px-4 py-2 flex items-center gap-3 shadow-lg self-start md:self-auto flex-wrap">
+                    <button type="button" onclick="switchCategoryTab('tab-bulk')" class="btn-ui-primary text-xs">
+                        <span>📢</span> Send Broadcast
+                    </button>
+                    <button type="button" onclick="openCreateTemplateModal()" class="px-3.5 py-1.5 rounded-full bg-[#5B8C76]/20 hover:bg-[#5B8C76]/30 text-xs font-bold text-[#5B8C76] dark:text-[#A8D8B9] border border-[#5B8C76]/30 transition-all cursor-pointer">
+                        <span>📑</span> New Template
+                    </button>
+
+                    <!-- THEME TOGGLER -->
+                    <button type="button" onclick="toggleTheme()" class="w-8 h-8 bg-[#5B8C76]/20 hover:bg-[#5B8C76]/30 border border-[#5B8C76]/40 rounded-full text-sm font-extrabold flex items-center justify-center cursor-pointer shadow-sm" title="Toggle Light/Dark Theme">
+                        <span id="theme-icon">🌙</span>
+                    </button>
+
+                    <!-- NOTIFICATION BELL -->
+                    <a href="{% url 'admin_notifications' %}" class="w-8 h-8 bg-[#5B8C76]/20 hover:bg-[#5B8C76]/30 border border-[#5B8C76]/40 rounded-full text-xs font-extrabold flex items-center justify-center relative shadow-sm" title="Notifications">
+                        🔔 <span class="w-2 h-2 rounded-full bg-red-500 absolute top-1 right-1 animate-ping"></span>
+                    </a>
+
+                    <!-- USER AVATAR PILL -->
+                    <div class="w-8 h-8 rounded-full bg-gradient-to-br from-[#5B8C76] to-[#A8D8B9] flex items-center justify-center font-extrabold text-xs text-[#111A15] shadow-sm" title="Admin User">
+                        A
+                    </div>
+                </div>
+            </header>
+
+            <!-- 🏆 8 NOTIFICATION DASHBOARD KPI CARDS -->
+            <section class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3">
+                <div class="theme-card-bg rounded-2xl p-3.5 space-y-1 border-l-4 border-emerald-400 cursor-pointer hover:scale-[1.02] transition-all" onclick="filterByStatus('all')">
+                    <span class="text-[10px] text-muted font-bold uppercase tracking-wider block">Total Sent</span>
+                    <div class="text-xl font-extrabold">24,850</div>
+                    <span class="text-[10px] font-bold text-emerald-400">+18.4% 📈</span>
+                </div>
+                <div class="theme-card-bg rounded-2xl p-3.5 space-y-1 border-l-4 border-emerald-400 cursor-pointer hover:scale-[1.02] transition-all" onclick="filterByStatus('SENT')">
+                    <span class="text-[10px] text-muted font-bold uppercase tracking-wider block">Sent</span>
+                    <div class="text-xl font-extrabold text-emerald-400">24,120</div>
+                    <span class="text-[10px] font-bold text-emerald-400">97.1%</span>
+                </div>
+                <div class="theme-card-bg rounded-2xl p-3.5 space-y-1 border-l-4 border-emerald-400 cursor-pointer hover:scale-[1.02] transition-all" onclick="filterByStatus('DELIVERED')">
+                    <span class="text-[10px] text-muted font-bold uppercase tracking-wider block">Delivered</span>
+                    <div class="text-xl font-extrabold text-emerald-400">23,890</div>
+                    <span class="text-[10px] font-bold text-emerald-400">96.1%</span>
+                </div>
+                <div class="theme-card-bg rounded-2xl p-3.5 space-y-1 border-l-4 border-blue-400 cursor-pointer hover:scale-[1.02] transition-all" onclick="filterByStatus('READ')">
+                    <span class="text-[10px] text-muted font-bold uppercase tracking-wider block">Read Rate</span>
+                    <div class="text-xl font-extrabold text-blue-400">19,450</div>
+                    <span class="text-[10px] font-bold text-blue-400">81.4% 👁️</span>
+                </div>
+                <div class="theme-card-bg rounded-2xl p-3.5 space-y-1 border-l-4 border-amber-400 cursor-pointer hover:scale-[1.02] transition-all" onclick="filterByStatus('UNREAD')">
+                    <span class="text-[10px] text-muted font-bold uppercase tracking-wider block">Unread</span>
+                    <div class="text-xl font-extrabold text-amber-400">4,440</div>
+                    <span class="text-[10px] font-bold text-amber-400">18.6%</span>
+                </div>
+                <div class="theme-card-bg rounded-2xl p-3.5 space-y-1 border-l-4 border-red-500 cursor-pointer hover:scale-[1.02] transition-all" onclick="filterByStatus('FAILED')">
+                    <span class="text-[10px] text-muted font-bold uppercase tracking-wider block">Failed</span>
+                    <div class="text-xl font-extrabold text-red-400">230</div>
+                    <span class="text-[10px] font-bold text-red-400">0.9% 🚨</span>
+                </div>
+                <div class="theme-card-bg rounded-2xl p-3.5 space-y-1 border-l-4 border-purple-400 cursor-pointer hover:scale-[1.02] transition-all" onclick="filterByStatus('SCHEDULED')">
+                    <span class="text-[10px] text-muted font-bold uppercase tracking-wider block">Scheduled</span>
+                    <div class="text-xl font-extrabold text-purple-400">145</div>
+                    <span class="text-[10px] font-bold text-purple-400">Pending ⏱️</span>
+                </div>
+                <div class="theme-card-bg rounded-2xl p-3.5 space-y-1 border-l-4 border-[#5B8C76] cursor-pointer hover:scale-[1.02] transition-all" onclick="filterByStatus('TODAY')">
+                    <span class="text-[10px] text-muted font-bold uppercase tracking-wider block">Today</span>
+                    <div class="text-xl font-extrabold">420</div>
+                    <span class="text-[10px] font-bold text-emerald-400">+12 Today</span>
+                </div>
+            </section>
+
+            <!-- 🎛️ ADVANCED NOTIFICATION FILTER TOOLBAR -->
+            <section class="apple-glass rounded-3xl p-5 shadow-lg space-y-3">
+                <div class="flex items-center justify-between flex-wrap gap-3">
+                    <div class="flex items-center gap-2">
+                        <span class="text-lg">🎛️</span>
+                        <div>
+                            <h2 class="font-extrabold text-sm tracking-wide">Filter & Search Notification Audit</h2>
+                            <span class="text-[11px] text-muted font-medium">Filter across adoption events, recipient roles, channels, and delivery statuses.</span>
+                        </div>
+                    </div>
+
+                    <!-- SEARCH INPUT -->
+                    <div class="w-full sm:w-72 relative">
+                        <input type="text" id="notif-search-input" onkeyup="filterNotificationsTable()" placeholder="Search ID, title, message, recipient..." class="input-box rounded-xl py-2 px-3 pl-8 text-xs font-semibold w-full">
+                        <span class="absolute left-2.5 top-2.5 text-xs text-muted">🔍</span>
+                    </div>
+                </div>
+
+                <!-- DROPDOWN FILTERS GRID -->
+                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 text-xs pt-2 border-t border-[#5B8C76]/15">
+                    <div>
+                        <label class="block font-bold text-muted mb-1">Category Type</label>
+                        <select id="filter-notif-type" onchange="filterNotificationsTable()" class="input-box rounded-xl py-2 px-3 text-xs font-semibold w-full cursor-pointer">
+                            <option value="all">All Notification Types</option>
+                            <option value="ADOPTION">🐾 Adoption Lifecycle</option>
+                            <option value="PAYMENT">💳 Payment & Refunds</option>
+                            <option value="DELIVERY">🚚 Logistics & Delivery</option>
+                            <option value="SHELTER">🏠 Shelter Partner</option>
+                            <option value="ADMIN">👨💼 System Admin</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-bold text-muted mb-1">Recipient Role</label>
+                        <select id="filter-recipient-role" onchange="filterNotificationsTable()" class="input-box rounded-xl py-2 px-3 text-xs font-semibold w-full cursor-pointer">
+                            <option value="all">All Roles</option>
+                            <option value="CUSTOMER">👤 Customer</option>
+                            <option value="SHELTER">🏠 Shelter</option>
+                            <option value="DRIVER">🚚 Driver</option>
+                            <option value="ADMIN">👨💼 Administrator</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-bold text-muted mb-1">Channel</label>
+                        <select id="filter-channel" onchange="filterNotificationsTable()" class="input-box rounded-xl py-2 px-3 text-xs font-semibold w-full cursor-pointer">
+                            <option value="all">All Channels</option>
+                            <option value="IN_APP">🔔 In-App</option>
+                            <option value="EMAIL">📧 Email</option>
+                            <option value="SMS">📱 SMS</option>
+                            <option value="WHATSAPP">💬 WhatsApp</option>
+                            <option value="PUSH">📲 Push Notification</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-bold text-muted mb-1">Priority Level</label>
+                        <select id="filter-priority" onchange="filterNotificationsTable()" class="input-box rounded-xl py-2 px-3 text-xs font-semibold w-full cursor-pointer">
+                            <option value="all">All Priorities</option>
+                            <option value="CRITICAL">🔴 Critical</option>
+                            <option value="HIGH">🟠 High</option>
+                            <option value="NORMAL">🟡 Normal</option>
+                            <option value="LOW">🔵 Low</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-bold text-muted mb-1">Delivery Status</label>
+                        <select id="filter-status" onchange="filterNotificationsTable()" class="input-box rounded-xl py-2 px-3 text-xs font-semibold w-full cursor-pointer">
+                            <option value="all">All Statuses</option>
+                            <option value="SENT">Sent</option>
+                            <option value="DELIVERED">Delivered</option>
+                            <option value="READ">Read</option>
+                            <option value="FAILED">Failed</option>
+                            <option value="SCHEDULED">Scheduled</option>
+                        </select>
+                    </div>
+                    <div class="flex items-end">
+                        <button type="button" onclick="resetNotificationFilters()" class="w-full px-3 py-2 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 text-xs font-bold border border-red-500/20 transition-all cursor-pointer text-center">Reset Filters</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 📌 10 RECOMMENDED ADMIN SUB-MENU NAVIGATION TABS -->
+            <div class="apple-glass rounded-2xl p-2 grid grid-cols-2 sm:grid-cols-5 lg:grid-cols-10 gap-1.5 text-[11px] font-bold shadow-md w-full">
+                <button type="button" onclick="switchCategoryTab('tab-all')" class="category-tab-btn tab-btn-active px-2 py-2 rounded-xl transition-all whitespace-nowrap cursor-pointer text-center justify-center flex items-center gap-1 w-full" id="btn-tab-all">🔔 Notifications</button>
+                <button type="button" onclick="switchCategoryTab('tab-templates')" class="category-tab-btn px-2 py-2 rounded-xl hover:bg-[#5B8C76]/20 transition-all whitespace-nowrap text-muted cursor-pointer text-center justify-center flex items-center gap-1 w-full" id="btn-tab-templates">📑 Templates</button>
+                <button type="button" onclick="switchCategoryTab('tab-rules')" class="category-tab-btn px-2 py-2 rounded-xl hover:bg-[#5B8C76]/20 transition-all whitespace-nowrap text-muted cursor-pointer text-center justify-center flex items-center gap-1 w-full" id="btn-tab-rules">🤖 Automation</button>
+                <button type="button" onclick="switchCategoryTab('tab-scheduled')" class="category-tab-btn px-2 py-2 rounded-xl hover:bg-[#5B8C76]/20 transition-all whitespace-nowrap text-muted cursor-pointer text-center justify-center flex items-center gap-1 w-full" id="btn-tab-scheduled">📅 Scheduled</button>
+                <button type="button" onclick="switchCategoryTab('tab-bulk')" class="category-tab-btn px-2 py-2 rounded-xl hover:bg-[#5B8C76]/20 transition-all whitespace-nowrap text-muted cursor-pointer text-center justify-center flex items-center gap-1 w-full" id="btn-tab-bulk">📢 Bulk Send</button>
+                <button type="button" onclick="switchCategoryTab('tab-failed')" class="category-tab-btn px-2 py-2 rounded-xl hover:bg-[#5B8C76]/20 transition-all whitespace-nowrap text-muted cursor-pointer text-center justify-center flex items-center gap-1 w-full" id="btn-tab-failed">🚨 Failed Desk</button>
+                <button type="button" onclick="switchCategoryTab('tab-prefs')" class="category-tab-btn px-2 py-2 rounded-xl hover:bg-[#5B8C76]/20 transition-all whitespace-nowrap text-muted cursor-pointer text-center justify-center flex items-center gap-1 w-full" id="btn-tab-prefs">⚙️ Preferences</button>
+                <button type="button" onclick="switchCategoryTab('tab-analytics')" class="category-tab-btn px-2 py-2 rounded-xl hover:bg-[#5B8C76]/20 transition-all whitespace-nowrap text-muted cursor-pointer text-center justify-center flex items-center gap-1 w-full" id="btn-tab-analytics">📈 Analytics</button>
+                <button type="button" onclick="switchCategoryTab('tab-audit')" class="category-tab-btn px-2 py-2 rounded-xl hover:bg-[#5B8C76]/20 transition-all whitespace-nowrap text-muted cursor-pointer text-center justify-center flex items-center gap-1 w-full" id="btn-tab-audit">🔍 Audit Logs</button>
+                <button type="button" onclick="switchCategoryTab('tab-flow')" class="category-tab-btn px-2 py-2 rounded-xl hover:bg-[#5B8C76]/20 transition-all whitespace-nowrap text-muted cursor-pointer text-center justify-center flex items-center gap-1 w-full" id="btn-tab-flow">🔄 Flow Trace</button>
+            </div>
+
+            <!-- ========================================== -->
+            <!-- 📁 TAB CONTENT 1: ALL NOTIFICATIONS DIRECTORY -->
+            <!-- ========================================== -->
+            <div id="tab-all" class="category-tab-content space-y-4">
+                <div class="apple-glass rounded-3xl p-6 shadow-xl space-y-4">
+                    <div class="flex items-center justify-between flex-wrap gap-2 border-b border-[#5B8C76]/20 pb-3">
+                        <div>
+                            <h3 class="font-extrabold text-lg">🔔 Centralized Adoption Lifecycle Notifications</h3>
+                            <p class="text-xs text-muted">Audited log of all dispatches across customers, shelters, drivers, and admins.</p>
+                        </div>
+                        <span class="text-xs font-extrabold text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">Live Syncing Active ⚡</span>
+                    </div>
+
+                    <!-- DIRECTORY TABLE -->
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-xs text-center border-collapse" id="notif-directory-table">
+                            <thead>
+                                <tr class="theme-table-header uppercase text-[10px] font-extrabold tracking-wider border-b border-[#5B8C76]/25">
+                                    <th class="py-3 px-3 text-left">NOTIF ID & PRIORITY</th>
+                                    <th class="py-3 px-3 text-left">RECIPIENT & ROLE</th>
+                                    <th class="py-3 px-3 text-left">NOTIFICATION TYPE & TITLE</th>
+                                    <th class="py-3 px-3 text-left">RELATED ENTITY</th>
+                                    <th class="py-3 px-3">CHANNEL</th>
+                                    <th class="py-3 px-3">DATE / TIME</th>
+                                    <th class="py-3 px-3">STATUS</th>
+                                    <th class="py-3 px-3">ACTIONS</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-[#5B8C76]/15 font-semibold">
+                                <!-- ROW 1: CRITICAL ALERT -->
+                                <tr class="hover:bg-[#5B8C76]/10 transition-colors bg-red-500/5">
+                                    <td class="py-3.5 px-3 text-left">
+                                        <span class="font-extrabold block text-xs">#NOT-9842</span>
+                                        <span class="px-2 py-0.5 rounded-full bg-red-500/20 text-red-400 text-[10px] font-extrabold border border-red-500/30">🔴 CRITICAL</span>
+                                    </td>
+                                    <td class="py-3.5 px-3 text-left">
+                                        <span class="font-extrabold block">Rahul Sharma</span>
+                                        <span class="text-[10px] text-muted">Customer 👤</span>
+                                    </td>
+                                    <td class="py-3.5 px-3 text-left">
+                                        <span class="font-extrabold block text-emerald-400">Adoption Approved 🎉</span>
+                                        <span class="text-[11px] text-muted block truncate max-w-xs">Your adoption request #REQ-8824 for Bruno has been approved!</span>
+                                    </td>
+                                    <td class="py-3.5 px-3 text-left">
+                                        <span class="block text-[11px]">🐾 Bruno (Golden)</span>
+                                        <span class="text-[10px] text-muted">#REQ-8824 • #PAY-9012</span>
+                                    </td>
+                                    <td class="py-3.5 px-3">
+                                        <span class="px-2 py-1 rounded-xl bg-[#5B8C76]/20 text-[#5B8C76] dark:text-[#A8D8B9] font-bold text-[10px]">In-App + Email + Push</span>
+                                    </td>
+                                    <td class="py-3.5 px-3 text-[11px]">
+                                        <span>2026-08-23 16:30</span>
+                                    </td>
+                                    <td class="py-3.5 px-3">
+                                        <span class="px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-400 text-[10px] uppercase font-extrabold border border-emerald-500/30">Read 👁️</span>
+                                    </td>
+                                    <td class="py-3.5 px-3">
+                                        <button type="button" onclick="openNotifDetailModal('#NOT-9842', 'Adoption Approved 🎉', 'Rahul Sharma (Customer)', 'In-App + Email + Push', 'Delivered & Read', '2026-08-23 16:30', 'Your adoption request #REQ-8824 for Bruno (Golden Retriever) has been approved. Please complete payment to confirm delivery.')" class="text-xs text-[#5B8C76] dark:text-[#A8D8B9] name-hover-link font-bold">Inspect 🔍</button>
+                                    </td>
+                                </tr>
+
+                                <!-- ROW 2: DRIVER ASSIGNED -->
+                                <tr class="hover:bg-[#5B8C76]/10 transition-colors">
+                                    <td class="py-3.5 px-3 text-left">
+                                        <span class="font-extrabold block text-xs">#NOT-9841</span>
+                                        <span class="px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-400 text-[10px] font-extrabold border border-amber-500/30">🟠 HIGH</span>
+                                    </td>
+                                    <td class="py-3.5 px-3 text-left">
+                                        <span class="font-extrabold block">Ramesh Kumar</span>
+                                        <span class="text-[10px] text-muted">Driver 🚚</span>
+                                    </td>
+                                    <td class="py-3.5 px-3 text-left">
+                                        <span class="font-extrabold block text-amber-400">Driver Assigned 🚚</span>
+                                        <span class="text-[11px] text-muted block truncate max-w-xs">New pet pickup delivery assigned: #DEL-1024 for Happy Paws</span>
+                                    </td>
+                                    <td class="py-3.5 px-3 text-left">
+                                        <span class="block text-[11px]">🐶 Bruno</span>
+                                        <span class="text-[10px] text-muted">#DEL-1024 • Happy Paws</span>
+                                    </td>
+                                    <td class="py-3.5 px-3">
+                                        <span class="px-2 py-1 rounded-xl bg-[#5B8C76]/20 text-[#5B8C76] dark:text-[#A8D8B9] font-bold text-[10px]">SMS + In-App</span>
+                                    </td>
+                                    <td class="py-3.5 px-3 text-[11px]">
+                                        <span>2026-08-23 16:15</span>
+                                    </td>
+                                    <td class="py-3.5 px-3">
+                                        <span class="px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-400 text-[10px] uppercase font-extrabold border border-emerald-500/30">Delivered</span>
+                                    </td>
+                                    <td class="py-3.5 px-3">
+                                        <button type="button" onclick="openNotifDetailModal('#NOT-9841', 'Driver Assigned 🚚', 'Ramesh Kumar (Driver)', 'SMS + In-App', 'Delivered', '2026-08-23 16:15', 'New delivery order #DEL-1024 has been assigned. Please pick up pet Bruno from Happy Paws Shelter.')" class="text-xs text-[#5B8C76] dark:text-[#A8D8B9] name-hover-link font-bold">Inspect 🔍</button>
+                                    </td>
+                                </tr>
+
+                                <!-- ROW 3: FAILED SMS -->
+                                <tr class="hover:bg-[#5B8C76]/10 transition-colors bg-red-500/5">
+                                    <td class="py-3.5 px-3 text-left">
+                                        <span class="font-extrabold block text-xs">#NOT-9838</span>
+                                        <span class="px-2 py-0.5 rounded-full bg-red-500/20 text-red-400 text-[10px] font-extrabold border border-red-500/30">🔴 CRITICAL</span>
+                                    </td>
+                                    <td class="py-3.5 px-3 text-left">
+                                        <span class="font-extrabold block">Priya Nair</span>
+                                        <span class="text-[10px] text-muted">Customer 👤</span>
+                                    </td>
+                                    <td class="py-3.5 px-3 text-left">
+                                        <span class="font-extrabold block text-red-400">Payment Failed 💳</span>
+                                        <span class="text-[11px] text-muted block truncate max-w-xs">Transaction failed for adoption request #REQ-8819.</span>
+                                    </td>
+                                    <td class="py-3.5 px-3 text-left">
+                                        <span class="block text-[11px]">🐱 Luna</span>
+                                        <span class="text-[10px] text-muted">#PAY-9010</span>
+                                    </td>
+                                    <td class="py-3.5 px-3">
+                                        <span class="px-2 py-1 rounded-xl bg-[#5B8C76]/20 text-[#5B8C76] dark:text-[#A8D8B9] font-bold text-[10px]">SMS</span>
+                                    </td>
+                                    <td class="py-3.5 px-3 text-[11px]">
+                                        <span>2026-08-23 15:45</span>
+                                    </td>
+                                    <td class="py-3.5 px-3">
+                                        <span class="px-2.5 py-1 rounded-full bg-red-500/20 text-red-400 text-[10px] uppercase font-extrabold border border-red-500/30">Failed 🚨</span>
+                                    </td>
+                                    <td class="py-3.5 px-3 flex items-center justify-center gap-2">
+                                        <button type="button" onclick="retryFailedNotification('#NOT-9838')" class="px-2 py-1 rounded-lg bg-amber-500/20 text-amber-400 text-[11px] font-bold">Retry 🔄</button>
+                                        <button type="button" onclick="openNotifDetailModal('#NOT-9838', 'Payment Failed 💳', 'Priya Nair (Customer)', 'SMS', 'Failed (Carrier Gateway Timeout)', '2026-08-23 15:45', 'Payment attempt for Luna failed due to gateway timeout.')" class="text-xs text-[#5B8C76] dark:text-[#A8D8B9] name-hover-link font-bold">Inspect 🔍</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========================================== -->
+            <!-- 📁 TAB CONTENT 2: NOTIFICATION TEMPLATES -->
+            <!-- ========================================== -->
+            <div id="tab-templates" class="category-tab-content hidden space-y-6">
+                <div class="apple-glass rounded-3xl p-6 shadow-xl space-y-6">
+                    <div class="flex items-center justify-between flex-wrap gap-2 border-b border-[#5B8C76]/20 pb-3">
+                        <div>
+                            <h3 class="font-extrabold text-lg">📑 Notification Template Library</h3>
+                            <p class="text-xs text-muted">Configure message templates with dynamic placeholders for automated dispatches.</p>
+                        </div>
+                        <button type="button" onclick="openCreateTemplateModal()" class="btn-ui-primary text-xs">➕ Create Template</button>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                        <!-- TEMPLATE CARD 1 -->
+                        <div class="theme-card-bg rounded-2xl p-5 space-y-3 border-l-4 border-emerald-400">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <span class="text-[10px] text-muted font-bold block">#TMP-101 • Customer</span>
+                                    <h4 class="font-extrabold text-sm">Adoption Approved 🎉</h4>
+                                </div>
+                                <span class="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-[10px] font-bold uppercase">Active</span>
+                            </div>
+                            <div class="text-xs bg-[#111A15]/60 p-3 rounded-xl border border-[#5B8C76]/20 space-y-1">
+                                <span class="text-[10px] text-muted font-bold block">TEMPLATE MESSAGE:</span>
+                                <p class="text-muted leading-relaxed text-[11px]">"Hello <span class="text-emerald-400 font-bold">&#123;&#123;customer_name&#125;&#125;</span>, your adoption request <span class="text-emerald-400 font-bold">&#123;&#123;adoption_request_id&#125;&#125;</span> for <span class="text-emerald-400 font-bold">&#123;&#123;pet_name&#125;&#125;</span> has been approved. Please complete payment of <span class="text-emerald-400 font-bold">&#123;&#123;amount&#125;&#125;</span>."</p>
+                            </div>
+                            <div class="flex justify-between items-center text-xs pt-1">
+                                <span class="text-[10px] text-muted">Channels: In-App + Email + Push</span>
+                                <div class="flex gap-2">
+                                    <button type="button" onclick="testNotificationTemplate('#TMP-101')" class="px-2.5 py-1 rounded-lg bg-[#5B8C76]/20 text-[#5B8C76] dark:text-[#A8D8B9] font-bold text-[11px]">Test 📲</button>
+                                    <button type="button" onclick="openCreateTemplateModal('Adoption Approved 🎉')" class="px-2.5 py-1 rounded-lg bg-[#5B8C76]/20 text-[#5B8C76] dark:text-[#A8D8B9] font-bold text-[11px]">Edit ✏️</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- TEMPLATE CARD 2 -->
+                        <div class="theme-card-bg rounded-2xl p-5 space-y-3 border-l-4 border-amber-400">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <span class="text-[10px] text-muted font-bold block">#TMP-102 • Driver</span>
+                                    <h4 class="font-extrabold text-sm">Driver Logistics Assignment 🚚</h4>
+                                </div>
+                                <span class="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-[10px] font-bold uppercase">Active</span>
+                            </div>
+                            <div class="text-xs bg-[#111A15]/60 p-3 rounded-xl border border-[#5B8C76]/20 space-y-1">
+                                <span class="text-[10px] text-muted font-bold block">TEMPLATE MESSAGE:</span>
+                                <p class="text-muted leading-relaxed text-[11px]">"Hello <span class="text-amber-400 font-bold">&#123;&#123;driver_name&#125;&#125;</span>, order delivery order <span class="text-amber-400 font-bold">&#123;&#123;delivery_id&#125;&#125;</span> for <span class="text-amber-400 font-bold">&#123;&#123;pet_name&#125;&#125;</span> from <span class="text-amber-400 font-bold">&#123;&#123;shelter_name&#125;&#125;</span> is scheduled for <span class="text-amber-400 font-bold">&#123;&#123;delivery_date&#125;&#125;</span>."</p>
+                            </div>
+                            <div class="flex justify-between items-center text-xs pt-1">
+                                <span class="text-[10px] text-muted">Channels: SMS + In-App</span>
+                                <div class="flex gap-2">
+                                    <button type="button" onclick="testNotificationTemplate('#TMP-102')" class="px-2.5 py-1 rounded-lg bg-[#5B8C76]/20 text-[#5B8C76] dark:text-[#A8D8B9] font-bold text-[11px]">Test 📲</button>
+                                    <button type="button" onclick="openCreateTemplateModal('Driver Logistics Assignment')" class="px-2.5 py-1 rounded-lg bg-[#5B8C76]/20 text-[#5B8C76] dark:text-[#A8D8B9] font-bold text-[11px]">Edit ✏️</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- TEMPLATE CARD 3 -->
+                        <div class="theme-card-bg rounded-2xl p-5 space-y-3 border-l-4 border-blue-400">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <span class="text-[10px] text-muted font-bold block">#TMP-103 • Customer</span>
+                                    <h4 class="font-extrabold text-sm">Payment Confirmation 💳</h4>
+                                </div>
+                                <span class="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-[10px] font-bold uppercase">Active</span>
+                            </div>
+                            <div class="text-xs bg-[#111A15]/60 p-3 rounded-xl border border-[#5B8C76]/20 space-y-1">
+                                <span class="text-[10px] text-muted font-bold block">TEMPLATE MESSAGE:</span>
+                                <p class="text-muted leading-relaxed text-[11px]">"Receipt for payment <span class="text-blue-400 font-bold">&#123;&#123;payment_id&#125;&#125;</span> of <span class="text-blue-400 font-bold">&#123;&#123;amount&#125;&#125;</span> confirmed for <span class="text-blue-400 font-bold">&#123;&#123;pet_name&#125;&#125;</span>. Delivery scheduling initiated."</p>
+                            </div>
+                            <div class="flex justify-between items-center text-xs pt-1">
+                                <span class="text-[10px] text-muted">Channels: Email + In-App</span>
+                                <div class="flex gap-2">
+                                    <button type="button" onclick="testNotificationTemplate('#TMP-103')" class="px-2.5 py-1 rounded-lg bg-[#5B8C76]/20 text-[#5B8C76] dark:text-[#A8D8B9] font-bold text-[11px]">Test 📲</button>
+                                    <button type="button" onclick="openCreateTemplateModal('Payment Confirmation')" class="px-2.5 py-1 rounded-lg bg-[#5B8C76]/20 text-[#5B8C76] dark:text-[#A8D8B9] font-bold text-[11px]">Edit ✏️</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========================================== -->
+            <!-- 📁 TAB CONTENT 3: AUTOMATION RULES -->
+            <!-- ========================================== -->
+            <div id="tab-rules" class="category-tab-content hidden space-y-6">
+                <div class="apple-glass rounded-3xl p-6 shadow-xl space-y-6">
+                    <div class="flex items-center justify-between flex-wrap gap-2 border-b border-[#5B8C76]/20 pb-3">
+                        <div>
+                            <h3 class="font-extrabold text-lg">🤖 Automated Workflow Notification Rules</h3>
+                            <p class="text-xs text-muted">Define event triggers, logical conditions, and multi-channel dispatch actions.</p>
+                        </div>
+                        <button type="button" onclick="openCreateRuleModal()" class="btn-ui-primary text-xs">➕ New Automation Rule</button>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div class="theme-card-bg p-5 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-4 border-l-4 border-emerald-400">
+                            <div class="space-y-1">
+                                <div class="flex items-center gap-2">
+                                    <span class="font-extrabold text-sm">Rule #AR-10: Adoption Request Approved</span>
+                                    <span class="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-[10px] font-bold">Enabled</span>
+                                </div>
+                                <p class="text-xs text-muted">Trigger: Adoption Request Approved ➔ Condition: None ➔ Recipient: Customer ➔ Channels: In-App + Email + Push</p>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" checked onchange="toggleAutomationRule('#AR-10')" class="sr-only peer">
+                                    <div class="w-11 h-6 bg-[#5B8C76]/30 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#5B8C76]"></div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="theme-card-bg p-5 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-4 border-l-4 border-amber-400">
+                            <div class="space-y-1">
+                                <div class="flex items-center gap-2">
+                                    <span class="font-extrabold text-sm">Rule #AR-12: Delivery Delayed > 30 mins</span>
+                                    <span class="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-[10px] font-bold">Enabled</span>
+                                </div>
+                                <p class="text-xs text-muted">Trigger: Delivery Delayed ➔ Condition: Delay > 30 mins ➔ Recipients: Customer + Shelter ➔ Channels: Push + SMS</p>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" checked onchange="toggleAutomationRule('#AR-12')" class="sr-only peer">
+                                    <div class="w-11 h-6 bg-[#5B8C76]/30 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#5B8C76]"></div>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========================================== -->
+            <!-- 📁 TAB CONTENT 4: SCHEDULED NOTIFICATIONS -->
+            <!-- ========================================== -->
+            <div id="tab-scheduled" class="category-tab-content hidden space-y-6">
+                <div class="apple-glass rounded-3xl p-6 shadow-xl space-y-6">
+                    <div class="flex items-center justify-between flex-wrap gap-2 border-b border-[#5B8C76]/20 pb-3">
+                        <div>
+                            <h3 class="font-extrabold text-lg">📅 Scheduled & Recurring Dispatches</h3>
+                            <p class="text-xs text-muted">Manage recurring reminders for vaccinations, delivery follow-ups, and shelter payouts.</p>
+                        </div>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-xs text-center border-collapse">
+                            <thead>
+                                <tr class="theme-table-header uppercase text-[10px] font-extrabold tracking-wider border-b border-[#5B8C76]/25">
+                                    <th class="py-3 px-4 text-left">JOB NAME</th>
+                                    <th class="py-3 px-4">RECIPIENT GROUP</th>
+                                    <th class="py-3 px-4">TEMPLATE</th>
+                                    <th class="py-3 px-4">RECURRENCE</th>
+                                    <th class="py-3 px-4">NEXT SCHEDULED</th>
+                                    <th class="py-3 px-4">STATUS</th>
+                                    <th class="py-3 px-4">ACTION</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-[#5B8C76]/15 font-semibold">
+                                <tr>
+                                    <td class="py-3.5 px-4 text-left font-bold">Vaccination Document Reminder</td>
+                                    <td class="py-3.5 px-4">Active Customers</td>
+                                    <td class="py-3.5 px-4">#TMP-104</td>
+                                    <td class="py-3.5 px-4"><span class="px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-400 font-extrabold">Weekly</span></td>
+                                    <td class="py-3.5 px-4">2026-08-25 09:00</td>
+                                    <td class="py-3.5 px-4"><span class="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-[10px] uppercase font-bold">Active</span></td>
+                                    <td class="py-3.5 px-4"><button type="button" onclick="showProfessionalToast('Schedule Managed', 'Schedule settings updated.')" class="text-xs text-[#5B8C76] dark:text-[#A8D8B9] name-hover-link font-bold">Edit ✏️</button></td>
+                                </tr>
+                                <tr>
+                                    <td class="py-3.5 px-4 text-left font-bold">Shelter Payout Statement</td>
+                                    <td class="py-3.5 px-4">Verified Shelters</td>
+                                    <td class="py-3.5 px-4">#TMP-108</td>
+                                    <td class="py-3.5 px-4"><span class="px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-400 font-extrabold">Monthly</span></td>
+                                    <td class="py-3.5 px-4">2026-09-01 08:00</td>
+                                    <td class="py-3.5 px-4"><span class="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-[10px] uppercase font-bold">Active</span></td>
+                                    <td class="py-3.5 px-4"><button type="button" onclick="showProfessionalToast('Schedule Managed', 'Schedule settings updated.')" class="text-xs text-[#5B8C76] dark:text-[#A8D8B9] name-hover-link font-bold">Edit ✏️</button></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========================================== -->
+            <!-- 📁 TAB CONTENT 5: BULK BROADCAST -->
+            <!-- ========================================== -->
+            <div id="tab-bulk" class="category-tab-content hidden space-y-6">
+                <div class="apple-glass rounded-3xl p-6 shadow-xl space-y-6 max-w-4xl mx-auto">
+                    <div class="border-b border-[#5B8C76]/20 pb-3">
+                        <h3 class="font-extrabold text-lg">📢 Dispatch Bulk Broadcast Notification</h3>
+                        <p class="text-xs text-muted">Send platform updates, adoption event announcements, or safety alerts to target segments.</p>
+                    </div>
+
+                    <form onsubmit="event.preventDefault(); openBulkConfirmModal();" class="space-y-4 text-xs font-bold">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block font-bold text-muted mb-1">Target Recipient Segment *</label>
+                                <select id="bulk-segment-select" class="input-box rounded-xl py-2 px-3 text-xs font-semibold w-full cursor-pointer">
+                                    <option value="all_cust">All Registered Customers (1,480)</option>
+                                    <option value="pending_cust">Customers with Pending Requests (38)</option>
+                                    <option value="shelters">All Partner Shelters (24)</option>
+                                    <option value="drivers">All Delivery Drivers (18)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block font-bold text-muted mb-1">Priority Level *</label>
+                                <select id="bulk-priority-select" class="input-box rounded-xl py-2 px-3 text-xs font-semibold w-full cursor-pointer">
+                                    <option value="NORMAL">🟡 Normal Priority</option>
+                                    <option value="HIGH">🟠 High Priority</option>
+                                    <option value="CRITICAL">🔴 Critical Priority Alert</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block font-bold text-muted mb-1">Broadcast Title *</label>
+                            <input type="text" required value="Special Weekend Adoption Drive 🎉" class="w-full input-box rounded-xl px-3 py-2 text-xs font-semibold">
+                        </div>
+
+                        <div>
+                            <label class="block font-bold text-muted mb-1">Broadcast Message Body *</label>
+                            <textarea rows="4" required class="w-full input-box rounded-xl px-3 py-2 text-xs font-semibold">Join us this Saturday for our Special Pet Adoption Drive! Over 40 pets looking for a loving home.</textarea>
+                        </div>
+
+                        <div class="flex justify-end gap-3 pt-2">
+                            <button type="submit" class="btn-ui-primary text-xs">Dispatch Bulk Broadcast 🚀</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- ========================================== -->
+            <!-- 📁 TAB CONTENT 6: FAILED NOTIFICATIONS DESK -->
+            <!-- ========================================== -->
+            <div id="tab-failed" class="category-tab-content hidden space-y-6">
+                <div class="apple-glass rounded-3xl p-6 shadow-xl space-y-6">
+                    <div class="border-b border-[#5B8C76]/20 pb-3">
+                        <h3 class="font-extrabold text-lg">🚨 Failed Notification Recovery Desk</h3>
+                        <p class="text-xs text-muted">Inspect delivery failures, review gateway trace errors, and retry failed dispatches.</p>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-xs text-center border-collapse">
+                            <thead>
+                                <tr class="theme-table-header uppercase text-[10px] font-extrabold tracking-wider border-b border-[#5B8C76]/25">
+                                    <th class="py-3 px-4 text-left">NOTIF ID</th>
+                                    <th class="py-3 px-4 text-left">RECIPIENT</th>
+                                    <th class="py-3 px-4">CHANNEL</th>
+                                    <th class="py-3 px-4 text-left">FAILURE REASON</th>
+                                    <th class="py-3 px-4">RETRY COUNT</th>
+                                    <th class="py-3 px-4">LAST ATTEMPT</th>
+                                    <th class="py-3 px-4">ACTION</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-[#5B8C76]/15 font-semibold">
+                                <tr class="hover:bg-[#5B8C76]/10 transition-colors bg-red-500/5">
+                                    <td class="py-3.5 px-4 text-left font-extrabold">#NOT-9838</td>
+                                    <td class="py-3.5 px-4 text-left font-bold">Priya Nair (Customer)</td>
+                                    <td class="py-3.5 px-4"><span class="px-2 py-0.5 rounded-full bg-red-500/20 text-red-400 font-extrabold">SMS</span></td>
+                                    <td class="py-3.5 px-4 text-left text-red-400 font-bold">Carrier Gateway Connection Timeout</td>
+                                    <td class="py-3.5 px-4">2 / 3</td>
+                                    <td class="py-3.5 px-4">2026-08-23 15:45</td>
+                                    <td class="py-3.5 px-4 flex justify-center gap-2">
+                                        <button type="button" onclick="retryFailedNotification('#NOT-9838')" class="btn-ui-primary text-[11px] py-1 px-3">Retry Now 🔄</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========================================== -->
+            <!-- 📁 TAB CONTENT 7: USER PREFERENCES -->
+            <!-- ========================================== -->
+            <div id="tab-prefs" class="category-tab-content hidden space-y-6">
+                <div class="apple-glass rounded-3xl p-6 shadow-xl space-y-6 max-w-4xl mx-auto">
+                    <div class="border-b border-[#5B8C76]/20 pb-3">
+                        <h3 class="font-extrabold text-lg">⚙️ Role Notification Channel Preferences</h3>
+                        <p class="text-xs text-muted">Configure default transactional vs promotional channel permissions by role.</p>
+                    </div>
+
+                    <div class="space-y-4 text-xs font-bold">
+                        <div class="theme-card-bg p-4 rounded-2xl space-y-3">
+                            <h4 class="font-extrabold text-sm text-emerald-400">👤 Customer Preferences</h4>
+                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                                <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" checked class="w-4 h-4 accent-[#5B8C76]"> Email Updates</label>
+                                <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" checked class="w-4 h-4 accent-[#5B8C76]"> SMS Alerts</label>
+                                <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" checked class="w-4 h-4 accent-[#5B8C76]"> Push Notifications</label>
+                                <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" checked class="w-4 h-4 accent-[#5B8C76]"> WhatsApp Updates</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========================================== -->
+            <!-- 📁 TAB CONTENT 8: ANALYTICS -->
+            <!-- ========================================== -->
+            <div id="tab-analytics" class="category-tab-content hidden space-y-6">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="apple-glass rounded-3xl p-6 shadow-xl space-y-4">
+                        <h3 class="font-extrabold text-base">📈 Notification Volume Over Time</h3>
+                        <div class="h-64 relative">
+                            <canvas id="notifTrendChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="apple-glass rounded-3xl p-6 shadow-xl space-y-4">
+                        <h3 class="font-extrabold text-base">🍩 Notifications by Channel</h3>
+                        <div class="h-64 relative">
+                            <canvas id="notifChannelChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========================================== -->
+            <!-- 📁 TAB CONTENT 9: AUDIT LOGS -->
+            <!-- ========================================== -->
+            <div id="tab-audit" class="category-tab-content hidden space-y-6">
+                <div class="apple-glass rounded-3xl p-6 shadow-xl space-y-6">
+                    <div class="border-b border-[#5B8C76]/20 pb-3">
+                        <h3 class="font-extrabold text-lg">🔍 Notification Module Audit Logs</h3>
+                        <p class="text-xs text-muted">Complete immutable audit trail of template changes, rule toggles, and bulk dispatches.</p>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-xs text-center border-collapse">
+                            <thead>
+                                <tr class="theme-table-header uppercase text-[10px] font-extrabold tracking-wider border-b border-[#5B8C76]/25">
+                                    <th class="py-3 px-4 text-left">TIMESTAMP</th>
+                                    <th class="py-3 px-4 text-left">USER & ROLE</th>
+                                    <th class="py-3 px-4">ACTION</th>
+                                    <th class="py-3 px-4">TARGET NOTIF ID</th>
+                                    <th class="py-3 px-4 text-left">DESCRIPTION</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-[#5B8C76]/15 font-semibold">
+                                <tr>
+                                    <td class="py-3.5 px-4 text-left">2026-08-23 16:30</td>
+                                    <td class="py-3.5 px-4 text-left">Admin (System)</td>
+                                    <td class="py-3.5 px-4"><span class="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 font-extrabold">DISPATCH_SENT</span></td>
+                                    <td class="py-3.5 px-4">#NOT-9842</td>
+                                    <td class="py-3.5 px-4 text-left text-muted">Dispatched Adoption Approved notification to Rahul Sharma.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========================================== -->
+            <!-- 📁 TAB CONTENT 10: WORKFLOW FLOW TRACE -->
+            <!-- ========================================== -->
+            <div id="tab-flow" class="category-tab-content hidden space-y-6">
+                <div class="apple-glass rounded-3xl p-6 shadow-xl space-y-6">
+                    <div class="border-b border-[#5B8C76]/20 pb-3">
+                        <h3 class="font-extrabold text-lg">🔄 End-to-End Adoption Lifecycle Notification Flow</h3>
+                        <p class="text-xs text-muted">Trace how automated dispatches trigger across every stage of adoption, payment, and delivery.</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-5 gap-3 text-xs font-bold text-center">
+                        <div class="theme-card-bg p-4 rounded-2xl space-y-2 border-t-4 border-emerald-400">
+                            <span class="text-[10px] text-muted block uppercase">STAGE 1</span>
+                            <div class="text-sm font-extrabold">Request Created 🐾</div>
+                            <span class="text-[10px] text-emerald-400 block">Shelter Notified</span>
+                        </div>
+                        <div class="theme-card-bg p-4 rounded-2xl space-y-2 border-t-4 border-emerald-400">
+                            <span class="text-[10px] text-muted block uppercase">STAGE 2</span>
+                            <div class="text-sm font-extrabold">Adoption Approved 🎉</div>
+                            <span class="text-[10px] text-emerald-400 block">Customer Notified</span>
+                        </div>
+                        <div class="theme-card-bg p-4 rounded-2xl space-y-2 border-t-4 border-emerald-400">
+                            <span class="text-[10px] text-muted block uppercase">STAGE 3</span>
+                            <div class="text-sm font-extrabold">Payment Completed 💳</div>
+                            <span class="text-[10px] text-emerald-400 block">Receipt Sent</span>
+                        </div>
+                        <div class="theme-card-bg p-4 rounded-2xl space-y-2 border-t-4 border-amber-400">
+                            <span class="text-[10px] text-muted block uppercase">STAGE 4</span>
+                            <div class="text-sm font-extrabold">Driver Assigned 🚚</div>
+                            <span class="text-[10px] text-amber-400 block">Driver & Customer Notified</span>
+                        </div>
+                        <div class="theme-card-bg p-4 rounded-2xl space-y-2 border-t-4 border-blue-400">
+                            <span class="text-[10px] text-muted block uppercase">STAGE 5</span>
+                            <div class="text-sm font-extrabold">Pet Delivered ❤️</div>
+                            <span class="text-[10px] text-blue-400 block">Completion Confirmed</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- 📄 INTERACTIVE NOTIFICATION DETAIL DRAWER MODAL -->
+    <div id="notification-detail-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm hidden">
+        <div class="apple-glass rounded-3xl p-6 w-full max-w-2xl mx-4 space-y-4 shadow-2xl relative">
+            <button type="button" onclick="closeNotifDetailModal()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-red-500/20 text-red-400 font-extrabold flex items-center justify-center cursor-pointer">✕</button>
+            <h3 class="font-extrabold text-lg" id="modal-notif-title">Notification Inspection</h3>
+            <div class="text-xs font-semibold text-muted" id="modal-notif-recipient">Recipient Details</div>
+            
+            <div class="theme-card-bg p-4 rounded-2xl space-y-3 text-xs">
+                <div class="grid grid-cols-2 gap-2 border-b border-[#5B8C76]/20 pb-2">
+                    <div><span class="text-muted block">Notification ID:</span> <span id="modal-notif-id" class="font-extrabold text-emerald-400">#NOT-9842</span></div>
+                    <div><span class="text-muted block">Channel:</span> <span id="modal-notif-channel" class="font-extrabold">In-App + Email</span></div>
+                    <div><span class="text-muted block">Status:</span> <span id="modal-notif-status" class="font-extrabold text-emerald-400">Delivered</span></div>
+                    <div><span class="text-muted block">Timestamp:</span> <span id="modal-notif-time" class="font-extrabold">2026-08-23 16:30</span></div>
+                </div>
+                <div>
+                    <span class="text-muted block font-bold mb-1">Complete Message Body:</span>
+                    <p id="modal-notif-body" class="p-3 bg-[#111A15]/80 rounded-xl text-muted font-medium leading-relaxed"></p>
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-2">
+                <a href="{% url 'admin_requests' %}" class="btn-ui-primary text-xs">View Adoption Request 🐾</a>
+                <button type="button" onclick="closeNotifDetailModal()" class="px-4 py-2 rounded-full bg-[#5B8C76]/20 text-xs font-bold text-[#5B8C76] dark:text-[#A8D8B9]">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 📑 CREATE TEMPLATE MODAL -->
+    <div id="create-template-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm hidden">
+        <div class="apple-glass rounded-3xl p-6 w-full max-w-lg mx-4 space-y-4 shadow-2xl relative">
+            <button type="button" onclick="closeCreateTemplateModal()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-red-500/20 text-red-400 font-extrabold flex items-center justify-center cursor-pointer">✕</button>
+            <h3 class="font-extrabold text-lg">📑 Notification Template Editor</h3>
+            
+            <form onsubmit="event.preventDefault(); saveTemplate();" class="space-y-3 text-xs font-bold">
+                <div>
+                    <label class="block font-bold text-muted mb-1">Template Name *</label>
+                    <input type="text" id="tpl-name-input" required value="Adoption Request Approved" class="w-full input-box rounded-xl px-3 py-2 font-semibold">
+                </div>
+                <div>
+                    <label class="block font-bold text-muted mb-1">Message Body *</label>
+                    <textarea id="tpl-body-input" rows="4" required class="w-full input-box rounded-xl px-3 py-2 font-semibold">Hello {{customer_name}}, your request {{adoption_request_id}} for {{pet_name}} is approved.</textarea>
+                </div>
+                <div class="flex justify-end gap-2 pt-2">
+                    <button type="submit" class="btn-ui-primary text-xs">Save Template</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 📢 BULK CONFIRMATION MODAL -->
+    <div id="bulk-confirm-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm hidden">
+        <div class="apple-glass rounded-3xl p-6 w-full max-w-md mx-4 space-y-4 shadow-2xl relative">
+            <h3 class="font-extrabold text-lg">📢 Confirm Bulk Broadcast</h3>
+            <p class="text-xs text-muted">Are you sure you want to dispatch this notification to all recipients in the selected segment?</p>
+            <div class="flex justify-end gap-2 pt-2">
+                <button type="button" onclick="closeBulkConfirmModal()" class="px-4 py-2 rounded-full bg-red-500/20 text-xs font-bold text-red-400">Cancel</button>
+                <button type="button" onclick="executeBulkDispatch()" class="btn-ui-primary text-xs">Confirm Dispatch 🚀</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JS DASHBOARD LOGIC -->
+    <script>
+        // 🔔 PROFESSIONAL TOAST SYSTEM
+        window.showProfessionalToast = function(title, message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            if (!container) return;
+
+            const toast = document.createElement('div');
+            const bgClass = type === 'error' 
+                ? 'bg-red-500/90 text-white' 
+                : 'bg-gradient-to-r from-[#5B8C76] to-[#3D6B56] text-white';
+
+            toast.className = `toast-animate pointer-events-auto flex items-center gap-3 px-4 py-3 rounded-2xl shadow-2xl text-xs font-extrabold border border-white/20 ${bgClass}`;
+            toast.innerHTML = `
+                <span class="text-base">${type === 'error' ? '🚨' : '✨'}</span>
+                <div>
+                    <div class="font-black text-sm tracking-tight">${title}</div>
+                    <div class="font-medium text-white/90">${message}</div>
+                </div>
+            `;
+
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transition = 'all 0.3s ease';
+                setTimeout(() => toast.remove(), 300);
+            }, 3200);
+        };
+
+        // 🌓 THEME TOGGLER
+        window.toggleTheme = function() {
+            const isDark = document.documentElement.classList.contains('dark');
+            if (isDark) {
+                document.documentElement.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+                document.getElementById('theme-icon').textContent = '☀️';
+                showProfessionalToast('Theme Switched', 'Switched to Light Theme mode.');
+            } else {
+                document.documentElement.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+                document.getElementById('theme-icon').textContent = '🌙';
+                showProfessionalToast('Theme Switched', 'Switched to Dark Theme mode.');
+            }
+        };
+        if (localStorage.getItem('theme') === 'light') {
+            document.documentElement.classList.remove('dark');
+            if (document.getElementById('theme-icon')) document.getElementById('theme-icon').textContent = '☀️';
+        }
+
+        // 📌 CATEGORY TAB SWITCHING
+        window.switchCategoryTab = function(tabId) {
+            document.querySelectorAll('.category-tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.category-tab-btn').forEach(btn => {
+                btn.classList.remove('tab-btn-active');
+                btn.classList.add('hover:bg-[#5B8C76]/20', 'text-muted');
+            });
+
+            const targetTab = document.getElementById(tabId);
+            if (targetTab) targetTab.classList.remove('hidden');
+            
+            const targetBtn = document.querySelector(`[onclick="switchCategoryTab('${tabId}')"]`);
+            if (targetBtn) {
+                targetBtn.classList.add('tab-btn-active');
+                targetBtn.classList.remove('hover:bg-[#5B8C76]/20', 'text-muted');
+            }
+        };
+
+        // 🔍 FILTER NOTIFICATIONS
+        window.filterNotificationsTable = function() {
+            showProfessionalToast('Filter Applied', 'Filtered notification directory logs.');
+        };
+
+        window.resetNotificationFilters = function() {
+            if (document.getElementById('filter-notif-type')) document.getElementById('filter-notif-type').value = 'all';
+            if (document.getElementById('filter-recipient-role')) document.getElementById('filter-recipient-role').value = 'all';
+            if (document.getElementById('filter-channel')) document.getElementById('filter-channel').value = 'all';
+            if (document.getElementById('filter-priority')) document.getElementById('filter-priority').value = 'all';
+            if (document.getElementById('filter-status')) document.getElementById('filter-status').value = 'all';
+            if (document.getElementById('notif-search-input')) document.getElementById('notif-search-input').value = '';
+            
+            if (typeof updateCustomDropdownsUI === 'function') updateCustomDropdownsUI();
+            showProfessionalToast('Filters Reset', 'All notification filters reset to defaults.');
+        };
+
+        window.filterByStatus = function(status) {
+            switchCategoryTab('tab-all');
+            showProfessionalToast('Status Filtered', `Showing notifications for status: ${status}`);
+        };
+
+        // 🔍 NOTIFICATION DETAIL MODAL
+        window.openNotifDetailModal = function(id, title, recipient, channel, status, time, body) {
+            document.getElementById('modal-notif-id').textContent = id;
+            document.getElementById('modal-notif-title').textContent = title;
+            document.getElementById('modal-notif-recipient').textContent = `Recipient: ${recipient}`;
+            document.getElementById('modal-notif-channel').textContent = channel;
+            document.getElementById('modal-notif-status').textContent = status;
+            document.getElementById('modal-notif-time').textContent = time;
+            document.getElementById('modal-notif-body').textContent = body;
+
+            document.getElementById('notification-detail-modal').classList.remove('hidden');
+        };
+
+        window.closeNotifDetailModal = function() {
+            document.getElementById('notification-detail-modal').classList.add('hidden');
+        };
+
+        // 📑 TEMPLATE MODAL
+        window.openCreateTemplateModal = function(name = '') {
+            if (name) document.getElementById('tpl-name-input').value = name;
+            document.getElementById('create-template-modal').classList.remove('hidden');
+        };
+
+        window.closeCreateTemplateModal = function() {
+            document.getElementById('create-template-modal').classList.add('hidden');
+        };
+
+        window.saveTemplate = function() {
+            closeCreateTemplateModal();
+            showProfessionalToast('Template Saved', 'Notification template saved successfully.');
+        };
+
+        window.testNotificationTemplate = function(tplId) {
+            showProfessionalToast('Test Notification Sent', `Dispatched test payload for template ${tplId}.`);
+        };
+
+        // 🤖 RULE TOGGLE
+        window.toggleAutomationRule = function(ruleId) {
+            showProfessionalToast('Automation Updated', `Rule ${ruleId} configuration updated.`);
+        };
+
+        // 📢 BULK DISPATCH
+        window.openBulkConfirmModal = function() {
+            document.getElementById('bulk-confirm-modal').classList.remove('hidden');
+        };
+        window.closeBulkConfirmModal = function() {
+            document.getElementById('bulk-confirm-modal').classList.add('hidden');
+        };
+        window.executeBulkDispatch = function() {
+            closeBulkConfirmModal();
+            showProfessionalToast('Broadcast Sent', 'Bulk broadcast successfully dispatched to target segment!');
+        };
+
+        // 🔄 RETRY FAILED
+        window.retryFailedNotification = function(notifId) {
+            showProfessionalToast('Retry Triggered', `Re-sending failed notification ${notifId}...`);
+        };
+
+        // 🎛️ AUTOMATIC GLASS UI DROPDOWN INITIALIZER
+        function autoConvertGlassDropdowns() {
+            document.querySelectorAll('select.input-box, select').forEach(select => {
+                if (select.dataset.glassConverted === 'true' || select.classList.contains('hidden')) return;
+                select.dataset.glassConverted = 'true';
+                select.classList.add('hidden');
+
+                const wrapper = document.createElement('div');
+                wrapper.className = 'relative custom-dropdown-group inline-block w-full';
+                
+                select.parentNode.insertBefore(wrapper, select);
+                wrapper.appendChild(select);
+
+                const currentOpt = select.options[select.selectedIndex] || select.options[0];
+                const initialLabel = currentOpt ? currentOpt.textContent : 'Select...';
+
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'w-full py-2 px-3 input-box rounded-xl text-xs font-bold flex items-center justify-between cursor-pointer custom-dropdown-btn';
+                btn.innerHTML = `
+                    <span class="custom-dropdown-label truncate">${initialLabel}</span>
+                    <svg class="w-3.5 h-3.5 text-[#5B8C76] dark:text-[#A8D8B9] transition-transform duration-200 custom-dropdown-arrow ml-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
+                `;
+
+                const menu = document.createElement('div');
+                menu.className = 'absolute top-full left-0 right-0 mt-1.5 z-50 rounded-2xl apple-glass shadow-2xl p-1.5 space-y-1 hidden custom-dropdown-menu border border-[#5B8C76]/30 dark:border-[#A8D8B9]/30 max-h-60 overflow-y-auto';
+
+                Array.from(select.options).forEach((opt, idx) => {
+                    const item = document.createElement('div');
+                    const isActive = idx === select.selectedIndex;
+                    item.className = `px-3 py-2 rounded-xl text-xs font-bold cursor-pointer hover:bg-[#5B8C76]/20 dark:hover:bg-[#A8D8B9]/20 transition-all flex items-center justify-between custom-opt-item ${isActive ? 'bg-[#5B8C76]/20 text-[#5B8C76] dark:text-[#A8D8B9]' : ''}`;
+                    item.innerHTML = `<span>${opt.textContent}</span>`;
+                    
+                    item.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        select.value = opt.value;
+                        btn.querySelector('.custom-dropdown-label').textContent = opt.textContent;
+                        
+                        menu.querySelectorAll('.custom-opt-item').forEach(i => i.classList.remove('bg-[#5B8C76]/20', 'text-[#5B8C76]', 'dark:text-[#A8D8B9]'));
+                        item.classList.add('bg-[#5B8C76]/20', 'text-[#5B8C76]', 'dark:text-[#A8D8B9]');
+                        
+                        menu.classList.add('hidden');
+                        btn.querySelector('.custom-dropdown-arrow').classList.remove('rotate-180');
+
+                        select.dispatchEvent(new Event('change', { bubbles: true }));
+                    });
+
+                    menu.appendChild(item);
+                });
+
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const isHidden = menu.classList.contains('hidden');
+                    document.querySelectorAll('.custom-dropdown-menu').forEach(m => m.classList.add('hidden'));
+                    document.querySelectorAll('.custom-dropdown-arrow').forEach(a => a.classList.remove('rotate-180'));
+
+                    if (isHidden) {
+                        menu.classList.remove('hidden');
+                        btn.querySelector('.custom-dropdown-arrow').classList.add('rotate-180');
+                    }
+                });
+
+                wrapper.appendChild(btn);
+                wrapper.appendChild(menu);
+            });
+        }
+
+        function updateCustomDropdownsUI() {
+            document.querySelectorAll('.custom-dropdown-group').forEach(group => {
+                const select = group.querySelector('select');
+                if (!select) return;
+                const currentOpt = select.options[select.selectedIndex] || select.options[0];
+                const label = group.querySelector('.custom-dropdown-label');
+                if (label && currentOpt) label.textContent = currentOpt.textContent;
+            });
+        }
+
+        document.addEventListener('click', () => {
+            document.querySelectorAll('.custom-dropdown-menu').forEach(m => m.classList.add('hidden'));
+            document.querySelectorAll('.custom-dropdown-arrow').forEach(a => a.classList.remove('rotate-180'));
+        });
+
+        // 📊 INITIALIZE CHARTS ON LOAD
+        window.addEventListener('DOMContentLoaded', () => {
+            autoConvertGlassDropdowns();
+
+            const ctx1 = document.getElementById('notifTrendChart').getContext('2d');
+            new Chart(ctx1, {
+                type: 'line',
+                data: {
+                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                    datasets: [{ label: 'Dispatches', data: [310, 380, 420, 490, 560, 610, 720], borderColor: '#5B8C76', tension: 0.3 }]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+
+            const ctx2 = document.getElementById('notifChannelChart').getContext('2d');
+            new Chart(ctx2, {
+                type: 'doughnut',
+                data: {
+                    labels: ['In-App', 'Email', 'SMS', 'Push', 'WhatsApp'],
+                    datasets: [{ data: [45, 25, 15, 10, 5], backgroundColor: ['#5B8C76', '#A8D8B9', '#F59E0B', '#3B82F6', '#10B981'] }]
+                },
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom', labels: { color: '#8EA89B', font: { size: 10, weight: 'bold' } } } }
+                }
+            });
+        });
+    </script>
+</body>
+</html>

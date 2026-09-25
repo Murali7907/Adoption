@@ -1,0 +1,1314 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reports & Analytics Dashboard - Admin Panel</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style type="text/css">
+        @import "tailwindcss";
+
+        body {
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        /* 🌙 DARK MODE STYLES */
+        .dark body { background-color: #111A15 !important; color: #F4EDE2 !important; }
+        .dark .apple-glass { 
+            background: rgba(27, 41, 33, 0.85) !important; 
+            backdrop-filter: blur(25px); 
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid rgba(168, 216, 185, 0.22) !important; 
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.45) !important;
+        }
+        .dark .sidebar-bg { 
+            background: rgba(14, 22, 18, 0.90) !important; 
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            border-right: 1px solid rgba(168, 216, 185, 0.15) !important; 
+        }
+        .dark .theme-card-bg {
+            background: rgba(22, 34, 28, 0.65);
+            border: 1px solid rgba(91, 140, 118, 0.18);
+        }
+        .dark .theme-table-header {
+            background: rgba(13, 20, 16, 0.85);
+            color: #A8D8B9;
+        }
+        .dark .input-box {
+            background: rgba(17, 26, 21, 0.9);
+            border: 1px solid rgba(91, 140, 118, 0.3);
+            color: #F4EDE2;
+        }
+        .dark .text-muted { color: #8EA89B; }
+
+        /* ☀️ LIGHT MODE STYLES */
+        html:not(.dark) body { background-color: #F4EDE2; color: #111A15; }
+        html:not(.dark) .apple-glass { 
+            background: rgba(255, 255, 255, 0.88); 
+            backdrop-filter: blur(25px); 
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid rgba(91, 140, 118, 0.3); 
+            box-shadow: 0 15px 35px rgba(91, 140, 118, 0.12); 
+        }
+        html:not(.dark) .sidebar-bg { 
+            background: rgba(244, 237, 226, 0.95); 
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            border-right: 1px solid rgba(91, 140, 118, 0.25); 
+        }
+        html:not(.dark) .theme-card-bg {
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(91, 140, 118, 0.25);
+        }
+        html:not(.dark) .theme-table-header {
+            background: rgba(235, 243, 238, 0.95);
+            color: #2D4A3E;
+        }
+        html:not(.dark) .input-box {
+            background: #FFFFFF;
+            border: 1px solid rgba(91, 140, 118, 0.35);
+            color: #111A15;
+        }
+        html:not(.dark) .text-muted { color: #5B8C76; }
+
+        /* ACTIVE NAV & BUTTONS */
+        .nav-item-active {
+            background: linear-gradient(135deg, #5B8C76 0%, #3D6B56 100%) !important;
+            color: #FFFFFF !important;
+            box-shadow: 0 8px 20px rgba(91, 140, 118, 0.4) !important;
+        }
+
+        .nav-item-hover-transform {
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .nav-item-hover-transform:hover {
+            background: rgba(91, 140, 118, 0.2);
+            transform: translateX(4px);
+        }
+
+        .tab-btn-active {
+            background: #5B8C76 !important;
+            color: #FFFFFF !important;
+            box-shadow: 0 4px 14px rgba(91, 140, 118, 0.35);
+        }
+
+        /* CUSTOM SCROLLBAR REMOVAL SYSTEM-WIDE */
+        * { scrollbar-width: none !important; }
+        *::-webkit-scrollbar { display: none !important; }
+
+        .btn-ui-primary {
+            background: linear-gradient(135deg, #5B8C76 0%, #44705D 100%);
+            color: #FFFFFF;
+            font-weight: 800;
+            padding: 0.55rem 1.25rem;
+            border-radius: 9999px;
+            transition: all 0.25s ease;
+            box-shadow: 0 6px 16px rgba(91, 140, 118, 0.3);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+        }
+        .btn-ui-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 22px rgba(91, 140, 118, 0.45);
+        }
+
+        /* TOAST ANIMATION */
+        @keyframes toastSlideIn {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .toast-animate {
+            animation: toastSlideIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+    </style>
+</head>
+<body class="min-h-screen font-sans transition-colors duration-300">
+
+    <!-- 🔔 PROFESSIONAL TOAST NOTIFICATION CONTAINER -->
+    <div id="toast-container" class="fixed bottom-6 right-6 z-50 flex flex-col gap-3 pointer-events-none"></div>
+
+    <div class="flex min-h-screen">
+        
+        <!-- 🚀 HORIZON STANDARDIZED SIDEBAR -->
+        <aside class="w-64 sidebar-bg flex flex-col justify-between p-6 sticky top-0 h-screen z-30 overflow-y-auto">
+            <div>
+                <!-- BRAND HEADER -->
+                <div class="flex items-center gap-3 mb-8 px-2">
+                    <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#5B8C76] to-[#A8D8B9] flex items-center justify-center font-extrabold text-xl text-[#111A15] shadow-md">
+                        👨‍💼
+                    </div>
+                    <div>
+                        <span class="font-extrabold text-lg tracking-tight block">HORIZON <span class="text-[#5B8C76] dark:text-[#A8D8B9]">UI</span></span>
+                        <span class="text-[10px] theme-accent-text font-extrabold uppercase tracking-widest">Pet Adoption Suite</span>
+                    </div>
+                </div>
+
+                <!-- NAVIGATION -->
+                <nav class="space-y-1 text-xs font-bold">
+                    <a href="{% url 'admin_dashboard' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>📊</span> Dashboard Overview</a>
+                    <a href="{% url 'admin_users' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>👥</span> User Management</a>
+                    
+                    <div class="space-y-1 my-2 py-2 border-y border-[#5B8C76]/25">
+                        <a href="{% url 'admin_shelters' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>🏠</span> Shelter Management</a>
+                        <a href="{% url 'admin_pets' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>🐶</span> Pet Management</a>
+                        <a href="{% url 'admin_requests' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>🐾</span> Adoption Requests</a>
+                        <a href="{% url 'admin_payments' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>💳</span> Payments</a>
+                        <a href="{% url 'admin_deliveries' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>🚚</span> Delivery Control</a>
+                        <a href="{% url 'admin_audit_logs' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>🔍</span> Audit Logs</a>
+                        <a href="{% url 'admin_revenue' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>💰</span> Revenue & Profit</a>
+                    </div>
+
+                    <a href="{% url 'admin_reports' %}" class="nav-item-active flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>📈</span> Reports & Analytics</a>
+                    <a href="{% url 'admin_notifications' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>🔔</span> Notifications</a>
+                    <a href="{% url 'admin_announcements' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>📢</span> Announcements</a>
+                    <a href="{% url 'admin_health' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>🩺</span> Pet Health</a>
+                    <a href="{% url 'admin_settings' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>⚙️</span> System Settings</a>
+                    <a href="{% url 'admin_roles' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>🔐</span> Roles & Permissions</a>
+                </nav>
+            </div>
+
+            <!-- FOOTER LINKS -->
+            <div class="pt-4 border-t border-[#5B8C76]/25 space-y-1">
+                <a href="{% url 'home' %}" class="flex items-center gap-3 px-4 py-2 hover:bg-[#5B8C76]/20 rounded-2xl text-xs font-bold"><span>🌐</span> Main Website</a>
+                <a href="{% url 'login' %}" class="flex items-center gap-3 px-4 py-2 hover:bg-red-500/20 text-red-500 rounded-2xl text-xs font-bold"><span>🚪</span> Logout</a>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT CONTAINER -->
+        <main class="flex-1 p-6 md:p-8 overflow-y-auto space-y-7 max-w-7xl mx-auto">
+            
+            <!-- 🚀 CLEAN & ELEGANT TOP HEADER NAVBAR -->
+            <header class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2 border-b border-[#5B8C76]/15">
+                <div>
+                    <div class="text-xs text-muted font-bold mb-1 flex items-center gap-1.5">
+                        <span>Pages</span> / <span class="text-[#5B8C76] dark:text-[#A8D8B9] font-extrabold">Reports & Analytics</span>
+                    </div>
+                    <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight">Reports & Analytics 📈</h1>
+                    <p class="text-xs text-muted font-medium mt-1">Platform performance overview, adoption metrics, shelter insights, and financial intelligence.</p>
+                </div>
+
+                <!-- TOP QUICK ACTION CONTROLS (CUSTOM BUILDER REMOVED FROM HEADER AS DIRECTED) -->
+                <div class="apple-glass rounded-full px-4 py-2 flex items-center gap-3 shadow-lg self-start md:self-auto flex-wrap">
+                    <button type="button" onclick="exportAnalyticsData('pdf')" class="btn-ui-primary text-xs">
+                        <span>📥</span> Export PDF Report
+                    </button>
+                    <button type="button" onclick="openScheduledReportsModal()" class="px-3.5 py-1.5 rounded-full bg-[#5B8C76]/20 hover:bg-[#5B8C76]/30 text-xs font-bold text-[#5B8C76] dark:text-[#A8D8B9] border border-[#5B8C76]/30 transition-all cursor-pointer">
+                        <span>📅</span> Schedule
+                    </button>
+
+                    <!-- THEME TOGGLER -->
+                    <button type="button" onclick="toggleTheme()" class="w-8 h-8 bg-[#5B8C76]/20 hover:bg-[#5B8C76]/30 border border-[#5B8C76]/40 rounded-full text-sm font-extrabold flex items-center justify-center cursor-pointer shadow-sm" title="Toggle Light/Dark Theme">
+                        <span id="theme-icon">🌙</span>
+                    </button>
+
+                    <!-- NOTIFICATION BELL -->
+                    <a href="{% url 'admin_notifications' %}" class="w-8 h-8 bg-[#5B8C76]/20 hover:bg-[#5B8C76]/30 border border-[#5B8C76]/40 rounded-full text-xs font-extrabold flex items-center justify-center relative shadow-sm" title="Notifications">
+                        🔔 <span class="w-2 h-2 rounded-full bg-red-500 absolute top-1 right-1 animate-ping"></span>
+                    </a>
+
+                    <!-- USER AVATAR PILL -->
+                    <div class="w-8 h-8 rounded-full bg-gradient-to-br from-[#5B8C76] to-[#A8D8B9] flex items-center justify-center font-extrabold text-xs text-[#111A15] shadow-sm" title="Admin User">
+                        A
+                    </div>
+                </div>
+            </header>
+
+            <!-- 🎛️ CLEAN & ACCESSIBLE FILTER TOOLBAR -->
+            <section class="apple-glass rounded-3xl p-5 shadow-lg space-y-4">
+                <div class="flex items-center justify-between flex-wrap gap-3">
+                    <div class="flex items-center gap-2">
+                        <span class="text-lg">🎛️</span>
+                        <div>
+                            <h2 class="font-extrabold text-sm tracking-wide">Filter Dashboard Analytics</h2>
+                            <span class="text-[11px] text-muted font-medium">Select timeframe and parameters to update insights instantly.</span>
+                        </div>
+                    </div>
+
+                    <!-- DATE PRESET QUICK PILLS -->
+                    <div class="flex items-center gap-1.5 text-xs font-bold bg-[#5B8C76]/10 p-1 rounded-2xl border border-[#5B8C76]/20 flex-wrap">
+                        <button type="button" onclick="setQuickDate(this, 'today')" class="date-pill px-3 py-1 rounded-xl hover:bg-[#5B8C76]/30 text-muted transition-all cursor-pointer">Today</button>
+                        <button type="button" onclick="setQuickDate(this, '7days')" class="date-pill px-3 py-1 rounded-xl hover:bg-[#5B8C76]/30 text-muted transition-all cursor-pointer">7 Days</button>
+                        <button type="button" onclick="setQuickDate(this, '30days')" class="date-pill px-3 py-1 rounded-xl bg-[#5B8C76] text-white font-extrabold shadow-sm cursor-pointer" id="pill-30days">30 Days</button>
+                        <button type="button" onclick="setQuickDate(this, 'month')" class="date-pill px-3 py-1 rounded-xl hover:bg-[#5B8C76]/30 text-muted transition-all cursor-pointer">This Month</button>
+                        <button type="button" onclick="setQuickDate(this, 'year')" class="date-pill px-3 py-1 rounded-xl hover:bg-[#5B8C76]/30 text-muted transition-all cursor-pointer">YTD</button>
+                    </div>
+                </div>
+
+                <!-- SECONDARY DROPDOWNS BAR (MATCHING REVENUE.HTML & REQUESTS.HTML CUSTOM DROPDOWN STYLE) -->
+                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 text-xs pt-2 border-t border-[#5B8C76]/15">
+                    <div>
+                        <label class="block font-bold text-muted mb-1">Shelter Partner</label>
+                        <select id="filter-shelter" onchange="applyGlobalFilters()" class="input-box rounded-xl py-2 px-3 text-xs font-semibold cursor-pointer w-full">
+                            <option value="all">All Shelters (24)</option>
+                            <option value="s1">Happy Paws Shelter</option>
+                            <option value="s2">Haven Pet Rescue</option>
+                            <option value="s3">City Paws Foundation</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-bold text-muted mb-1">Pet Type</label>
+                        <select id="filter-pet-type" onchange="applyGlobalFilters()" class="input-box rounded-xl py-2 px-3 text-xs font-semibold cursor-pointer w-full">
+                            <option value="all">All Animals</option>
+                            <option value="dog">Dogs 🐶</option>
+                            <option value="cat">Cats 🐱</option>
+                            <option value="rabbit">Rabbits 🐰</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-bold text-muted mb-1">Adoption Status</label>
+                        <select id="filter-adoption-status" onchange="applyGlobalFilters()" class="input-box rounded-xl py-2 px-3 text-xs font-semibold cursor-pointer w-full">
+                            <option value="all">All Statuses</option>
+                            <option value="approved">Approved</option>
+                            <option value="pending">Pending</option>
+                            <option value="completed">Completed</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-bold text-muted mb-1">Payment Status</label>
+                        <select id="filter-payment-status" onchange="applyGlobalFilters()" class="input-box rounded-xl py-2 px-3 text-xs font-semibold cursor-pointer w-full">
+                            <option value="all">All Payments</option>
+                            <option value="completed">Completed</option>
+                            <option value="refunded">Refunded</option>
+                        </select>
+                    </div>
+                    <div class="flex items-end">
+                        <button type="button" onclick="resetGlobalFilters()" class="w-full px-3 py-2 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 text-xs font-bold border border-red-500/20 transition-all cursor-pointer text-center">Reset Filters</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 🏆 4 PRIMARY EXECUTIVE KPI CARDS -->
+            <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                <!-- 1. TOTAL ADOPTIONS -->
+                <div class="theme-card-bg rounded-[24px] p-5 space-y-3 cursor-pointer hover:scale-[1.01] transition-all shadow-md border-l-4 border-emerald-400" onclick="openDrilldownModal('Total Adoptions', '142 Successful Adoptions')">
+                    <div class="flex items-center justify-between text-muted text-xs font-bold">
+                        <span>Total Completed Adoptions</span>
+                        <span class="text-xl">❤️</span>
+                    </div>
+                    <div class="flex items-baseline justify-between">
+                        <div class="text-3xl font-black tracking-tight text-emerald-400" id="kpi-adopted-pets">142</div>
+                        <span class="text-xs font-extrabold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">+28.6% 📈</span>
+                    </div>
+                    <p class="text-[11px] text-muted font-medium">130 Delivered • 12 In Transit</p>
+                </div>
+
+                <!-- 2. REGISTERED CUSTOMERS -->
+                <div class="theme-card-bg rounded-[24px] p-5 space-y-3 cursor-pointer hover:scale-[1.01] transition-all shadow-md border-l-4 border-[#5B8C76]" onclick="openDrilldownModal('Registered Customers', '1,480 Active Users')">
+                    <div class="flex items-center justify-between text-muted text-xs font-bold">
+                        <span>Active Platform Customers</span>
+                        <span class="text-xl">👥</span>
+                    </div>
+                    <div class="flex items-baseline justify-between">
+                        <div class="text-3xl font-black tracking-tight" id="kpi-customers">1,480</div>
+                        <span class="text-xs font-extrabold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">+16.8% 📈</span>
+                    </div>
+                    <p class="text-[11px] text-muted font-medium">240 New Registrations this period</p>
+                </div>
+
+                <!-- 3. ACTIVE SHELTERS -->
+                <div class="theme-card-bg rounded-[24px] p-5 space-y-3 cursor-pointer hover:scale-[1.01] transition-all shadow-md border-l-4 border-[#A8D8B9]" onclick="openDrilldownModal('Active Shelters', '24 Partner Shelters')">
+                    <div class="flex items-center justify-between text-muted text-xs font-bold">
+                        <span>Active Partner Shelters</span>
+                        <span class="text-xl">🏠</span>
+                    </div>
+                    <div class="flex items-baseline justify-between">
+                        <div class="text-3xl font-black tracking-tight" id="kpi-active-shelters">24</div>
+                        <span class="text-xs font-extrabold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">+8.3% 📈</span>
+                    </div>
+                    <p class="text-[11px] text-muted font-medium">96.2% Avg Partner Success Score</p>
+                </div>
+
+                <!-- 4. NET PLATFORM REVENUE -->
+                <div class="theme-card-bg rounded-[24px] p-5 space-y-3 cursor-pointer hover:scale-[1.01] transition-all shadow-md border-l-4 border-emerald-400" onclick="openDrilldownModal('Net Revenue', '₹8,50,000 Total Gross Revenue')">
+                    <div class="flex items-center justify-between text-muted text-xs font-bold">
+                        <span>Net Platform Revenue</span>
+                        <span class="text-xl">💰</span>
+                    </div>
+                    <div class="flex items-baseline justify-between">
+                        <div class="text-3xl font-black tracking-tight text-emerald-400" id="kpi-total-revenue">₹8,50,000</div>
+                        <span class="text-xs font-extrabold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">+19.4% 📈</span>
+                    </div>
+                    <p class="text-[11px] text-muted font-medium">Net Profit: <span id="kpi-net-profit">₹3,30,000</span> (Margin 38.8%)</p>
+                </div>
+            </section>
+
+            <!-- 👁️ OPTIONAL EXPAND ALL METRICS TOGGLE -->
+            <div class="flex items-center justify-between px-2">
+                <button type="button" onclick="toggleSecondaryKpis()" class="text-xs font-extrabold text-[#5B8C76] dark:text-[#A8D8B9] hover:underline flex items-center gap-1.5 cursor-pointer">
+                    <span id="kpi-toggle-icon">👁️</span> <span id="kpi-toggle-text">Show All 12 Metrics Breakdown</span>
+                </button>
+            </div>
+
+            <!-- SECONDARY 8 KPI CARDS -->
+            <section id="secondary-kpis-grid" class="grid grid-cols-2 sm:grid-cols-4 gap-4 hidden">
+                <div class="theme-card-bg rounded-2xl p-4 space-y-1">
+                    <span class="text-xs text-muted font-bold">Total Pets Listed</span>
+                    <div class="text-xl font-extrabold">220</div>
+                </div>
+                <div class="theme-card-bg rounded-2xl p-4 space-y-1">
+                    <span class="text-xs text-muted font-bold">Available Pets</span>
+                    <div class="text-xl font-extrabold text-emerald-400">156</div>
+                </div>
+                <div class="theme-card-bg rounded-2xl p-4 space-y-1">
+                    <span class="text-xs text-muted font-bold">Pending Requests</span>
+                    <div class="text-xl font-extrabold text-amber-400">38</div>
+                </div>
+                <div class="theme-card-bg rounded-2xl p-4 space-y-1">
+                    <span class="text-xs text-muted font-bold">Total Expenses</span>
+                    <div class="text-xl font-extrabold text-amber-400" id="kpi-total-expenses">₹5,20,000</div>
+                </div>
+                <div class="theme-card-bg rounded-2xl p-4 space-y-1">
+                    <span class="text-xs text-muted font-bold">Successful Payments</span>
+                    <div class="text-xl font-extrabold text-emerald-400">142</div>
+                </div>
+                <div class="theme-card-bg rounded-2xl p-4 space-y-1">
+                    <span class="text-xs text-muted font-bold">Completed Deliveries</span>
+                    <div class="text-xl font-extrabold text-emerald-400">52</div>
+                </div>
+                <div class="theme-card-bg rounded-2xl p-4 space-y-1">
+                    <span class="text-xs text-muted font-bold">Avg Approval Speed</span>
+                    <div class="text-xl font-extrabold text-emerald-400">1.8 Days</div>
+                </div>
+                <div class="theme-card-bg rounded-2xl p-4 space-y-1">
+                    <span class="text-xs text-muted font-bold">On-Time Delivery SLA</span>
+                    <div class="text-xl font-extrabold text-emerald-400">96.8%</div>
+                </div>
+            </section>
+
+            <!-- 📌 STREAMLINED 6 CORE NAVIGATION TABS (PERFECTLY ALIGNED & EVENLY DISTRIBUTED) -->
+            <div class="apple-glass rounded-2xl p-2 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 text-xs font-bold shadow-md w-full">
+                <button type="button" onclick="switchCategoryTab('tab-overview')" class="category-tab-btn tab-btn-active px-3 py-2.5 rounded-xl transition-all whitespace-nowrap cursor-pointer text-center justify-center flex items-center gap-1.5 w-full" id="btn-tab-overview">📊 Executive Overview</button>
+                <button type="button" onclick="switchCategoryTab('tab-adoption')" class="category-tab-btn px-3 py-2.5 rounded-xl hover:bg-[#5B8C76]/20 transition-all whitespace-nowrap text-muted cursor-pointer text-center justify-center flex items-center gap-1.5 w-full" id="btn-tab-adoption">🐾 Adoption & Pets</button>
+                <button type="button" onclick="switchCategoryTab('tab-shelters')" class="category-tab-btn px-3 py-2.5 rounded-xl hover:bg-[#5B8C76]/20 transition-all whitespace-nowrap text-muted cursor-pointer text-center justify-center flex items-center gap-1.5 w-full" id="btn-tab-shelters">🏠 Shelters & Partners</button>
+                <button type="button" onclick="switchCategoryTab('tab-customers')" class="category-tab-btn px-3 py-2.5 rounded-xl hover:bg-[#5B8C76]/20 transition-all whitespace-nowrap text-muted cursor-pointer text-center justify-center flex items-center gap-1.5 w-full" id="btn-tab-customers">👥 Customers & Funnel</button>
+                <button type="button" onclick="switchCategoryTab('tab-financial')" class="category-tab-btn px-3 py-2.5 rounded-xl hover:bg-[#5B8C76]/20 transition-all whitespace-nowrap text-muted cursor-pointer text-center justify-center flex items-center gap-1.5 w-full" id="btn-tab-financial">💳 Financials & SLAs</button>
+                <button type="button" onclick="switchCategoryTab('tab-builder')" class="category-tab-btn px-3 py-2.5 rounded-xl hover:bg-[#5B8C76]/20 transition-all whitespace-nowrap text-muted cursor-pointer text-center justify-center flex items-center gap-1.5 w-full" id="btn-tab-builder">🛠️ Report Builder</button>
+            </div>
+
+            <!-- ========================================== -->
+            <!-- 📁 TAB CONTENT 1: EXECUTIVE OVERVIEW -->
+            <!-- ========================================== -->
+            <div id="tab-overview" class="category-tab-content space-y-6">
+                <!-- AI INSIGHTS BANNER -->
+                <section class="apple-glass rounded-3xl p-5 shadow-md bg-gradient-to-r from-[#5B8C76]/15 via-transparent to-[#A8D8B9]/15 border border-[#5B8C76]/30">
+                    <div class="flex items-center gap-2 mb-3">
+                        <span class="text-base">🤖</span>
+                        <h3 class="font-extrabold text-xs uppercase tracking-wider text-[#5B8C76] dark:text-[#A8D8B9]">AI Automated Platform Insights</h3>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+                        <div class="theme-card-bg rounded-2xl p-3 space-y-1 cursor-pointer hover:border-[#5B8C76] transition-all" onclick="openDrilldownModal('Dog Adoptions', 'Dog Adoptions (+18.4%)')">
+                            <div class="flex justify-between font-extrabold text-emerald-400"><span>🐶 Dog Adoptions</span><span>+18.4% 📈</span></div>
+                            <p class="text-muted leading-tight">Dog adoptions surged by 18.4% this month, leading all categories.</p>
+                        </div>
+                        <div class="theme-card-bg rounded-2xl p-3 space-y-1 cursor-pointer hover:border-[#5B8C76] transition-all" onclick="openDrilldownModal('Top Shelter', 'Happy Paws Shelter (96.2%)')">
+                            <div class="flex justify-between font-extrabold text-emerald-400"><span>🏆 Top Shelter</span><span>96.2% Score</span></div>
+                            <p class="text-muted leading-tight">Happy Paws Shelter holds the highest adoption completion score.</p>
+                        </div>
+                        <div class="theme-card-bg rounded-2xl p-3 space-y-1 cursor-pointer hover:border-[#5B8C76] transition-all" onclick="openDrilldownModal('Delivery SLA', 'On-time Delivery (96.8%)')">
+                            <div class="flex justify-between font-extrabold text-emerald-400"><span>🚚 Delivery SLAs</span><span>96.8% On-time</span></div>
+                            <p class="text-muted leading-tight">Delivery completion rate achieved 96.8% on-time across 14 zones.</p>
+                        </div>
+                    </div>
+                </section>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- ADOPTION TREND CHART -->
+                    <div class="apple-glass rounded-3xl p-6 shadow-xl lg:col-span-2 space-y-4">
+                        <div class="flex items-center justify-between flex-wrap gap-2">
+                            <div>
+                                <h3 class="font-extrabold text-base">🐾 Adoption Activity & Request Volume</h3>
+                                <p class="text-xs text-muted">Submitted adoption applications vs completed adoptions over time.</p>
+                            </div>
+                        </div>
+                        <div class="h-64 relative">
+                            <canvas id="overviewAdoptionChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- ADOPTION STATUS BREAKDOWN DONUT -->
+                    <div class="apple-glass rounded-3xl p-6 shadow-xl space-y-4 flex flex-col justify-between">
+                        <div>
+                            <h3 class="font-extrabold text-base mb-1">🍩 Adoption Status Ratio</h3>
+                            <p class="text-xs text-muted">Distribution across process stages.</p>
+                        </div>
+                        <div class="h-60 relative flex items-center justify-center my-2">
+                            <canvas id="overviewStatusDonutChart"></canvas>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2 text-xs font-bold pt-3 border-t border-[#5B8C76]/20">
+                            <div class="flex items-center justify-between p-2 rounded-xl theme-card-bg">
+                                <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Approved</span>
+                                <span class="font-extrabold text-emerald-400">142</span>
+                            </div>
+                            <div class="flex items-center justify-between p-2 rounded-xl theme-card-bg">
+                                <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span> Pending</span>
+                                <span class="font-extrabold text-amber-400">14</span>
+                            </div>
+                            <div class="flex items-center justify-between p-2 rounded-xl theme-card-bg">
+                                <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-red-500"></span> Rejected</span>
+                                <span class="font-extrabold text-red-400">18</span>
+                            </div>
+                            <div class="flex items-center justify-between p-2 rounded-xl theme-card-bg">
+                                <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span> Completed</span>
+                                <span class="font-extrabold text-blue-400">130</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========================================== -->
+            <!-- 📁 TAB CONTENT 2: ADOPTION & PETS -->
+            <!-- ========================================== -->
+            <div id="tab-adoption" class="category-tab-content hidden space-y-6">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- SPECIES DISTRIBUTION CHART -->
+                    <div class="apple-glass rounded-3xl p-6 shadow-xl space-y-4">
+                        <h3 class="font-extrabold text-base">🐶 Adoption Rate by Animal Species</h3>
+                        <div class="h-64 relative">
+                            <canvas id="petSpeciesChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- TOP BREEDS POPULARITY CHART -->
+                    <div class="apple-glass rounded-3xl p-6 shadow-xl space-y-4">
+                        <h3 class="font-extrabold text-base">🏆 Top Breed Adoption Volume</h3>
+                        <div class="h-64 relative">
+                            <canvas id="petBreedChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========================================== -->
+            <!-- 📁 TAB CONTENT 3: SHELTERS & PARTNERS -->
+            <!-- ========================================== -->
+            <div id="tab-shelters" class="category-tab-content hidden space-y-6">
+                <div class="apple-glass rounded-3xl p-6 shadow-xl space-y-4">
+                    <div class="flex items-center justify-between flex-wrap gap-2 border-b border-[#5B8C76]/20 pb-3">
+                        <div>
+                            <h3 class="font-extrabold text-lg">🏠 Shelter Partner Performance Directory</h3>
+                            <p class="text-xs text-muted">Comprehensive shelter rankings based on active listings, adoption speed, and revenue.</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button type="button" onclick="sortShelterTable('score')" class="px-3 py-1.5 rounded-full bg-[#5B8C76]/20 text-xs font-bold text-[#5B8C76] dark:text-[#A8D8B9]">Highest Score ⬆️</button>
+                            <button type="button" onclick="sortShelterTable('revenue')" class="px-3 py-1.5 rounded-full bg-[#5B8C76]/20 text-xs font-bold text-[#5B8C76] dark:text-[#A8D8B9]">Highest Revenue 💰</button>
+                        </div>
+                    </div>
+
+                    <!-- SHELTER RANKING TABLE -->
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-xs text-center border-collapse">
+                            <thead>
+                                <tr class="theme-table-header uppercase text-[10px] font-extrabold tracking-wider border-b border-[#5B8C76]/25">
+                                    <th class="py-3 px-4 text-left">SHELTER NAME</th>
+                                    <th class="py-3 px-4">LOCATION</th>
+                                    <th class="py-3 px-4">LISTED PETS</th>
+                                    <th class="py-3 px-4">REQUESTS</th>
+                                    <th class="py-3 px-4">ADOPTIONS</th>
+                                    <th class="py-3 px-4">REVENUE</th>
+                                    <th class="py-3 px-4">AVG SPEED</th>
+                                    <th class="py-3 px-4">SCORE</th>
+                                    <th class="py-3 px-4">STATUS</th>
+                                    <th class="py-3 px-4">ACTION</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-[#5B8C76]/15 font-semibold">
+                                <tr class="hover:bg-[#5B8C76]/10 transition-colors">
+                                    <td class="py-3.5 px-4 text-left font-bold">Happy Paws Shelter</td>
+                                    <td class="py-3.5 px-4">Mumbai, MH</td>
+                                    <td class="py-3.5 px-4">42</td>
+                                    <td class="py-3.5 px-4">58</td>
+                                    <td class="py-3.5 px-4 text-emerald-400 font-extrabold">36</td>
+                                    <td class="py-3.5 px-4 text-emerald-400 font-extrabold">₹2,80,000</td>
+                                    <td class="py-3.5 px-4">1.2 Days</td>
+                                    <td class="py-3.5 px-4"><span class="px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-400 font-extrabold border border-emerald-500/30">96.2 / 100</span></td>
+                                    <td class="py-3.5 px-4"><span class="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-[10px] uppercase font-bold">Active</span></td>
+                                    <td class="py-3.5 px-4"><button type="button" onclick="openDrilldownModal('Shelter: Happy Paws', 'Happy Paws Shelter Details')" class="text-xs text-[#5B8C76] dark:text-[#A8D8B9] hover:underline font-bold">Inspect 🔍</button></td>
+                                </tr>
+                                <tr class="hover:bg-[#5B8C76]/10 transition-colors">
+                                    <td class="py-3.5 px-4 text-left font-bold">Haven Pet Rescue</td>
+                                    <td class="py-3.5 px-4">Bengaluru, KA</td>
+                                    <td class="py-3.5 px-4">38</td>
+                                    <td class="py-3.5 px-4">44</td>
+                                    <td class="py-3.5 px-4 text-emerald-400 font-extrabold">28</td>
+                                    <td class="py-3.5 px-4 text-emerald-400 font-extrabold">₹2,10,000</td>
+                                    <td class="py-3.5 px-4">1.5 Days</td>
+                                    <td class="py-3.5 px-4"><span class="px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-400 font-extrabold border border-emerald-500/30">92.8 / 100</span></td>
+                                    <td class="py-3.5 px-4"><span class="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-[10px] uppercase font-bold">Active</span></td>
+                                    <td class="py-3.5 px-4"><button type="button" onclick="openDrilldownModal('Shelter: Haven Pet Rescue', 'Haven Pet Rescue Details')" class="text-xs text-[#5B8C76] dark:text-[#A8D8B9] hover:underline font-bold">Inspect 🔍</button></td>
+                                </tr>
+                                <tr class="hover:bg-[#5B8C76]/10 transition-colors">
+                                    <td class="py-3.5 px-4 text-left font-bold">City Paws Foundation</td>
+                                    <td class="py-3.5 px-4">Delhi NCR</td>
+                                    <td class="py-3.5 px-4">26</td>
+                                    <td class="py-3.5 px-4">32</td>
+                                    <td class="py-3.5 px-4 text-emerald-400 font-extrabold">19</td>
+                                    <td class="py-3.5 px-4 text-emerald-400 font-extrabold">₹1,65,000</td>
+                                    <td class="py-3.5 px-4">2.1 Days</td>
+                                    <td class="py-3.5 px-4"><span class="px-2.5 py-1 rounded-full bg-amber-500/20 text-amber-400 font-extrabold border border-amber-500/30">88.5 / 100</span></td>
+                                    <td class="py-3.5 px-4"><span class="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-[10px] uppercase font-bold">Active</span></td>
+                                    <td class="py-3.5 px-4"><button type="button" onclick="openDrilldownModal('Shelter: City Paws', 'City Paws Foundation Details')" class="text-xs text-[#5B8C76] dark:text-[#A8D8B9] hover:underline font-bold">Inspect 🔍</button></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========================================== -->
+            <!-- 📁 TAB CONTENT 4: CUSTOMERS & FUNNEL -->
+            <!-- ========================================== -->
+            <div id="tab-customers" class="category-tab-content hidden space-y-6">
+                <!-- VISUAL STAGE FUNNEL STACK -->
+                <div class="apple-glass rounded-3xl p-6 shadow-xl space-y-6">
+                    <div class="border-b border-[#5B8C76]/20 pb-3">
+                        <h3 class="font-extrabold text-lg">⏳ Step-by-Step User Adoption Conversion Funnel</h3>
+                        <p class="text-xs text-muted">Identify conversion drop-offs from initial pet viewing to final adoption completion.</p>
+                    </div>
+
+                    <div class="space-y-3 max-w-4xl mx-auto">
+                        <div class="theme-card-bg p-4 rounded-2xl space-y-2 border-l-4 border-emerald-400">
+                            <div class="flex items-center justify-between text-xs font-bold">
+                                <span>1. Pet Viewed</span>
+                                <span class="text-emerald-400 font-extrabold">12,450 Users (100%)</span>
+                            </div>
+                            <div class="w-full bg-[#5B8C76]/20 h-3 rounded-full overflow-hidden">
+                                <div class="bg-emerald-400 h-full rounded-full" style="width: 100%;"></div>
+                            </div>
+                        </div>
+
+                        <div class="theme-card-bg p-4 rounded-2xl space-y-2 border-l-4 border-emerald-400">
+                            <div class="flex items-center justify-between text-xs font-bold">
+                                <span>2. Adoption Request Started</span>
+                                <span class="text-emerald-400 font-extrabold">4,820 Users (38.7%)</span>
+                            </div>
+                            <div class="w-full bg-[#5B8C76]/20 h-3 rounded-full overflow-hidden">
+                                <div class="bg-emerald-400 h-full rounded-full" style="width: 38.7%;"></div>
+                            </div>
+                            <div class="text-[10px] text-amber-400 font-bold">⚠️ Drop-off: 61.3% abandoned before submission</div>
+                        </div>
+
+                        <div class="theme-card-bg p-4 rounded-2xl space-y-2 border-l-4 border-emerald-400">
+                            <div class="flex items-center justify-between text-xs font-bold">
+                                <span>3. Application Submitted</span>
+                                <span class="text-emerald-400 font-extrabold">3,150 Users (25.3%)</span>
+                            </div>
+                            <div class="w-full bg-[#5B8C76]/20 h-3 rounded-full overflow-hidden">
+                                <div class="bg-emerald-400 h-full rounded-full" style="width: 25.3%;"></div>
+                            </div>
+                        </div>
+
+                        <div class="theme-card-bg p-4 rounded-2xl space-y-2 border-l-4 border-emerald-400">
+                            <div class="flex items-center justify-between text-xs font-bold">
+                                <span>4. Approved & Paid</span>
+                                <span class="text-emerald-400 font-extrabold">2,120 Users (17.0%)</span>
+                            </div>
+                            <div class="w-full bg-[#5B8C76]/20 h-3 rounded-full overflow-hidden">
+                                <div class="bg-emerald-400 h-full rounded-full" style="width: 17.0%;"></div>
+                            </div>
+                        </div>
+
+                        <div class="theme-card-bg p-4 rounded-2xl space-y-2 border-l-4 border-emerald-400">
+                            <div class="flex items-center justify-between text-xs font-bold">
+                                <span>5. Delivered & Completed</span>
+                                <span class="text-emerald-400 font-extrabold">1,950 Users (15.7%)</span>
+                            </div>
+                            <div class="w-full bg-[#5B8C76]/20 h-3 rounded-full overflow-hidden">
+                                <div class="bg-emerald-400 h-full rounded-full" style="width: 15.7%;"></div>
+                            </div>
+                            <div class="text-xs text-emerald-400 font-extrabold">🎉 Overall Platform Conversion Rate: 15.7%</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========================================== -->
+            <!-- 📁 TAB CONTENT 5: FINANCIALS & SLAS -->
+            <!-- ========================================== -->
+            <div id="tab-financial" class="category-tab-content hidden space-y-6">
+                <div class="apple-glass rounded-3xl p-6 shadow-xl space-y-6">
+                    <div class="flex items-center justify-between flex-wrap gap-2 border-b border-[#5B8C76]/20 pb-3">
+                        <div>
+                            <h3 class="font-extrabold text-lg">💳 Payment & Revenue Financial Performance</h3>
+                            <p class="text-xs text-muted">Gross payments, platform service charges, shelter payouts, and net profit.</p>
+                        </div>
+                        <a href="{% url 'admin_revenue' %}" class="btn-ui-primary text-xs">Open Revenue Dashboard 💰</a>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="h-64 relative">
+                            <canvas id="financialTrendChart"></canvas>
+                        </div>
+                        <div class="h-64 relative">
+                            <canvas id="paymentDistributionChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========================================== -->
+            <!-- 📁 TAB CONTENT 6: CUSTOM BUILDER & EXPORT -->
+            <!-- ========================================== -->
+            <div id="tab-builder" class="category-tab-content hidden space-y-6">
+                <div class="apple-glass rounded-3xl p-6 shadow-xl space-y-6 max-w-4xl mx-auto">
+                    <div class="border-b border-[#5B8C76]/20 pb-3">
+                        <h3 class="font-extrabold text-lg">🛠️ Custom Report Generator</h3>
+                        <p class="text-xs text-muted">Configure custom parameters, field outputs, filters, and export instant platform reports.</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                        <div>
+                            <label class="block font-bold text-muted mb-1">Report Module</label>
+                            <select id="builder-report-type" class="input-box rounded-xl py-2 px-3 text-xs font-semibold cursor-pointer w-full">
+                                <option value="adoption">Adoption Performance Report</option>
+                                <option value="pet">Pet Census & Breed Breakdown</option>
+                                <option value="shelter">Shelter Financial Payouts</option>
+                                <option value="revenue">Revenue & Platform Profit Audit</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block font-bold text-muted mb-1">Export Format</label>
+                            <select id="builder-format" class="input-box rounded-xl py-2 px-3 text-xs font-semibold cursor-pointer w-full">
+                                <option value="pdf">PDF Document (.pdf)</option>
+                                <option value="excel">Excel Spreadsheet (.xlsx)</option>
+                                <option value="csv">Comma Separated Values (.csv)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-end gap-3 pt-4 border-t border-[#5B8C76]/20">
+                        <button type="button" onclick="previewCustomReport()" class="px-4 py-2 rounded-full bg-[#5B8C76]/20 hover:bg-[#5B8C76]/30 text-xs font-bold text-[#5B8C76] dark:text-[#A8D8B9]">Preview Report</button>
+                        <button type="button" onclick="generateCustomReport()" class="btn-ui-primary text-xs">Generate & Download Report</button>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- 📄 INTERACTIVE DRILLDOWN DRAWER MODAL -->
+    <div id="analytics-drilldown-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm hidden">
+        <div class="apple-glass rounded-3xl p-6 w-full max-w-2xl mx-4 space-y-4 shadow-2xl relative">
+            <button type="button" onclick="closeDrilldownModal()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-red-500/20 text-red-400 font-extrabold flex items-center justify-center cursor-pointer">✕</button>
+            <h3 class="font-extrabold text-lg" id="modal-title">Record Details</h3>
+            <div class="text-xs font-semibold text-muted" id="modal-subtitle">Inspecting record breakdown</div>
+            
+            <div class="theme-card-bg p-4 rounded-2xl max-h-80 overflow-y-auto space-y-2 text-xs" id="modal-content-list">
+                <!-- DYNAMIC LIST POPULATED BY JS -->
+            </div>
+
+            <div class="flex justify-end">
+                <button type="button" onclick="closeDrilldownModal()" class="btn-ui-primary text-xs">Close Inspection</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 📅 SCHEDULED REPORTS MODAL -->
+    <div id="scheduled-reports-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm hidden">
+        <div class="apple-glass rounded-3xl p-6 w-full max-w-lg mx-4 space-y-4 shadow-2xl relative">
+            <button type="button" onclick="closeScheduledReportsModal()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-red-500/20 text-red-400 font-extrabold flex items-center justify-center cursor-pointer">✕</button>
+            <h3 class="font-extrabold text-lg">📅 Automated Scheduled Reports</h3>
+            <p class="text-xs text-muted">Configure recurring automated report dispatch via email.</p>
+
+            <div class="space-y-3 text-xs">
+                <div>
+                    <label class="block font-bold text-muted mb-1">Frequency</label>
+                    <select id="sched-freq-select" class="input-box rounded-xl py-2 px-3 text-xs font-semibold cursor-pointer w-full">
+                        <option value="daily">Daily at 8:00 AM</option>
+                        <option value="weekly" selected>Weekly every Monday</option>
+                        <option value="monthly">Monthly on 1st</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block font-bold text-muted mb-1">Recipients (Email)</label>
+                    <input type="email" value="admin@petadoption.com" class="w-full input-box rounded-xl px-3 py-2 font-semibold">
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-2 pt-2">
+                <button type="button" onclick="saveScheduledReport()" class="btn-ui-primary text-xs">Save Schedule</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JS DASHBOARD LOGIC -->
+    <script>
+        // 🔔 PROFESSIONAL TOAST SYSTEM (NO RAW ALERT POPS)
+        window.showProfessionalToast = function(title, message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            if (!container) return;
+
+            const toast = document.createElement('div');
+            const bgClass = type === 'error' 
+                ? 'bg-red-500/90 text-white' 
+                : 'bg-gradient-to-r from-[#5B8C76] to-[#3D6B56] text-white';
+
+            toast.className = `toast-animate pointer-events-auto flex items-center gap-3 px-4 py-3 rounded-2xl shadow-2xl text-xs font-extrabold border border-white/20 ${bgClass}`;
+            toast.innerHTML = `
+                <span class="text-base">${type === 'error' ? '🚨' : '✨'}</span>
+                <div>
+                    <div class="font-black text-sm tracking-tight">${title}</div>
+                    <div class="font-medium text-white/90">${message}</div>
+                </div>
+            `;
+
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transition = 'all 0.3s ease';
+                setTimeout(() => toast.remove(), 300);
+            }, 3200);
+        };
+
+        // 🌓 THEME TOGGLER
+        window.toggleTheme = function() {
+            const isDark = document.documentElement.classList.contains('dark');
+            if (isDark) {
+                document.documentElement.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+                document.getElementById('theme-icon').textContent = '☀️';
+                showProfessionalToast('Theme Switched', 'Switched to Light Theme mode.');
+            } else {
+                document.documentElement.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+                document.getElementById('theme-icon').textContent = '🌙';
+                showProfessionalToast('Theme Switched', 'Switched to Dark Theme mode.');
+            }
+        };
+        if (localStorage.getItem('theme') === 'light') {
+            document.documentElement.classList.remove('dark');
+            if (document.getElementById('theme-icon')) document.getElementById('theme-icon').textContent = '☀️';
+        }
+
+        // 👁️ TOGGLE SECONDARY KPIS
+        window.toggleSecondaryKpis = function() {
+            const grid = document.getElementById('secondary-kpis-grid');
+            const isHidden = grid.classList.contains('hidden');
+            if (isHidden) {
+                grid.classList.remove('hidden');
+                document.getElementById('kpi-toggle-icon').textContent = '🙈';
+                document.getElementById('kpi-toggle-text').textContent = 'Hide Secondary Metrics';
+            } else {
+                grid.classList.add('hidden');
+                document.getElementById('kpi-toggle-icon').textContent = '👁️';
+                document.getElementById('kpi-toggle-text').textContent = 'Show All 12 Metrics Breakdown';
+            }
+        };
+
+        // 📌 CATEGORY TAB SWITCHING
+        window.switchCategoryTab = function(tabId) {
+            document.querySelectorAll('.category-tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.category-tab-btn').forEach(btn => {
+                btn.classList.remove('tab-btn-active');
+                btn.classList.add('hover:bg-[#5B8C76]/20', 'text-muted');
+            });
+
+            const targetTab = document.getElementById(tabId);
+            if (targetTab) targetTab.classList.remove('hidden');
+            
+            const targetBtn = document.querySelector(`[onclick="switchCategoryTab('${tabId}')"]`);
+            if (targetBtn) {
+                targetBtn.classList.add('tab-btn-active');
+                targetBtn.classList.remove('hover:bg-[#5B8C76]/20', 'text-muted');
+            }
+        };
+
+        // 📅 QUICK DATE PRESET PILLS
+        window.setQuickDate = function(btnEl, period) {
+            document.querySelectorAll('.date-pill').forEach(btn => {
+                btn.className = 'date-pill px-3 py-1 rounded-xl hover:bg-[#5B8C76]/30 text-muted transition-all cursor-pointer';
+            });
+            if (btnEl) {
+                btnEl.className = 'date-pill px-3 py-1 rounded-xl bg-[#5B8C76] text-white font-extrabold shadow-sm cursor-pointer';
+            }
+
+            const adoptedEl = document.getElementById('kpi-adopted-pets');
+            const custEl = document.getElementById('kpi-customers');
+            const revEl = document.getElementById('kpi-total-revenue');
+            const expEl = document.getElementById('kpi-total-expenses');
+            const profEl = document.getElementById('kpi-net-profit');
+
+            if (period === 'today') {
+                if (adoptedEl) adoptedEl.textContent = '6';
+                if (custEl) custEl.textContent = '42';
+                if (revEl) revEl.textContent = '₹35,000';
+                if (expEl) expEl.textContent = '₹21,000';
+                if (profEl) profEl.textContent = '₹14,000';
+                showProfessionalToast('Period Changed', 'Showing analytics for Today.');
+            } else if (period === '7days') {
+                if (adoptedEl) adoptedEl.textContent = '38';
+                if (custEl) custEl.textContent = '310';
+                if (revEl) revEl.textContent = '₹2,20,000';
+                if (expEl) expEl.textContent = '₹1,35,000';
+                if (profEl) profEl.textContent = '₹85,000';
+                showProfessionalToast('Period Changed', 'Showing analytics for Last 7 Days.');
+            } else if (period === 'month') {
+                if (adoptedEl) adoptedEl.textContent = '118';
+                if (custEl) custEl.textContent = '1,120';
+                if (revEl) revEl.textContent = '₹7,10,000';
+                if (expEl) expEl.textContent = '₹4,30,000';
+                if (profEl) profEl.textContent = '₹2,80,000';
+                showProfessionalToast('Period Changed', 'Showing analytics for This Month.');
+            } else if (period === 'year') {
+                if (adoptedEl) adoptedEl.textContent = '840';
+                if (custEl) custEl.textContent = '4,950';
+                if (revEl) revEl.textContent = '₹42,80,000';
+                if (expEl) expEl.textContent = '₹26,10,000';
+                if (profEl) profEl.textContent = '₹16,70,000';
+                showProfessionalToast('Period Changed', 'Showing analytics for Year to Date.');
+            } else {
+                // Default 30days
+                if (adoptedEl) adoptedEl.textContent = '142';
+                if (custEl) custEl.textContent = '1,480';
+                if (revEl) revEl.textContent = '₹8,50,000';
+                if (expEl) expEl.textContent = '₹5,20,000';
+                if (profEl) profEl.textContent = '₹3,30,000';
+                showProfessionalToast('Period Changed', 'Showing analytics for Last 30 Days.');
+            }
+        };
+
+        // 🎛️ UPDATE CUSTOM DROPDOWN LABELS ON RESET
+        function updateCustomDropdownsUI() {
+            document.querySelectorAll('.custom-dropdown-group').forEach(group => {
+                const select = group.querySelector('select');
+                if (!select) return;
+                const currentOpt = select.options[select.selectedIndex] || select.options[0];
+                const label = group.querySelector('.custom-dropdown-label');
+                if (label && currentOpt) label.textContent = currentOpt.textContent;
+                
+                group.querySelectorAll('.custom-opt-item').forEach((item, idx) => {
+                    if (idx === select.selectedIndex) {
+                        item.classList.add('bg-[#5B8C76]/20', 'text-[#5B8C76]', 'dark:text-[#A8D8B9]');
+                    } else {
+                        item.classList.remove('bg-[#5B8C76]/20', 'text-[#5B8C76]', 'dark:text-[#A8D8B9]');
+                    }
+                });
+            });
+        }
+
+        // 🎛️ GLOBAL FILTER APPLICATION
+        window.applyGlobalFilters = function() {
+            const petType = document.getElementById('filter-pet-type')?.value;
+            const shelter = document.getElementById('filter-shelter')?.value;
+            const adoptedEl = document.getElementById('kpi-adopted-pets');
+
+            let count = 142;
+            if (petType === 'dog') count = 98;
+            else if (petType === 'cat') count = 44;
+            else if (petType === 'rabbit') count = 12;
+
+            if (shelter === 's1') count = Math.round(count * 0.4);
+            else if (shelter === 's2') count = Math.round(count * 0.3);
+            else if (shelter === 's3') count = Math.round(count * 0.2);
+
+            if (adoptedEl) adoptedEl.textContent = count;
+            showProfessionalToast('Filters Applied', 'Analytics updated with selected parameters.');
+        };
+
+        window.resetGlobalFilters = function() {
+            if (document.getElementById('filter-shelter')) document.getElementById('filter-shelter').value = 'all';
+            if (document.getElementById('filter-pet-type')) document.getElementById('filter-pet-type').value = 'all';
+            if (document.getElementById('filter-adoption-status')) document.getElementById('filter-adoption-status').value = 'all';
+            if (document.getElementById('filter-payment-status')) document.getElementById('filter-payment-status').value = 'all';
+            
+            updateCustomDropdownsUI();
+
+            const pill30 = document.getElementById('pill-30days');
+            if (pill30) setQuickDate(pill30, '30days');
+            else applyGlobalFilters();
+
+            showProfessionalToast('Filters Reset', 'All analytics filters reset to defaults.');
+        };
+
+        // 🔍 DRILLDOWN MODAL
+        window.openDrilldownModal = function(title, subtitle) {
+            document.getElementById('modal-title').textContent = title;
+            document.getElementById('modal-subtitle').textContent = subtitle;
+
+            const list = document.getElementById('modal-content-list');
+            list.innerHTML = `
+                <div class="p-2.5 border-b border-[#5B8C76]/20 font-bold flex justify-between"><span>#REQ-8824 - Bruno (Golden Retriever)</span><span class="text-emerald-400 font-extrabold">Completed</span></div>
+                <div class="p-2.5 border-b border-[#5B8C76]/20 font-bold flex justify-between"><span>#REQ-8819 - Luna (Persian Cat)</span><span class="text-emerald-400 font-extrabold">Completed</span></div>
+                <div class="p-2.5 border-b border-[#5B8C76]/20 font-bold flex justify-between"><span>#REQ-8812 - Rocky (German Shepherd)</span><span class="text-amber-400 font-extrabold">Pending Review</span></div>
+                <div class="p-2.5 font-bold flex justify-between"><span>#REQ-8805 - Bella (Beagle)</span><span class="text-emerald-400 font-extrabold">In Delivery</span></div>
+            `;
+
+            document.getElementById('analytics-drilldown-modal').classList.remove('hidden');
+        };
+
+        window.closeDrilldownModal = function() {
+            document.getElementById('analytics-drilldown-modal').classList.add('hidden');
+        };
+
+        // 📅 SCHEDULED REPORTS MODAL
+        window.openScheduledReportsModal = function() {
+            document.getElementById('scheduled-reports-modal').classList.remove('hidden');
+        };
+
+        window.closeScheduledReportsModal = function() {
+            document.getElementById('scheduled-reports-modal').classList.add('hidden');
+        };
+
+        window.saveScheduledReport = function() {
+            closeScheduledReportsModal();
+            showProfessionalToast('Schedule Saved', 'Automated recurring report scheduled successfully.');
+        };
+
+        // 📥 EXPORT ENGINE - GENERATES REAL VIEWABLE & DOWNLOADABLE REPORT
+        window.exportAnalyticsData = function(format) {
+            showProfessionalToast('Generating Report', 'Compiling platform analytics report...');
+
+            const reportHTML = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Horizon UI - Pet Adoption Platform Analytics Report</title>
+    <style>
+        body { font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif; padding: 40px; background: #0B120E; color: #F4EDE2; line-height: 1.6; }
+        .header { border-bottom: 2px solid #5B8C76; padding-bottom: 20px; margin-bottom: 30px; display: flex; justify-content: space-between; align-items: center; }
+        .brand { font-size: 24px; font-weight: 800; color: #5B8C76; }
+        .title { font-size: 20px; font-weight: 700; margin-top: 5px; }
+        .date { font-size: 12px; color: #8EA89B; margin-top: 4px; }
+        .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 30px; }
+        .card { background: #111A15; border: 1px solid #5B8C76; border-radius: 16px; padding: 20px; }
+        .card-title { font-size: 11px; color: #8EA89B; font-weight: 700; text-transform: uppercase; }
+        .card-val { font-size: 26px; font-weight: 800; color: #A8D8B9; margin-top: 6px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; margin-bottom: 30px; }
+        th, td { border: 1px solid rgba(91, 140, 118, 0.4); padding: 12px; text-align: left; font-size: 13px; }
+        th { background: #111A15; color: #A8D8B9; font-weight: 800; }
+        .badge { background: rgba(91, 140, 118, 0.3); color: #A8D8B9; padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: 700; }
+        .btn-print { background: linear-gradient(135deg, #5B8C76 0%, #3D6B56 100%); color: white; border: none; padding: 10px 22px; border-radius: 20px; font-weight: 800; font-size: 13px; cursor: pointer; }
+        @media print { body { background: white; color: black; } .card { border-color: #ccc; background: #f9f9f9; } .btn-print { display: none; } }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div>
+            <div class="brand">👨‍💼 HORIZON UI • Pet Adoption Suite</div>
+            <div class="title">Platform Executive Analytics & Financial Report</div>
+            <div class="date">Generated on: ${new Date().toLocaleString()}</div>
+        </div>
+        <div>
+            <button onclick="window.print()" class="btn-print">🖨️ Print / Save as PDF</button>
+        </div>
+    </div>
+
+    <h2>1. Executive Key Performance Indicators</h2>
+    <div class="grid">
+        <div class="card">
+            <div class="card-title">Total Completed Adoptions</div>
+            <div class="card-val">142</div>
+        </div>
+        <div class="card">
+            <div class="card-title">Active Registered Customers</div>
+            <div class="card-val">1,480</div>
+        </div>
+        <div class="card">
+            <div class="card-title">Active Partner Shelters</div>
+            <div class="card-val">24</div>
+        </div>
+        <div class="card">
+            <div class="card-title">Net Gross Revenue</div>
+            <div class="card-val">₹8,50,000</div>
+        </div>
+    </div>
+
+    <h2>2. Shelter Partner Performance Breakdown</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Shelter Partner</th>
+                <th>Location</th>
+                <th>Pets Listed</th>
+                <th>Adoptions</th>
+                <th>Gross Revenue</th>
+                <th>Performance Score</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Happy Paws Shelter</td>
+                <td>Mumbai, MH</td>
+                <td>42</td>
+                <td>36</td>
+                <td>₹2,80,000</td>
+                <td><span class="badge">96.2 / 100</span></td>
+            </tr>
+            <tr>
+                <td>Haven Pet Rescue</td>
+                <td>Bengaluru, KA</td>
+                <td>38</td>
+                <td>28</td>
+                <td>₹2,10,000</td>
+                <td><span class="badge">92.8 / 100</span></td>
+            </tr>
+            <tr>
+                <td>City Paws Foundation</td>
+                <td>Delhi NCR</td>
+                <td>26</td>
+                <td>19</td>
+                <td>₹1,65,000</td>
+                <td><span class="badge">88.5 / 100</span></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>3. Operational SLAs & Platform Metrics</h2>
+    <ul>
+        <li><strong>Application Review SLA:</strong> 14.2 Hours (Target: &lt; 24h ✅)</li>
+        <li><strong>Adoption Approval SLA:</strong> 1.2 Days (Target: &lt; 48h ✅)</li>
+        <li><strong>On-Time Delivery SLA:</strong> 96.8% On-time across 14 zones ✅</li>
+        <li><strong>Platform Net Profit Margin:</strong> 38.82% (Net Profit: ₹3,30,000)</li>
+    </ul>
+
+    <script>
+        setTimeout(() => { window.print(); }, 800);
+    <\/script>
+</body>
+</html>
+            `;
+
+            // CREATE BLOB AND OPEN VIEWABLE TAB + DOWNLOAD
+            const blob = new Blob([reportHTML], { type: 'text/html' });
+            const blobUrl = URL.createObjectURL(blob);
+            
+            // OPEN REPORT IN NEW TAB FOR DIRECT VIEWING & PDF PRINTING
+            window.open(blobUrl, '_blank');
+
+            // TRIGGER AUTOMATIC DOWNLOAD
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.href = blobUrl;
+            downloadAnchor.download = `Horizon_UI_Pet_Adoption_Analytics_Report_${Date.now()}.html`;
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            document.body.removeChild(downloadAnchor);
+
+            showProfessionalToast('Report Generated', 'Viewable report opened in new tab & download started.');
+        };
+
+        window.previewCustomReport = function() {
+            showProfessionalToast('Report Preview', 'Custom report preview generated successfully.');
+        };
+
+        window.generateCustomReport = function() {
+            const format = document.getElementById('builder-format')?.value || 'pdf';
+            exportAnalyticsData(format);
+        };
+
+        // 🎛️ AUTOMATIC GLASS UI DROPDOWN INITIALIZER (MATCHING REVENUE.HTML & REQUESTS.HTML)
+        function autoConvertGlassDropdowns() {
+            document.querySelectorAll('select.input-box, select').forEach(select => {
+                if (select.dataset.glassConverted === 'true' || select.classList.contains('hidden')) return;
+                select.dataset.glassConverted = 'true';
+                select.classList.add('hidden');
+
+                const wrapper = document.createElement('div');
+                wrapper.className = 'relative custom-dropdown-group inline-block w-full';
+                
+                select.parentNode.insertBefore(wrapper, select);
+                wrapper.appendChild(select);
+
+                const currentOpt = select.options[select.selectedIndex] || select.options[0];
+                const initialLabel = currentOpt ? currentOpt.textContent : 'Select...';
+
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'w-full py-2 px-3 input-box rounded-xl text-xs font-bold flex items-center justify-between cursor-pointer custom-dropdown-btn';
+                btn.innerHTML = `
+                    <span class="custom-dropdown-label truncate">${initialLabel}</span>
+                    <svg class="w-3.5 h-3.5 text-[#5B8C76] dark:text-[#A8D8B9] transition-transform duration-200 custom-dropdown-arrow ml-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
+                `;
+
+                const menu = document.createElement('div');
+                menu.className = 'absolute top-full left-0 right-0 mt-1.5 z-50 rounded-2xl apple-glass shadow-2xl p-1.5 space-y-1 hidden custom-dropdown-menu border border-[#5B8C76]/30 dark:border-[#A8D8B9]/30 max-h-60 overflow-y-auto';
+
+                Array.from(select.options).forEach((opt, idx) => {
+                    const item = document.createElement('div');
+                    const isActive = idx === select.selectedIndex;
+                    item.className = `px-3 py-2 rounded-xl text-xs font-bold cursor-pointer hover:bg-[#5B8C76]/20 dark:hover:bg-[#A8D8B9]/20 transition-all flex items-center justify-between custom-opt-item ${isActive ? 'bg-[#5B8C76]/20 text-[#5B8C76] dark:text-[#A8D8B9]' : ''}`;
+                    item.innerHTML = `<span>${opt.textContent}</span>`;
+                    
+                    item.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        select.value = opt.value;
+                        btn.querySelector('.custom-dropdown-label').textContent = opt.textContent;
+                        
+                        menu.querySelectorAll('.custom-opt-item').forEach(i => i.classList.remove('bg-[#5B8C76]/20', 'text-[#5B8C76]', 'dark:text-[#A8D8B9]'));
+                        item.classList.add('bg-[#5B8C76]/20', 'text-[#5B8C76]', 'dark:text-[#A8D8B9]');
+                        
+                        menu.classList.add('hidden');
+                        btn.querySelector('.custom-dropdown-arrow').classList.remove('rotate-180');
+
+                        select.dispatchEvent(new Event('change', { bubbles: true }));
+                    });
+
+                    menu.appendChild(item);
+                });
+
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const isHidden = menu.classList.contains('hidden');
+                    document.querySelectorAll('.custom-dropdown-menu').forEach(m => m.classList.add('hidden'));
+                    document.querySelectorAll('.custom-dropdown-arrow').forEach(a => a.classList.remove('rotate-180'));
+
+                    if (isHidden) {
+                        menu.classList.remove('hidden');
+                        btn.querySelector('.custom-dropdown-arrow').classList.add('rotate-180');
+                    }
+                });
+
+                wrapper.appendChild(btn);
+                wrapper.appendChild(menu);
+            });
+        }
+
+        // CLOSE DROPDOWNS ON OUTSIDE CLICK
+        document.addEventListener('click', () => {
+            document.querySelectorAll('.custom-dropdown-menu').forEach(m => m.classList.add('hidden'));
+            document.querySelectorAll('.custom-dropdown-arrow').forEach(a => a.classList.remove('rotate-180'));
+        });
+
+        // 📊 INITIALIZE CHART.JS VISUALIZATIONS & GLASS DROPDOWNS ON LOAD
+        window.addEventListener('DOMContentLoaded', () => {
+            autoConvertGlassDropdowns();
+
+            // 1. OVERVIEW ADOPTION CHART
+            const ctx1 = document.getElementById('overviewAdoptionChart').getContext('2d');
+            new Chart(ctx1, {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'],
+                    datasets: [
+                        {
+                            label: 'Adoption Requests',
+                            data: [42, 58, 65, 78, 92, 110, 145, 186],
+                            borderColor: '#5B8C76',
+                            backgroundColor: 'rgba(91, 140, 118, 0.15)',
+                            fill: true,
+                            tension: 0.4
+                        },
+                        {
+                            label: 'Completed Adoptions',
+                            data: [28, 38, 45, 52, 68, 85, 105, 130],
+                            borderColor: '#A8D8B9',
+                            backgroundColor: 'transparent',
+                            borderDash: [5, 5],
+                            tension: 0.4
+                        }
+                    ]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+
+            // 2. STATUS DONUT
+            const ctx2 = document.getElementById('overviewStatusDonutChart').getContext('2d');
+            new Chart(ctx2, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Approved', 'Pending', 'Rejected', 'Completed'],
+                    datasets: [{
+                        data: [142, 14, 18, 130],
+                        backgroundColor: ['#10B981', '#F59E0B', '#EF4444', '#3B82F6'],
+                        borderWidth: 2,
+                        borderColor: 'transparent'
+                    }]
+                },
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    cutout: '68%'
+                }
+            });
+
+            // 3. PET SPECIES CHART
+            const ctx3 = document.getElementById('petSpeciesChart').getContext('2d');
+            new Chart(ctx3, {
+                type: 'bar',
+                data: {
+                    labels: ['Dogs 🐶', 'Cats 🐱', 'Rabbits 🐰', 'Birds 🦜'],
+                    datasets: [{
+                        label: 'Adopted Count',
+                        data: [142, 58, 12, 8],
+                        backgroundColor: '#5B8C76',
+                        borderRadius: 8
+                    }]
+                },
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
+
+            // 4. TOP BREEDS CHART
+            const ctx4 = document.getElementById('petBreedChart').getContext('2d');
+            new Chart(ctx4, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Golden Retriever', 'Persian Cat', 'German Shepherd', 'French Bulldog', 'Other Breeds'],
+                    datasets: [{
+                        data: [48, 36, 28, 22, 86],
+                        backgroundColor: ['#5B8C76', '#A8D8B9', '#F59E0B', '#3B82F6', '#6B7280'],
+                        borderWidth: 2,
+                        borderColor: 'transparent'
+                    }]
+                },
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { color: '#8EA89B', font: { size: 10, weight: 'bold' } } }
+                    },
+                    cutout: '65%'
+                }
+            });
+
+            // 5. FINANCIAL TREND CHART
+            const ctx7 = document.getElementById('financialTrendChart').getContext('2d');
+            new Chart(ctx7, {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                    datasets: [
+                        { label: 'Revenue (₹)', data: [450000, 520000, 610000, 720000, 790000, 850000], borderColor: '#10B981', tension: 0.3 },
+                        { label: 'Expenses (₹)', data: [310000, 340000, 390000, 430000, 480000, 520000], borderColor: '#F59E0B', tension: 0.3 }
+                    ]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+
+            // 6. PAYMENT DISTRIBUTION CHART
+            const ctx8 = document.getElementById('paymentDistributionChart').getContext('2d');
+            new Chart(ctx8, {
+                type: 'pie',
+                data: {
+                    labels: ['UPI / QR', 'Credit/Debit Card', 'Net Banking', 'Wallet'],
+                    datasets: [{ data: [65, 20, 10, 5], backgroundColor: ['#5B8C76', '#A8D8B9', '#3B82F6', '#F59E0B'] }]
+                },
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { color: '#8EA89B', font: { size: 10, weight: 'bold' } } }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>

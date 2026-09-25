@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shelter Management - Horizon UI Suite</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS v4 Browser Build -->
+    <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+    <style type="text/css">
+        :root {
+            --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        * {
+            transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease;
+        }
+
+        /* 🚫 GLOBALLY HIDE ALL SCROLLBARS SYSTEM-WIDE (FIREFOX, CHROME, EDGE, SAFARI) */
+        *, html, body, main, div, aside, section {
+            -ms-overflow-style: none !important;
+            scrollbar-width: none !important;
+        }
+
+        *::-webkit-scrollbar,
+        html::-webkit-scrollbar,
+        body::-webkit-scrollbar,
+        main::-webkit-scrollbar,
+        div::-webkit-scrollbar,
+        aside::-webkit-scrollbar {
+            display: none !important;
+            width: 0px !important;
+            height: 0px !important;
+            background: transparent !important;
+        }
+
+        /* ☀️ LIGHT MODE: HORIZON UI ALABASTER CREAM (#F4EDE2) */
+        html:not(.dark) body { background-color: #F4EDE2 !important; color: #111A15 !important; }
+        
+        html:not(.dark) .apple-glass { 
+            background: #FFFFFF !important; 
+            border: 1px solid rgba(91, 140, 118, 0.35) !important; 
+            box-shadow: 0 18px 40px rgba(91, 140, 118, 0.12) !important; 
+        }
+        
+        html:not(.dark) .sidebar-bg { 
+            background: #EFE8DC !important; 
+            border-right: 1px solid rgba(91, 140, 118, 0.30) !important; 
+        }
+        
+        html:not(.dark) .modal-bg { 
+            background: #FFFFFF !important; 
+            border: 1px solid rgba(91, 140, 118, 0.40) !important; 
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25) !important; 
+        }
+
+        html:not(.dark) .user-name-text { color: #111A15 !important; font-weight: 800 !important; }
+        html:not(.dark) .text-muted { color: #374151 !important; font-weight: 600 !important; }
+        html:not(.dark) .theme-accent-text { color: #1E3A2B !important; font-weight: 800 !important; }
+        html:not(.dark) .table-header-text { color: #111A15 !important; font-weight: 800 !important; }
+        
+        html:not(.dark) .input-box {
+            background: #FFFFFF !important;
+            border: 1px solid #789D8C !important;
+            color: #111A15 !important;
+            font-weight: 600 !important;
+        }
+        html:not(.dark) .input-box::placeholder { color: #4B5563 !important; }
+
+        html:not(.dark) .card-inner-box {
+            background: #F4EDE2 !important;
+            border: 1px solid #A3C4B5 !important;
+            color: #111A15 !important;
+        }
+
+        /* SOLID HOVER STYLE MATCHING USER MANAGEMENT BUTTONS */
+        .btn-preview-doc {
+            background-color: #5B8C76 !important;
+            color: #FFFFFF !important;
+            font-weight: 800 !important;
+            border-radius: 0.75rem !important;
+            box-shadow: 0 4px 12px rgba(91, 140, 118, 0.35) !important;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+        }
+        .btn-preview-doc:hover {
+            background-color: #2D4C3E !important;
+            transform: translateY(-1px) !important;
+            box-shadow: 0 6px 16px rgba(45, 76, 62, 0.45) !important;
+        }
+
+        /* LIGHT MODE BADGES & BUTTONS */
+        html:not(.dark) .badge-adopter {
+            background-color: #D1FAE5 !important;
+            color: #064E3B !important;
+            border: 1px solid #6EE7B7 !important;
+            font-weight: 800 !important;
+        }
+
+        html:not(.dark) .badge-shelter {
+            background-color: #F3E8FF !important;
+            color: #581C87 !important;
+            border: 1px solid #C084FC !important;
+            font-weight: 800 !important;
+        }
+
+        html:not(.dark) .badge-verified {
+            background-color: #D1FAE5 !important;
+            color: #065F46 !important;
+            border: 1px solid #6EE7B7 !important;
+            font-weight: 800 !important;
+        }
+
+        html:not(.dark) .badge-active {
+            background-color: #DCFCE7 !important;
+            color: #14532D !important;
+            font-weight: 800 !important;
+        }
+
+        html:not(.dark) .badge-pending {
+            background-color: #FEF3C7 !important;
+            color: #78350F !important;
+            border: 1px solid #FCD34D !important;
+            font-weight: 800 !important;
+        }
+
+        html:not(.dark) .btn-block {
+            background-color: #FEF3C7 !important;
+            color: #78350F !important;
+            border: 1px solid #FCD34D !important;
+            font-weight: 800 !important;
+        }
+
+        html:not(.dark) .btn-delete {
+            background-color: #FEE2E2 !important;
+            color: #7F1D1D !important;
+            border: 1px solid #FCA5A5 !important;
+            font-weight: 800 !important;
+        }
+
+        html:not(.dark) .tab-inactive {
+            background-color: #E5E7EB !important;
+            color: #111827 !important;
+            border: 1px solid #9CA3AF !important;
+            font-weight: 700 !important;
+        }
+
+        html:not(.dark) .tab-blocked-inactive {
+            background-color: #FEE2E2 !important;
+            color: #7F1D1D !important;
+            border: 1px solid #FCA5A5 !important;
+            font-weight: 700 !important;
+        }
+
+        /* 🌙 DARK MODE: ELEGANT DEEP EMERALD */
+        .dark body { background-color: #111A15 !important; color: #F4EDE2 !important; }
+        
+        .dark .apple-glass { 
+            background: rgba(27, 41, 33, 0.85) !important; 
+            backdrop-filter: blur(25px); 
+            border: 1px solid rgba(168, 216, 185, 0.22) !important; 
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.45) !important;
+        }
+        
+        .dark .sidebar-bg { 
+            background: rgba(14, 22, 18, 0.90) !important; 
+            border-right: 1px solid rgba(168, 216, 185, 0.15) !important; 
+        }
+        
+        .dark .modal-bg { 
+            background: rgba(22, 33, 27, 0.96) !important; 
+            border: 1px solid rgba(168, 216, 185, 0.3) !important; 
+        }
+
+        .dark .user-name-text { color: #FFFFFF !important; font-weight: 800 !important; }
+        .dark .text-muted { color: #9CA3AF !important; font-weight: 500 !important; }
+        .dark .theme-accent-text { color: #A8D8B9 !important; font-weight: 800 !important; }
+        .dark .table-header-text { color: #A8D8B9 !important; font-weight: 800 !important; }
+        
+        .dark .input-box {
+            background: rgba(17, 26, 21, 0.8) !important;
+            border: 1px solid rgba(168, 216, 185, 0.25) !important;
+            color: #F4EDE2 !important;
+        }
+
+        .dark .card-inner-box {
+            background: rgba(17, 26, 21, 0.6) !important;
+            border: 1px solid rgba(168, 216, 185, 0.2) !important;
+            color: #F4EDE2 !important;
+        }
+
+        .dark .badge-adopter {
+            background-color: rgba(91, 140, 118, 0.2) !important;
+            color: #A8D8B9 !important;
+            border: 1px solid rgba(168, 216, 185, 0.3) !important;
+        }
+
+        .dark .badge-shelter {
+            background-color: rgba(168, 85, 247, 0.2) !important;
+            color: #D8B4FE !important;
+            border: 1px solid rgba(192, 132, 252, 0.3) !important;
+        }
+
+        .dark .badge-verified {
+            background-color: rgba(91, 140, 118, 0.3) !important;
+            color: #A8D8B9 !important;
+        }
+
+        .dark .badge-active {
+            background-color: rgba(16, 185, 129, 0.2) !important;
+            color: #34D399 !important;
+        }
+
+        .dark .badge-pending {
+            background-color: rgba(245, 158, 11, 0.2) !important;
+            color: #FBBF24 !important;
+        }
+
+        .dark .btn-block {
+            background-color: rgba(245, 158, 11, 0.2) !important;
+            color: #FBBF24 !important;
+        }
+
+        .dark .btn-delete {
+            background-color: rgba(239, 68, 68, 0.2) !important;
+            color: #F87171 !important;
+        }
+
+        .dark .tab-inactive {
+            background-color: rgba(91, 140, 118, 0.2) !important;
+            color: #F4EDE2 !important;
+            border: 1px solid rgba(168, 216, 185, 0.2) !important;
+        }
+
+        .dark .tab-blocked-inactive {
+            background-color: rgba(239, 68, 68, 0.2) !important;
+            color: #F87171 !important;
+        }
+
+        .nav-item-active {
+            background: linear-gradient(135deg, #5B8C76 0%, #2D4C3E 100%) !important;
+            color: #FFFFFF !important;
+            box-shadow: 0 8px 20px rgba(91, 140, 118, 0.45) !important;
+        }
+
+        .nav-item-hover-transform {
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .nav-item-hover-transform:hover {
+            background: rgba(91, 140, 118, 0.25);
+            transform: translateX(4px);
+        }
+    </style>
+</head>
+<body class="min-h-screen font-sans">
+
+    <div class="flex min-h-screen">
+        
+        <!-- SIDEBAR -->
+        <aside class="w-64 sidebar-bg flex flex-col justify-between p-6 sticky top-0 h-screen z-30 overflow-y-auto">
+            <div>
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#5B8C76] to-[#A8D8B9] flex items-center justify-center text-[#111A15] font-extrabold text-xl shadow-lg shadow-[#5B8C76]/30">
+                        👨‍💼
+                    </div>
+                    <div>
+                        <span class="font-extrabold text-lg tracking-tight block">HORIZON <span class="text-[#5B8C76] dark:text-[#A8D8B9]">UI</span></span>
+                        <span class="text-[10px] theme-accent-text font-extrabold uppercase tracking-widest">Pet Adoption Suite</span>
+                    </div>
+                </div>
+
+                <nav class="space-y-1 text-xs font-bold">
+                    <a href="{% url 'admin_dashboard' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>📊</span> Dashboard Overview</a>
+                    <a href="{% url 'admin_users' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>👥</span> User Management</a>
+                    
+                    <div class="space-y-1 my-2 py-2 border-y border-[#5B8C76]/25">
+                        <a href="{% url 'admin_shelters' %}" class="nav-item-active flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>🏠</span> Shelter Management</a>
+                        <a href="{% url 'admin_pets' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>🐶</span> Pet Management</a>
+                        <a href="{% url 'admin_requests' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>🐾</span> Adoption Requests</a>
+                        <a href="{% url 'admin_payments' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>💳</span> Payments</a>
+                        <a href="{% url 'admin_deliveries' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>🚚</span> Delivery Control</a>
+                        <a href="{% url 'admin_audit_logs' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>🔍</span> Audit Logs</a>
+                        <a href="{% url 'admin_revenue' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>💰</span> Revenue & Profit</a>
+                    </div>
+
+                    <a href="{% url 'admin_reports' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>📈</span> Reports & Analytics</a>
+                    <a href="{% url 'admin_notifications' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>🔔</span> Notifications</a>
+                    <a href="{% url 'admin_announcements' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>📢</span> Announcements</a>
+                    <a href="{% url 'admin_health' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>🩺</span> Pet Health</a>
+                    <a href="{% url 'admin_settings' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>⚙️</span> System Settings</a>
+                    <a href="{% url 'admin_roles' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>🔐</span> Roles & Permissions</a>
+                </nav>
+            </div>
+            
+            <div class="pt-4 border-t border-[#5B8C76]/25 space-y-1">
+                <a href="{% url 'home' %}" class="flex items-center gap-3 px-4 py-2 hover:bg-[#5B8C76]/20 rounded-2xl text-xs font-bold"><span>🌐</span> Main Website</a>
+                <a href="{% url 'login' %}" class="flex items-center gap-3 px-4 py-2 hover:bg-red-500/20 text-red-500 rounded-2xl text-xs font-bold"><span>🚪</span> Logout</a>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT CONTAINER -->
+        <main class="flex-1 p-8 overflow-y-auto">
+            
+            <!-- 🚀 HORIZON FLOATING TOP HEADER NAVBAR (MATCHING USER MANAGEMENT EXACTLY) -->
+            <header class="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 gap-4">
+                <div>
+                    <div class="text-xs text-muted font-bold mb-0.5">
+                        <span>Pages</span> / <span class="theme-accent-text font-extrabold">Shelter Management</span>
+                    </div>
+                    <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight">Registered Shelters Directory 🏠</h1>
+                </div>
+
+                <div class="apple-glass rounded-full px-4 py-2 flex items-center gap-3 shadow-lg">
+                    <button type="button" onclick="openAddShelterModal()" class="px-3.5 py-1.5 bg-[#5B8C76] hover:bg-[#2D4C3E] text-white text-xs font-extrabold rounded-full shadow-sm flex items-center gap-1 cursor-pointer">
+                        <span>➕</span> Add Shelter
+                    </button>
+
+                    <button type="button" onclick="toggleTheme()" class="w-8 h-8 bg-[#5B8C76]/20 hover:bg-[#5B8C76]/30 border border-[#5B8C76]/40 rounded-full text-sm font-extrabold flex items-center justify-center cursor-pointer shadow-sm" title="Toggle Theme">
+                        <span id="theme-icon">🌙</span>
+                    </button>
+
+                    <a href="{% url 'admin_notifications' %}" class="w-8 h-8 bg-[#5B8C76]/20 hover:bg-[#5B8C76]/30 border border-[#5B8C76]/40 rounded-full text-xs font-extrabold flex items-center justify-center relative shadow-sm" title="Notifications">
+                        🔔 <span class="w-2 h-2 rounded-full bg-red-500 absolute top-1 right-1 animate-ping"></span>
+                    </a>
+
+                    <div class="w-8 h-8 rounded-full bg-gradient-to-br from-[#5B8C76] to-[#A8D8B9] flex items-center justify-center font-extrabold text-xs text-[#111A15] shadow-sm">
+                        A
+                    </div>
+                </div>
+            </header>
+
+            <!-- 🔍 INTERACTIVE SEARCH & TAB FILTERS (MATCHING USER MANAGEMENT) -->
+            <div class="apple-glass rounded-[28px] p-4 mb-6 flex flex-col md:flex-row justify-between items-center gap-4">
+                <div class="relative w-full md:w-80">
+                    <input type="text" id="shelter-search-input" onkeyup="filterShelters()" placeholder="Search by name, owner, license..." class="w-full py-2.5 px-4 pr-9 input-box rounded-2xl text-xs font-semibold focus:outline-none focus:border-[#5B8C76]">
+                    <span class="absolute right-3 top-2.5 text-xs text-muted">🔍</span>
+                </div>
+
+                <div class="flex flex-wrap gap-2 w-full md:w-auto" id="filter-tabs">
+                    <button onclick="setActiveTab('all')" id="tab-all" class="px-4 py-2 bg-[#5B8C76] text-white text-xs font-extrabold rounded-2xl cursor-pointer shadow-md">All Shelters (18)</button>
+                    <button onclick="setActiveTab('verified')" id="tab-verified" class="px-4 py-2 tab-inactive text-xs font-extrabold rounded-2xl cursor-pointer">Active Verified (14)</button>
+                    <button onclick="setActiveTab('pending')" id="tab-pending" class="px-4 py-2 tab-inactive text-xs font-extrabold rounded-2xl cursor-pointer">Pending Queue (3)</button>
+                    <button onclick="setActiveTab('suspended')" id="tab-suspended" class="px-4 py-2 tab-blocked-inactive text-xs font-extrabold rounded-2xl cursor-pointer">Suspended (1)</button>
+                </div>
+            </div>
+
+            <!-- 📋 HORIZON DATA TABLE (MATCHING USER MANAGEMENT DESIGN) -->
+            <div class="apple-glass rounded-[28px] p-6 shadow-xl">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs" id="shelters-table">
+                        <thead>
+                            <tr class="border-b border-[#5B8C76]/25 table-header-text uppercase tracking-wider">
+                                <th class="pb-3">Shelter & Owner</th>
+                                <th class="pb-3">License & Location</th>
+                                <th class="pb-3">Pets / Status</th>
+                                <th class="pb-3 text-right">Interactive Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-[#5B8C76]/20 font-medium">
+                            
+                            <!-- SHELTER 1: ABC ANIMAL SHELTER -->
+                            <tr class="shelter-row" data-id="1" data-status="VERIFIED" data-name="ABC Animal Shelter" data-owner="Dr. Ananya Roy" data-email="contact@abcshelter.org" data-phone="+1 555-0192" data-location="San Francisco, CA" data-address="45 Rescue Lane, San Francisco, CA" data-license="SH-2025-992" data-pets="42" data-adoptions="15" data-rating="4.9 ⭐ (128 Reviews)" data-doc="SHELTER-LICENSE-CERT-992.pdf" data-password="AbcShelterPass2026!" data-joined="01 Aug 2026" data-image="https://images.unsplash.com/photo-1548199973-03cce0bbc87b?auto=format&fit=crop&q=80&w=250">
+                                <td class="py-4">
+                                    <button onclick="openProfileModal(1)" class="text-left group cursor-pointer flex items-center gap-3">
+                                        <img class="w-10 h-10 rounded-2xl object-cover border border-[#5B8C76]/40 shadow-sm" src="https://images.unsplash.com/photo-1548199973-03cce0bbc87b?auto=format&fit=crop&q=80&w=250" alt="ABC Animal Shelter">
+                                        <div>
+                                            <div class="font-extrabold text-sm user-name-text group-hover:text-[#5B8C76] flex items-center gap-1">
+                                                <span id="row-name-1">ABC Animal Shelter</span> 🏠
+                                            </div>
+                                            <div class="text-[11px] text-muted font-semibold" id="row-owner-email-1">Dr. Ananya Roy • contact@abcshelter.org</div>
+                                        </div>
+                                    </button>
+                                </td>
+                                <td class="py-4">
+                                    <div class="font-extrabold text-xs user-name-text" id="row-location-1">San Francisco, CA</div>
+                                    <div class="text-[10px] theme-accent-text font-bold">License: <span id="row-license-1">SH-2025-992</span></div>
+                                </td>
+                                <td class="py-4">
+                                    <div class="flex items-center gap-2" id="status-badge-container-1">
+                                        <span class="px-2.5 py-0.5 badge-verified font-extrabold text-[10px] rounded-lg">Verified Safe ✅</span>
+                                        <span class="px-2.5 py-0.5 badge-active font-extrabold text-[10px] rounded-lg" id="status-badge-1">Active</span>
+                                    </div>
+                                </td>
+                                <td class="py-4 text-right space-x-1.5 whitespace-nowrap">
+                                    <button onclick="openProfileModal(1)" class="px-3.5 py-1.5 btn-preview-doc font-extrabold text-xs rounded-2xl cursor-pointer shadow-sm">View Profile</button>
+                                    <button id="suspend-btn-1" onclick="openSuspendModal(1, 'ABC Animal Shelter')" class="px-3.5 py-1.5 btn-block font-extrabold text-xs rounded-2xl cursor-pointer">Suspend</button>
+                                    <button onclick="openDeleteModal(1, 'ABC Animal Shelter')" class="px-3.5 py-1.5 btn-delete font-extrabold text-xs rounded-2xl cursor-pointer">Delete</button>
+                                </td>
+                            </tr>
+
+                            <!-- SHELTER 2: HAPPY PAWS RESCUE -->
+                            <tr class="shelter-row" data-id="2" data-status="PENDING" data-name="Happy Paws Rescue" data-owner="Vikram Singh" data-email="contact@happypaws.org" data-phone="+1 555-8831" data-location="San Jose, CA" data-address="128 Haven Road, San Jose, CA" data-license="SH-2026-104" data-pets="8" data-adoptions="0" data-rating="New Shelter" data-doc="SHELTER-LICENSE-CERT-104.pdf" data-password="HappyPawsPass2026!" data-joined="14 Aug 2026" data-image="https://images.unsplash.com/photo-1576201836106-db1758fd1c97?auto=format&fit=crop&q=80&w=250">
+                                <td class="py-4">
+                                    <button onclick="openProfileModal(2)" class="text-left group cursor-pointer flex items-center gap-3">
+                                        <img class="w-10 h-10 rounded-2xl object-cover border border-amber-400/40 shadow-sm" src="https://images.unsplash.com/photo-1576201836106-db1758fd1c97?auto=format&fit=crop&q=80&w=250" alt="Happy Paws Rescue">
+                                        <div>
+                                            <div class="font-extrabold text-sm user-name-text group-hover:text-[#5B8C76] flex items-center gap-1">
+                                                <span id="row-name-2">Happy Paws Rescue</span> 🐾
+                                            </div>
+                                            <div class="text-[11px] text-muted font-semibold" id="row-owner-email-2">Vikram Singh • contact@happypaws.org</div>
+                                        </div>
+                                    </button>
+                                </td>
+                                <td class="py-4">
+                                    <div class="font-extrabold text-xs user-name-text" id="row-location-2">San Jose, CA</div>
+                                    <div class="text-[10px] theme-accent-text font-bold">License: <span id="row-license-2">SH-2026-104</span></div>
+                                </td>
+                                <td class="py-4">
+                                    <div class="flex items-center gap-2" id="status-badge-container-2">
+                                        <span class="px-2.5 py-0.5 badge-pending font-extrabold text-[10px] rounded-lg" id="status-badge-2">Pending ⏳</span>
+                                    </div>
+                                </td>
+                                <td class="py-4 text-right space-x-1.5 whitespace-nowrap">
+                                    <button onclick="openProfileModal(2)" class="px-3.5 py-1.5 btn-preview-doc font-extrabold text-xs rounded-2xl cursor-pointer shadow-sm">View Profile</button>
+                                    <button id="suspend-btn-2" onclick="openSuspendModal(2, 'Happy Paws Rescue')" class="px-3.5 py-1.5 btn-block font-extrabold text-xs rounded-2xl cursor-pointer">Suspend</button>
+                                    <button onclick="openDeleteModal(2, 'Happy Paws Rescue')" class="px-3.5 py-1.5 btn-delete font-extrabold text-xs rounded-2xl cursor-pointer">Delete</button>
+                                </td>
+                            </tr>
+
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- ➕ ADD NEW SHELTER MODAL -->
+    <div id="add-shelter-modal" class="fixed inset-0 bg-black/75 backdrop-blur-lg z-50 flex items-center justify-center p-4 hidden">
+        <div class="modal-bg rounded-[32px] p-6 sm:p-8 max-w-lg w-full shadow-2xl relative space-y-5 max-h-[90vh] overflow-y-auto">
+            <button onclick="closeAddShelterModal()" class="absolute top-6 right-6 text-muted hover:text-[#5B8C76] font-extrabold text-lg cursor-pointer">✕</button>
+            <h2 class="text-xl font-extrabold user-name-text flex items-center gap-2"><span>🏠</span> Register New Shelter Organization</h2>
+            
+            <form id="add-shelter-form" onsubmit="submitAddShelterForm(event)" class="space-y-4 text-xs font-bold">
+                <div>
+                    <label class="block text-muted mb-1">Shelter Organization Name:</label>
+                    <input type="text" id="add-shelter-name" placeholder="e.g. Sacramento Rescue Shelter" required class="w-full py-2.5 px-4 input-box rounded-2xl text-xs font-semibold">
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-muted mb-1">Owner / Manager Name:</label>
+                        <input type="text" id="add-owner-name" placeholder="e.g. Dr. Marcus Vance" required class="w-full py-2.5 px-4 input-box rounded-2xl text-xs font-semibold">
+                    </div>
+                    <div>
+                        <label class="block text-muted mb-1">License Registration #:</label>
+                        <input type="text" id="add-license-number" placeholder="e.g. SH-2026-880" required class="w-full py-2.5 px-4 input-box rounded-2xl text-xs font-semibold">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-muted mb-1">Contact Email:</label>
+                        <input type="email" id="add-email" placeholder="contact@sacramentorescue.org" required class="w-full py-2.5 px-4 input-box rounded-2xl text-xs font-semibold">
+                    </div>
+                    <div>
+                        <label class="block text-muted mb-1">Phone Number:</label>
+                        <input type="text" id="add-phone" placeholder="+1 555-9012" required class="w-full py-2.5 px-4 input-box rounded-2xl text-xs font-semibold">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-muted mb-1">City Location & Full Address:</label>
+                    <input type="text" id="add-location" placeholder="102 Shelter Way, Sacramento, CA" required class="w-full py-2.5 px-4 input-box rounded-2xl text-xs font-semibold">
+                </div>
+
+                <div>
+                    <label class="block text-muted mb-1">Upload License / Accreditation Document (PDF/Word/Image):</label>
+                    <input type="file" id="add-doc-file" accept=".pdf,.doc,.docx,.png,.jpg" class="w-full py-2 px-3 input-box rounded-2xl text-xs font-semibold file:mr-3 file:py-1 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-extrabold file:bg-[#5B8C76] file:text-white hover:file:bg-[#2D4C3E] cursor-pointer">
+                </div>
+
+                <div>
+                    <label class="block text-muted mb-1">Set Owner Portal Access Password:</label>
+                    <div class="relative">
+                        <input type="password" id="add-shelter-password" placeholder="Set shelter manager login password..." required class="w-full py-2.5 px-4 pr-10 input-box rounded-2xl text-xs font-semibold">
+                        <button type="button" onclick="toggleAddPasswordVisibility()" class="absolute right-3 top-2 text-sm text-muted hover:text-[#5B8C76] cursor-pointer z-10 p-1" title="Toggle Password Visibility">
+                            <span id="add-pwd-icon">👁</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="flex justify-end gap-3 pt-3 border-t border-[#5B8C76]/20">
+                    <button type="button" onclick="closeAddShelterModal()" class="px-4 py-2.5 tab-inactive rounded-2xl cursor-pointer">Cancel</button>
+                    <button type="submit" class="px-5 py-2.5 bg-[#5B8C76] hover:bg-[#2D4C3E] text-white font-extrabold rounded-2xl shadow-md cursor-pointer">Create Shelter Entry 🏠</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 📜 COMPREHENSIVE SHELTER PROFILE DRAWER MODAL (MATCHING USER MANAGEMENT EXACTLY) -->
+    <div id="profile-modal" class="fixed inset-0 bg-black/75 backdrop-blur-lg z-50 flex items-center justify-center p-4 hidden">
+        <div class="modal-bg rounded-[32px] p-6 sm:p-8 max-w-2xl w-full shadow-2xl relative space-y-6 max-h-[90vh] overflow-y-auto">
+            <button onclick="closeProfileModal()" class="absolute top-6 right-6 text-muted hover:text-[#5B8C76] font-extrabold text-lg cursor-pointer">✕</button>
+            
+            <!-- HEADER WITH SHELTER LOGO / PHOTO -->
+            <div class="flex items-center gap-4 border-b border-[#5B8C76]/25 pb-4">
+                <img id="modal-profile-img" class="w-18 h-18 rounded-2xl object-cover border-2 border-[#5B8C76]/40 shadow-md" src="" alt="Shelter Profile Photo">
+                <div>
+                    <h2 class="text-2xl font-extrabold user-name-text" id="modal-name">ABC Animal Shelter</h2>
+                    <div class="flex items-center gap-2 mt-1">
+                        <span class="px-3 py-0.5 badge-verified text-xs font-extrabold rounded-full" id="modal-status-badge">Active Verified ✅</span>
+                        <span class="text-xs text-muted font-semibold" id="modal-joined">Joined: 01 Aug 2026</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 📄 DEDICATED DOCUMENT VERIFICATION AUDIT SECTION -->
+            <div class="p-4 card-inner-box rounded-2xl space-y-3">
+                <div class="flex justify-between items-center font-bold">
+                    <span class="text-xs theme-accent-text font-extrabold">📄 Accreditation Document Audit</span>
+                    <span class="text-[11px] px-2.5 py-0.5 badge-verified rounded-lg font-extrabold" id="drawer-doc-status-badge">Verified Safe ✅</span>
+                </div>
+                <div class="text-xs font-semibold flex justify-between items-center">
+                    <span>License Certificate File: <strong class="theme-accent-text font-extrabold" id="drawer-doc-name">SHELTER-LICENSE-CERT-992.pdf 📄</strong></span>
+                    
+                    <button type="button" onclick="triggerDirectDocDownload()" class="px-4 py-1.5 btn-preview-doc rounded-xl text-xs font-extrabold cursor-pointer flex items-center gap-1">
+                        Preview File 📄
+                    </button>
+                </div>
+                <div class="flex gap-2 pt-1">
+                    <button type="button" onclick="approveShelterFromDrawer()" class="flex-1 py-2 bg-[#5B8C76] hover:bg-[#2D4C3E] text-white text-xs font-extrabold rounded-xl shadow-sm cursor-pointer transition-all">Approve Verified ✅</button>
+                    <button type="button" onclick="suspendShelterFromDrawer()" class="flex-1 py-2 btn-delete text-xs font-extrabold rounded-xl cursor-pointer">Suspend Access ⚠️</button>
+                </div>
+            </div>
+
+            <!-- 🔑 PORTAL LOGIN PASSWORD INSPECTOR ROW -->
+            <div class="p-4 card-inner-box rounded-2xl flex items-center justify-between gap-3 text-xs font-extrabold">
+                <div class="flex items-center gap-2.5">
+                    <span class="text-base">🔑</span>
+                    <div>
+                        <span class="text-muted text-[10px] uppercase block">Owner Portal Login Password:</span>
+                        <span id="prof-card-password-text" class="theme-accent-text font-mono text-sm tracking-widest">••••••••••••</span>
+                    </div>
+                </div>
+                <button type="button" onclick="toggleProfilePasswordVisibility()" class="px-3.5 py-1.5 tab-inactive rounded-xl text-xs font-extrabold cursor-pointer flex items-center gap-1.5">
+                    <span id="prof-pwd-toggle-icon">👁</span> <span id="prof-pwd-toggle-label">Show Password</span>
+                </button>
+            </div>
+
+            <!-- EDIT SHELTER FORM -->
+            <form onsubmit="saveShelterProfile(event)" class="space-y-4 text-xs font-bold">
+                <input type="hidden" id="edit-shelter-id">
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block mb-1 user-name-text">Shelter Name *</label>
+                        <input type="text" id="edit-name" required class="w-full py-2.5 px-4 input-box rounded-2xl text-xs font-semibold">
+                    </div>
+                    <div>
+                        <label class="block mb-1 user-name-text">Owner / Manager Name *</label>
+                        <input type="text" id="edit-owner" required class="w-full py-2.5 px-4 input-box rounded-2xl text-xs font-semibold">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block mb-1 user-name-text">Contact Email *</label>
+                        <input type="email" id="edit-email" required class="w-full py-2.5 px-4 input-box rounded-2xl text-xs font-semibold">
+                    </div>
+                    <div>
+                        <label class="block mb-1 user-name-text">Phone Number *</label>
+                        <input type="text" id="edit-phone" required class="w-full py-2.5 px-4 input-box rounded-2xl text-xs font-semibold">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block mb-1 user-name-text">License Number *</label>
+                        <input type="text" id="edit-license" required class="w-full py-2.5 px-4 input-box rounded-2xl text-xs font-semibold">
+                    </div>
+                    <div>
+                        <label class="block mb-1 user-name-text">City Location & Address *</label>
+                        <input type="text" id="edit-location" required class="w-full py-2.5 px-4 input-box rounded-2xl text-xs font-semibold">
+                    </div>
+                </div>
+
+                <div class="flex justify-between items-center pt-4 border-t border-[#5B8C76]/25">
+                    <button type="button" onclick="navigateToPets()" class="px-4 py-2.5 bg-[#5B8C76] hover:bg-[#2D4C3E] text-white font-extrabold rounded-2xl cursor-pointer flex items-center gap-1 shadow-sm">
+                        🐶 Manage Pets
+                    </button>
+                    <div class="flex gap-2">
+                        <button type="button" onclick="closeProfileModal()" class="px-4 py-2.5 tab-inactive rounded-2xl font-extrabold cursor-pointer">Cancel</button>
+                        <button type="submit" class="px-5 py-2.5 bg-[#5B8C76] hover:bg-[#2D4C3E] text-white font-extrabold rounded-2xl cursor-pointer shadow-md">Save Changes 💾</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ⚡ CONTROLLERS -->
+    <script>
+        let currentShelterId = 1;
+        let currentPasswordPlain = 'AbcShelterPass2026!';
+        let isPasswordVisible = false;
+
+        function navigateToPets() {
+            window.location.href = "{% url 'admin_pets' %}";
+        }
+
+        function openAddShelterModal() {
+            document.getElementById('add-shelter-modal').classList.remove('hidden');
+        }
+
+        function closeAddShelterModal() {
+            document.getElementById('add-shelter-modal').classList.add('hidden');
+        }
+
+        function toggleAddPasswordVisibility() {
+            const pwd = document.getElementById('add-shelter-password');
+            const icon = document.getElementById('add-pwd-icon');
+            if (pwd) {
+                if (pwd.type === 'password') {
+                    pwd.type = 'text';
+                    if (icon) icon.textContent = '🙈';
+                } else {
+                    pwd.type = 'password';
+                    if (icon) icon.textContent = '👁';
+                }
+            }
+        }
+
+        function toggleProfilePasswordVisibility() {
+            const textEl = document.getElementById('prof-card-password-text');
+            const iconEl = document.getElementById('prof-pwd-toggle-icon');
+            const labelEl = document.getElementById('prof-pwd-toggle-label');
+            if (isPasswordVisible) {
+                textEl.textContent = '••••••••••••';
+                textEl.className = 'theme-accent-text font-mono text-sm tracking-widest';
+                if (iconEl) iconEl.textContent = '👁';
+                if (labelEl) labelEl.textContent = 'Show Password';
+                isPasswordVisible = false;
+            } else {
+                textEl.textContent = currentPasswordPlain;
+                textEl.className = 'text-emerald-400 font-mono text-sm font-black tracking-normal';
+                if (iconEl) iconEl.textContent = '🙈';
+                if (labelEl) labelEl.textContent = 'Hide Password';
+                isPasswordVisible = true;
+            }
+        }
+
+        function openProfileModal(id) {
+            currentShelterId = id;
+            const row = document.querySelector(`.shelter-row[data-id="${id}"]`);
+            if (row) {
+                const name = row.getAttribute('data-name');
+                const owner = row.getAttribute('data-owner');
+                const email = row.getAttribute('data-email');
+                const phone = row.getAttribute('data-phone');
+                const license = row.getAttribute('data-license');
+                const location = row.getAttribute('data-location');
+                const doc = row.getAttribute('data-doc');
+                const joined = row.getAttribute('data-joined') || '01 Aug 2026';
+                const status = row.getAttribute('data-status');
+                const image = row.getAttribute('data-image');
+
+                currentPasswordPlain = row.getAttribute('data-password') || 'ShelterPass2026!';
+                isPasswordVisible = false;
+
+                document.getElementById('edit-shelter-id').value = id;
+                document.getElementById('modal-name').textContent = name;
+                document.getElementById('modal-joined').textContent = `Joined: ${joined}`;
+                document.getElementById('modal-profile-img').src = image;
+
+                document.getElementById('drawer-doc-name').textContent = `${doc} 📄`;
+                document.getElementById('prof-card-password-text').textContent = '••••••••••••';
+                document.getElementById('prof-card-password-text').className = 'theme-accent-text font-mono text-sm tracking-widest';
+                document.getElementById('prof-pwd-toggle-icon').textContent = '👁';
+                document.getElementById('prof-pwd-toggle-label').textContent = 'Show Password';
+
+                document.getElementById('edit-name').value = name;
+                document.getElementById('edit-owner').value = owner;
+                document.getElementById('edit-email').value = email;
+                document.getElementById('edit-phone').value = phone;
+                document.getElementById('edit-license').value = license;
+                document.getElementById('edit-location').value = location;
+
+                const statusBadge = document.getElementById('modal-status-badge');
+                const docBadge = document.getElementById('drawer-doc-status-badge');
+
+                if (status === 'SUSPENDED') {
+                    statusBadge.textContent = 'Suspended ⚠️';
+                    statusBadge.className = 'px-3 py-0.5 tab-blocked-inactive text-xs font-extrabold rounded-full';
+                    docBadge.textContent = 'Suspended ⚠️';
+                    docBadge.className = 'text-[11px] px-2.5 py-0.5 tab-blocked-inactive rounded-lg font-extrabold';
+                } else if (status === 'PENDING') {
+                    statusBadge.textContent = 'Pending Registration ⏳';
+                    statusBadge.className = 'px-3 py-0.5 badge-pending text-xs font-extrabold rounded-full';
+                    docBadge.textContent = 'Pending Audit ⏳';
+                    docBadge.className = 'text-[11px] px-2.5 py-0.5 badge-pending rounded-lg font-extrabold';
+                } else {
+                    statusBadge.textContent = 'Active Verified ✅';
+                    statusBadge.className = 'px-3 py-0.5 badge-verified text-xs font-extrabold rounded-full';
+                    docBadge.textContent = 'Verified Safe ✅';
+                    docBadge.className = 'text-[11px] px-2.5 py-0.5 badge-verified rounded-lg font-extrabold';
+                }
+            }
+            document.getElementById('profile-modal').classList.remove('hidden');
+        }
+
+        function closeProfileModal() {
+            document.getElementById('profile-modal').classList.add('hidden');
+        }
+
+        function saveShelterProfile(event) {
+            event.preventDefault();
+            const name = document.getElementById('edit-name').value;
+            const owner = document.getElementById('edit-owner').value;
+            const email = document.getElementById('edit-email').value;
+            const phone = document.getElementById('edit-phone').value;
+            const license = document.getElementById('edit-license').value;
+            const location = document.getElementById('edit-location').value;
+
+            const row = document.querySelector(`.shelter-row[data-id="${currentShelterId}"]`);
+            if (row) {
+                row.setAttribute('data-name', name);
+                row.setAttribute('data-owner', owner);
+                row.setAttribute('data-email', email);
+                row.setAttribute('data-phone', phone);
+                row.setAttribute('data-license', license);
+                row.setAttribute('data-location', location);
+
+                const nameEl = document.getElementById(`row-name-${currentShelterId}`);
+                if (nameEl) nameEl.textContent = name;
+                const ownerEmailEl = document.getElementById(`row-owner-email-${currentShelterId}`);
+                if (ownerEmailEl) ownerEmailEl.textContent = `${owner} • ${email}`;
+                const licenseEl = document.getElementById(`row-license-${currentShelterId}`);
+                if (licenseEl) licenseEl.textContent = license;
+                const locationEl = document.getElementById(`row-location-${currentShelterId}`);
+                if (locationEl) locationEl.textContent = location;
+            }
+
+            closeProfileModal();
+        }
+
+        function approveShelterFromDrawer() {
+            const row = document.querySelector(`.shelter-row[data-id="${currentShelterId}"]`);
+            if (row) {
+                row.setAttribute('data-status', 'VERIFIED');
+                const badgeContainer = document.getElementById(`status-badge-container-${currentShelterId}`);
+                if (badgeContainer) {
+                    badgeContainer.innerHTML = `
+                        <span class="px-2.5 py-0.5 badge-verified font-extrabold text-[10px] rounded-lg">Verified Safe ✅</span>
+                        <span class="px-2.5 py-0.5 badge-active font-extrabold text-[10px] rounded-lg" id="status-badge-${currentShelterId}">Active</span>
+                    `;
+                }
+            }
+            openProfileModal(currentShelterId);
+        }
+
+        function suspendShelterFromDrawer() {
+            const row = document.querySelector(`.shelter-row[data-id="${currentShelterId}"]`);
+            if (row) {
+                row.setAttribute('data-status', 'SUSPENDED');
+                const badgeContainer = document.getElementById(`status-badge-container-${currentShelterId}`);
+                if (badgeContainer) {
+                    badgeContainer.innerHTML = `
+                        <span class="px-2.5 py-0.5 tab-blocked-inactive font-extrabold text-[10px] rounded-lg">Suspended ⚠️</span>
+                    `;
+                }
+            }
+            openProfileModal(currentShelterId);
+        }
+
+        function openSuspendModal(id, name) {
+            currentShelterId = id;
+            suspendShelterFromDrawer();
+        }
+
+        function openDeleteModal(id, name) {
+            const row = document.querySelector(`.shelter-row[data-id="${id}"]`);
+            if (row) row.remove();
+        }
+
+        function triggerDirectDocDownload() {
+            const row = document.querySelector(`.shelter-row[data-id="${currentShelterId}"]`);
+            const docName = row ? row.getAttribute('data-doc') : 'SHELTER-LICENSE-CERT-992.pdf';
+            const blob = new Blob([`Official License Document for ${docName}`], { type: 'application/pdf' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = docName;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        async function submitAddShelterForm(event) {
+            event.preventDefault();
+            const name = document.getElementById('add-shelter-name').value.trim();
+            const owner = document.getElementById('add-owner-name').value.trim();
+            const license = document.getElementById('add-license-number').value.trim();
+            const email = document.getElementById('add-email').value.trim();
+            const phone = document.getElementById('add-phone').value.trim();
+            const location = document.getElementById('add-location').value.trim();
+            const password = document.getElementById('add-shelter-password').value.trim();
+            const fileInput = document.getElementById('add-doc-file');
+            
+            let docName = `SHELTER-LICENSE-CERT-${license}.pdf`;
+            if (fileInput && fileInput.files && fileInput.files[0]) {
+                docName = fileInput.files[0].name;
+            }
+
+            try {
+                const response = await fetch('/users/api/admin/create-shelter/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        shelter_name: name,
+                        contact_person: owner,
+                        email: email,
+                        phone: phone,
+                        address: location,
+                        password: password
+                    })
+                });
+
+                const resData = await response.json();
+                if (resData.success) {
+                    alert(`✅ Shelter '${name}' successfully created!\n\n🔑 Shelter Login Credentials:\nEmail / Username: ${resData.credentials.email || resData.credentials.username}\nTemporary Password: ${resData.credentials.password}\n\nPlease share these credentials with the shelter manager.`);
+                    closeAddShelterModal();
+                    document.getElementById('add-shelter-form').reset();
+                    window.location.reload();
+                } else {
+                    alert(`⛔ Error creating shelter: ${resData.error}`);
+                }
+            } catch (err) {
+                alert(`⚠️ Network Error: ${err.message}`);
+            }
+        }
+
+        function setActiveTab(type) {
+            document.getElementById('tab-all').className = 'px-4 py-2 tab-inactive text-xs font-extrabold rounded-2xl cursor-pointer';
+            document.getElementById('tab-verified').className = 'px-4 py-2 tab-inactive text-xs font-extrabold rounded-2xl cursor-pointer';
+            document.getElementById('tab-pending').className = 'px-4 py-2 tab-inactive text-xs font-extrabold rounded-2xl cursor-pointer';
+            document.getElementById('tab-suspended').className = 'px-4 py-2 tab-blocked-inactive text-xs font-extrabold rounded-2xl cursor-pointer';
+
+            if (type === 'all') {
+                document.getElementById('tab-all').className = 'px-4 py-2 bg-[#5B8C76] text-white text-xs font-extrabold rounded-2xl cursor-pointer shadow-md';
+            } else if (type === 'verified') {
+                document.getElementById('tab-verified').className = 'px-4 py-2 bg-[#5B8C76] text-white text-xs font-extrabold rounded-2xl cursor-pointer shadow-md';
+            } else if (type === 'pending') {
+                document.getElementById('tab-pending').className = 'px-4 py-2 bg-amber-500 text-white text-xs font-extrabold rounded-2xl cursor-pointer shadow-md';
+            } else if (type === 'suspended') {
+                document.getElementById('tab-suspended').className = 'px-4 py-2 bg-red-500 text-white text-xs font-extrabold rounded-2xl cursor-pointer shadow-md';
+            }
+
+            document.querySelectorAll('.shelter-row').forEach(row => {
+                const status = row.getAttribute('data-status');
+                if (type === 'all') {
+                    row.style.display = '';
+                } else if (type === 'verified' && status === 'VERIFIED') {
+                    row.style.display = '';
+                } else if (type === 'pending' && status === 'PENDING') {
+                    row.style.display = '';
+                } else if (type === 'suspended' && status === 'SUSPENDED') {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+
+        function filterShelters() {
+            const query = document.getElementById('shelter-search-input').value.toLowerCase();
+            document.querySelectorAll('.shelter-row').forEach(row => {
+                const name = row.getAttribute('data-name').toLowerCase();
+                const owner = row.getAttribute('data-owner').toLowerCase();
+                const license = row.getAttribute('data-license').toLowerCase();
+                row.style.display = (name.includes(query) || owner.includes(query) || license.includes(query)) ? '' : 'none';
+            });
+        }
+
+        function toggleTheme() {
+            const isDark = document.documentElement.classList.contains('dark');
+            const themeIcon = document.getElementById('theme-icon');
+            if (isDark) { 
+                document.documentElement.classList.remove('dark'); 
+                localStorage.setItem('theme', 'light'); 
+                if (themeIcon) themeIcon.textContent = '☀️';
+            } else { 
+                document.documentElement.classList.add('dark'); 
+                localStorage.setItem('theme', 'dark'); 
+                if (themeIcon) themeIcon.textContent = '🌙';
+            }
+        }
+
+        if (localStorage.getItem('theme') === 'light') {
+            document.documentElement.classList.remove('dark');
+            const themeIcon = document.getElementById('theme-icon');
+            if (themeIcon) themeIcon.textContent = '☀️';
+        } else {
+            const themeIcon = document.getElementById('theme-icon');
+            if (themeIcon) themeIcon.textContent = '🌙';
+        }
+    </script>
+</body>
+</html>

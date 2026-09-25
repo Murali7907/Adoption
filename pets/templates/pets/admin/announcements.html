@@ -1,0 +1,1093 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Platform Announcements - Admin Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style type="text/css">
+        @import "tailwindcss";
+
+        body {
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        /* 🌙 DARK MODE STYLES */
+        .dark body { background-color: #111A15 !important; color: #F4EDE2 !important; }
+        .dark .apple-glass { 
+            background: rgba(27, 41, 33, 0.85) !important; 
+            backdrop-filter: blur(25px); 
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid rgba(168, 216, 185, 0.22) !important; 
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.45) !important;
+        }
+        .dark .sidebar-bg { 
+            background: rgba(14, 22, 18, 0.90) !important; 
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            border-right: 1px solid rgba(168, 216, 185, 0.15) !important; 
+        }
+        .dark .theme-card-bg {
+            background: rgba(22, 34, 28, 0.65);
+            border: 1px solid rgba(91, 140, 118, 0.18);
+        }
+        .dark .theme-table-header {
+            background: rgba(13, 20, 16, 0.85);
+            color: #A8D8B9;
+        }
+        .dark .input-box {
+            background: rgba(17, 26, 21, 0.9);
+            border: 1px solid rgba(91, 140, 118, 0.3);
+            color: #F4EDE2;
+        }
+        .dark .text-muted { color: #8EA89B; }
+
+        /* ☀️ LIGHT MODE STYLES */
+        html:not(.dark) body { background-color: #F4EDE2 !important; color: #111A15 !important; }
+        html:not(.dark) .apple-glass { 
+            background: rgba(255, 255, 255, 0.88) !important; 
+            backdrop-filter: blur(25px); 
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid rgba(91, 140, 118, 0.3) !important; 
+            box-shadow: 0 15px 35px rgba(91, 140, 118, 0.12) !important; 
+        }
+        html:not(.dark) .sidebar-bg { 
+            background: rgba(244, 237, 226, 0.95) !important; 
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            border-right: 1px solid rgba(91, 140, 118, 0.25) !important; 
+        }
+        html:not(.dark) .theme-card-bg {
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(91, 140, 118, 0.25);
+        }
+        html:not(.dark) .theme-table-header {
+            background: rgba(235, 243, 238, 0.95);
+            color: #2D4A3E;
+        }
+        html:not(.dark) .input-box {
+            background: #FFFFFF;
+            border: 1px solid rgba(91, 140, 118, 0.35);
+            color: #111A15;
+        }
+        html:not(.dark) .text-muted { color: #5B8C76; }
+
+        /* ACTIVE NAV & BUTTONS (NO TEXT UNDERLINES, TACTILE HOVER) */
+        .nav-item-active {
+            background: linear-gradient(135deg, #5B8C76 0%, #3D6B56 100%) !important;
+            color: #FFFFFF !important;
+            box-shadow: 0 8px 20px rgba(91, 140, 118, 0.4) !important;
+        }
+
+        .nav-item-hover-transform {
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .nav-item-hover-transform:hover {
+            background: rgba(91, 140, 118, 0.2);
+            transform: translateX(4px);
+        }
+
+        .tab-btn-active {
+            background: #5B8C76 !important;
+            color: #FFFFFF !important;
+            box-shadow: 0 4px 14px rgba(91, 140, 118, 0.35);
+        }
+
+        /* TACTILE BUTTON SYSTEM */
+        .btn-ui-primary {
+            background: linear-gradient(135deg, #5B8C76 0%, #3D6B56 100%) !important;
+            color: #FFFFFF !important;
+            font-weight: 800 !important;
+            font-size: 0.75rem !important;
+            padding: 0.5rem 1.1rem !important;
+            border-radius: 0.85rem !important;
+            border: 1px solid rgba(168, 216, 185, 0.3) !important;
+            box-shadow: 0 4px 14px rgba(91, 140, 118, 0.35) !important;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+            cursor: pointer !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            gap: 0.375rem !important;
+            white-space: nowrap !important;
+            text-decoration: none !important;
+        }
+        .btn-ui-primary:hover {
+            transform: translateY(-2px) scale(1.02) !important;
+            box-shadow: 0 8px 22px rgba(91, 140, 118, 0.55) !important;
+            background: linear-gradient(135deg, #689D85 0%, #44745E 100%) !important;
+            border-color: rgba(168, 216, 185, 0.6) !important;
+            text-decoration: none !important;
+        }
+        .btn-ui-primary:active {
+            transform: translateY(0) scale(0.97) !important;
+            box-shadow: 0 2px 8px rgba(91, 140, 118, 0.3) !important;
+        }
+
+        .btn-ui-secondary {
+            background-color: rgba(91, 140, 118, 0.18) !important;
+            color: #A8D8B9 !important;
+            border: 1px solid rgba(168, 216, 185, 0.3) !important;
+            font-weight: 800 !important;
+            font-size: 0.75rem !important;
+            padding: 0.5rem 1.1rem !important;
+            border-radius: 0.85rem !important;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+            cursor: pointer !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            gap: 0.375rem !important;
+            white-space: nowrap !important;
+            text-decoration: none !important;
+        }
+        .btn-ui-secondary:hover {
+            background-color: rgba(91, 140, 118, 0.35) !important;
+            transform: translateY(-2px) scale(1.02) !important;
+            border-color: rgba(168, 216, 185, 0.5) !important;
+            box-shadow: 0 6px 18px rgba(91, 140, 118, 0.25) !important;
+            text-decoration: none !important;
+        }
+        .btn-ui-secondary:active {
+            transform: translateY(0) scale(0.97) !important;
+        }
+
+        /* ZERO UNDERLINE HOVER GLOW LINKS */
+        a, button, .name-hover-link {
+            text-decoration: none !important;
+        }
+        .name-hover-link {
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+            cursor: pointer !important;
+            text-decoration: none !important;
+            display: inline-block !important;
+        }
+        .name-hover-link:hover {
+            text-decoration: none !important;
+            transform: translateY(-1px) scale(1.01) !important;
+            color: #A8D8B9 !important;
+            text-shadow: 0 0 10px rgba(168, 216, 185, 0.4) !important;
+        }
+
+        /* CUSTOM SCROLLBAR REMOVAL SYSTEM-WIDE */
+        * { scrollbar-width: none !important; }
+        *::-webkit-scrollbar { display: none !important; }
+
+        /* TOAST ANIMATION */
+        @keyframes toastSlideIn {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .toast-animate {
+            animation: toastSlideIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+    </style>
+</head>
+<body class="min-h-screen font-sans transition-colors duration-300">
+
+    <!-- 🔔 PROFESSIONAL TOAST NOTIFICATION CONTAINER -->
+    <div id="toast-container" class="fixed bottom-6 right-6 z-50 flex flex-col gap-3 pointer-events-none"></div>
+
+    <div class="flex min-h-screen">
+        
+        <!-- 🚀 HORIZON STANDARDIZED SIDEBAR -->
+        <aside class="w-64 sidebar-bg flex flex-col justify-between p-6 sticky top-0 h-screen z-30 overflow-y-auto">
+            <div>
+                <!-- BRAND HEADER -->
+                <div class="flex items-center gap-3 mb-8 px-2">
+                    <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#5B8C76] to-[#A8D8B9] flex items-center justify-center font-extrabold text-xl text-[#111A15] shadow-md">
+                        👨‍💼
+                    </div>
+                    <div>
+                        <span class="font-extrabold text-lg tracking-tight block">HORIZON <span class="text-[#5B8C76] dark:text-[#A8D8B9]">UI</span></span>
+                        <span class="text-[10px] theme-accent-text font-extrabold uppercase tracking-widest">Pet Adoption Suite</span>
+                    </div>
+                </div>
+
+                <!-- NAVIGATION -->
+                <nav class="space-y-1 text-xs font-bold">
+                    <a href="{% url 'admin_dashboard' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>📊</span> Dashboard Overview</a>
+                    <a href="{% url 'admin_users' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>👥</span> User Management</a>
+                    
+                    <div class="space-y-1 my-2 py-2 border-y border-[#5B8C76]/25">
+                        <a href="{% url 'admin_shelters' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>🏠</span> Shelter Management</a>
+                        <a href="{% url 'admin_pets' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>🐶</span> Pet Management</a>
+                        <a href="{% url 'admin_requests' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>🐾</span> Adoption Requests</a>
+                        <a href="{% url 'admin_payments' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>💳</span> Payments</a>
+                        <a href="{% url 'admin_deliveries' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>🚚</span> Delivery Control</a>
+                        <a href="{% url 'admin_audit_logs' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>🔍</span> Audit Logs</a>
+                        <a href="{% url 'admin_revenue' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>💰</span> Revenue & Profit</a>
+                    </div>
+
+                    <a href="{% url 'admin_reports' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>📈</span> Reports & Analytics</a>
+                    <a href="{% url 'admin_notifications' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>🔔</span> Notifications</a>
+                    <a href="{% url 'admin_announcements' %}" class="nav-item-active flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>📢</span> Announcements</a>
+                    <a href="{% url 'admin_health' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>🩺</span> Pet Health</a>
+                    <a href="{% url 'admin_settings' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>⚙️</span> System Settings</a>
+                    <a href="{% url 'admin_roles' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>🔐</span> Roles & Permissions</a>
+                </nav>
+            </div>
+
+            <!-- FOOTER LINKS -->
+            <div class="pt-4 border-t border-[#5B8C76]/25 space-y-1">
+                <a href="{% url 'home' %}" class="flex items-center gap-3 px-4 py-2 hover:bg-[#5B8C76]/20 rounded-2xl text-xs font-bold"><span>🌐</span> Main Website</a>
+                <a href="{% url 'login' %}" class="flex items-center gap-3 px-4 py-2 hover:bg-red-500/20 text-red-500 rounded-2xl text-xs font-bold"><span>🚪</span> Logout</a>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT CONTAINER -->
+        <main class="flex-1 p-6 md:p-8 overflow-y-auto space-y-7 max-w-7xl mx-auto">
+            
+            <!-- 🚀 TOP HEADER NAVBAR -->
+            <header class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2 border-b border-[#5B8C76]/15">
+                <div>
+                    <div class="text-xs text-muted font-bold mb-1 flex items-center gap-1.5">
+                        <span>Pages</span> / <span class="text-[#5B8C76] dark:text-[#A8D8B9] font-extrabold">Announcements</span>
+                    </div>
+                    <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight">Platform Announcements 📢</h1>
+                    <p class="text-xs text-muted font-medium mt-1">Broadcast, schedule, target, and audit platform-wide communications and campaigns.</p>
+                </div>
+
+                <!-- TOP QUICK ACTION CONTROLS -->
+                <div class="apple-glass rounded-full px-4 py-2 flex items-center gap-3 shadow-lg self-start md:self-auto flex-wrap">
+                    <button type="button" onclick="switchCategoryTab('tab-create')" class="btn-ui-primary text-xs">
+                        <span>➕</span> Create Announcement
+                    </button>
+                    <button type="button" onclick="switchCategoryTab('tab-templates')" class="px-3.5 py-1.5 rounded-full bg-[#5B8C76]/20 hover:bg-[#5B8C76]/30 text-xs font-bold text-[#5B8C76] dark:text-[#A8D8B9] border border-[#5B8C76]/30 transition-all cursor-pointer">
+                        <span>📑</span> Template Library
+                    </button>
+
+                    <!-- THEME TOGGLER -->
+                    <button type="button" onclick="toggleTheme()" class="w-8 h-8 bg-[#5B8C76]/20 hover:bg-[#5B8C76]/30 border border-[#5B8C76]/40 rounded-full text-sm font-extrabold flex items-center justify-center cursor-pointer shadow-sm" title="Toggle Light/Dark Theme">
+                        <span id="theme-icon">🌙</span>
+                    </button>
+
+                    <!-- NOTIFICATION BELL -->
+                    <a href="{% url 'admin_notifications' %}" class="w-8 h-8 bg-[#5B8C76]/20 hover:bg-[#5B8C76]/30 border border-[#5B8C76]/40 rounded-full text-xs font-extrabold flex items-center justify-center relative shadow-sm" title="Notifications">
+                        🔔 <span class="w-2 h-2 rounded-full bg-red-500 absolute top-1 right-1 animate-ping"></span>
+                    </a>
+
+                    <!-- USER AVATAR PILL -->
+                    <div class="w-8 h-8 rounded-full bg-gradient-to-br from-[#5B8C76] to-[#A8D8B9] flex items-center justify-center font-extrabold text-xs text-[#111A15] shadow-sm" title="Admin User">
+                        A
+                    </div>
+                </div>
+            </header>
+
+            <!-- 🏆 8 ANNOUNCEMENT DASHBOARD KPI CARDS -->
+            <section class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3">
+                <div class="theme-card-bg rounded-2xl p-3.5 space-y-1 border-l-4 border-emerald-400 cursor-pointer hover:scale-[1.02] transition-all" onclick="filterByStatus('all')">
+                    <span class="text-[10px] text-muted font-bold uppercase tracking-wider block">Total Broadcasts</span>
+                    <div class="text-xl font-extrabold">148</div>
+                    <span class="text-[10px] font-bold text-emerald-400">+12.4% 📈</span>
+                </div>
+                <div class="theme-card-bg rounded-2xl p-3.5 space-y-1 border-l-4 border-emerald-400 cursor-pointer hover:scale-[1.02] transition-all" onclick="filterByStatus('PUBLISHED')">
+                    <span class="text-[10px] text-muted font-bold uppercase tracking-wider block">Published</span>
+                    <div class="text-xl font-extrabold text-emerald-400">92</div>
+                    <span class="text-[10px] font-bold text-emerald-400">62.1% Active</span>
+                </div>
+                <div class="theme-card-bg rounded-2xl p-3.5 space-y-1 border-l-4 border-amber-400 cursor-pointer hover:scale-[1.02] transition-all" onclick="filterByStatus('DRAFT')">
+                    <span class="text-[10px] text-muted font-bold uppercase tracking-wider block">Drafts</span>
+                    <div class="text-xl font-extrabold text-amber-400">18</div>
+                    <span class="text-[10px] font-bold text-amber-400">In Review</span>
+                </div>
+                <div class="theme-card-bg rounded-2xl p-3.5 space-y-1 border-l-4 border-purple-400 cursor-pointer hover:scale-[1.02] transition-all" onclick="filterByStatus('SCHEDULED')">
+                    <span class="text-[10px] text-muted font-bold uppercase tracking-wider block">Scheduled</span>
+                    <div class="text-xl font-extrabold text-purple-400">24</div>
+                    <span class="text-[10px] font-bold text-purple-400">Pending ⏱️</span>
+                </div>
+                <div class="theme-card-bg rounded-2xl p-3.5 space-y-1 border-l-4 border-gray-400 cursor-pointer hover:scale-[1.02] transition-all" onclick="filterByStatus('EXPIRED')">
+                    <span class="text-[10px] text-muted font-bold uppercase tracking-wider block">Expired</span>
+                    <div class="text-xl font-extrabold text-gray-400">14</div>
+                    <span class="text-[10px] font-bold text-gray-400">Past Banners</span>
+                </div>
+                <div class="theme-card-bg rounded-2xl p-3.5 space-y-1 border-l-4 border-emerald-400 cursor-pointer hover:scale-[1.02] transition-all" onclick="filterByStatus('ACTIVE_BANNER')">
+                    <span class="text-[10px] text-muted font-bold uppercase tracking-wider block">Active Banners</span>
+                    <div class="text-xl font-extrabold text-emerald-400">8</div>
+                    <span class="text-[10px] font-bold text-emerald-400">Live Top 📢</span>
+                </div>
+                <div class="theme-card-bg rounded-2xl p-3.5 space-y-1 border-l-4 border-blue-400 cursor-pointer hover:scale-[1.02] transition-all" onclick="filterByStatus('RECIPIENTS')">
+                    <span class="text-[10px] text-muted font-bold uppercase tracking-wider block">Recipients</span>
+                    <div class="text-xl font-extrabold text-blue-400">1,522</div>
+                    <span class="text-[10px] font-bold text-blue-400">Total Reach</span>
+                </div>
+                <div class="theme-card-bg rounded-2xl p-3.5 space-y-1 border-l-4 border-emerald-400 cursor-pointer hover:scale-[1.02] transition-all" onclick="filterByStatus('READ_RATE')">
+                    <span class="text-[10px] text-muted font-bold uppercase tracking-wider block">Read Rate</span>
+                    <div class="text-xl font-extrabold text-emerald-400">84.6%</div>
+                    <span class="text-[10px] font-bold text-emerald-400">1,288 Views 👁️</span>
+                </div>
+            </section>
+
+            <!-- 💡 ANNOUNCEMENT VS NOTIFICATION DISTINCTION EXPLANATION BANNER -->
+            <div class="apple-glass rounded-2xl p-4 border-l-4 border-sky-400 flex items-start gap-3 text-xs">
+                <span class="text-xl">💡</span>
+                <div class="space-y-0.5">
+                    <h3 class="font-extrabold text-sky-400">Architectural Note: Platform Announcements vs Automated Notifications</h3>
+                    <p class="text-muted leading-relaxed">
+                        <strong>Platform Announcements</strong> are platform-wide broadcasts (e.g. <em>"Adoption Festival Drive"</em>, <em>"Scheduled Maintenance"</em>, <em>"New Policy Notice"</em>) targeted at audience segments. Transactional notifications (e.g., <em>"Adoption Approved"</em>, <em>"Payment Receipt"</em>) are managed separately via the 🔔 Notification Center.
+                    </p>
+                </div>
+            </div>
+
+            <!-- 🎛️ ADVANCED SEARCH & MULTI-FILTER TOOLBAR -->
+            <section class="apple-glass rounded-3xl p-5 shadow-lg space-y-3">
+                <div class="flex items-center justify-between flex-wrap gap-3">
+                    <div class="flex items-center gap-2">
+                        <span class="text-lg">🎛️</span>
+                        <div>
+                            <h2 class="font-extrabold text-sm tracking-wide">Filter Announcement Broadcasts</h2>
+                            <span class="text-[11px] text-muted font-medium">Search across categories, priority levels, audience segments, and statuses.</span>
+                        </div>
+                    </div>
+
+                    <!-- SEARCH BAR -->
+                    <div class="w-full sm:w-72 relative">
+                        <input type="text" id="anc-search-input" onkeyup="filterAnnouncementsTable()" placeholder="Search title, message, category..." class="input-box rounded-xl py-2 px-3 pl-8 text-xs font-semibold w-full">
+                        <span class="absolute left-2.5 top-2.5 text-xs text-muted">🔍</span>
+                    </div>
+                </div>
+
+                <!-- DROPDOWN FILTERS GRID -->
+                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 text-xs pt-2 border-t border-[#5B8C76]/15">
+                    <div>
+                        <label class="block font-bold text-muted mb-1">Category</label>
+                        <select id="filter-anc-category" onchange="filterAnnouncementsTable()" class="input-box rounded-xl py-2 px-3 text-xs font-semibold w-full cursor-pointer">
+                            <option value="all">All Categories (10)</option>
+                            <option value="GEN">📢 General Announcement</option>
+                            <option value="CAMP">🐾 Adoption Campaign</option>
+                            <option value="SHELTER">🏠 Shelter Update</option>
+                            <option value="DELIV">🚚 Delivery Update</option>
+                            <option value="PAY">💳 Payment Update</option>
+                            <option value="MAINT">🛠️ Maintenance</option>
+                            <option value="EVENT">🎉 Promotion/Event</option>
+                            <option value="NOTICE">⚠️ Important Notice</option>
+                            <option value="POLICY">📋 Policy Update</option>
+                            <option value="SEC">🔐 Security Notice</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-bold text-muted mb-1">Priority Level</label>
+                        <select id="filter-anc-priority" onchange="filterAnnouncementsTable()" class="input-box rounded-xl py-2 px-3 text-xs font-semibold w-full cursor-pointer">
+                            <option value="all">All Priorities</option>
+                            <option value="CRITICAL">🔴 Critical (Acknowledge)</option>
+                            <option value="HIGH">🟠 High Priority</option>
+                            <option value="NORMAL">🟡 Normal Priority</option>
+                            <option value="LOW">🔵 Low Priority</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-bold text-muted mb-1">Target Audience</label>
+                        <select id="filter-anc-audience" onchange="filterAnnouncementsTable()" class="input-box rounded-xl py-2 px-3 text-xs font-semibold w-full cursor-pointer">
+                            <option value="all">All Audiences</option>
+                            <option value="ALL">🌐 All Platform Users</option>
+                            <option value="CUST">👤 All Customers</option>
+                            <option value="ACTIVE_CUST">🐾 Active Adoption Customers</option>
+                            <option value="SHELTER">🏠 All Shelters</option>
+                            <option value="DRIVER">🚚 All Drivers</option>
+                            <option value="ADMIN">👨💼 Administrators</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-bold text-muted mb-1">Publish Status</label>
+                        <select id="filter-anc-status" onchange="filterAnnouncementsTable()" class="input-box rounded-xl py-2 px-3 text-xs font-semibold w-full cursor-pointer">
+                            <option value="all">All Statuses</option>
+                            <option value="PUBLISHED">Published (Live)</option>
+                            <option value="SCHEDULED">Scheduled</option>
+                            <option value="DRAFT">Draft</option>
+                            <option value="EXPIRED">Expired</option>
+                            <option value="ARCHIVED">Archived</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-bold text-muted mb-1">Distribution Channel</label>
+                        <select id="filter-anc-channel" onchange="filterAnnouncementsTable()" class="input-box rounded-xl py-2 px-3 text-xs font-semibold w-full cursor-pointer">
+                            <option value="all">All Channels</option>
+                            <option value="BANNER">📢 In-App Banner</option>
+                            <option value="NOTIF">🔔 Notification Center</option>
+                            <option value="PUSH">📲 Push Notification</option>
+                            <option value="EMAIL">📧 Email Broadcast</option>
+                        </select>
+                    </div>
+                    <div class="flex items-end">
+                        <button type="button" onclick="resetAnnouncementFilters()" class="w-full px-3 py-2 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 text-xs font-bold border border-red-500/20 transition-all cursor-pointer text-center">Reset Filters</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 📌 7 RECOMMENDED ADMIN SUB-MENU NAVIGATION TABS -->
+            <div class="apple-glass rounded-2xl p-2 grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-1.5 text-[11px] font-bold shadow-md w-full">
+                <button type="button" onclick="switchCategoryTab('tab-all')" class="category-tab-btn tab-btn-active px-2 py-2 rounded-xl transition-all whitespace-nowrap cursor-pointer text-center justify-center flex items-center gap-1 w-full" id="btn-tab-all">📢 All Announcements</button>
+                <button type="button" onclick="switchCategoryTab('tab-create')" class="category-tab-btn px-2 py-2 rounded-xl hover:bg-[#5B8C76]/20 transition-all whitespace-nowrap text-muted cursor-pointer text-center justify-center flex items-center gap-1 w-full" id="btn-tab-create">➕ Create Announcement</button>
+                <button type="button" onclick="switchCategoryTab('tab-scheduled')" class="category-tab-btn px-2 py-2 rounded-xl hover:bg-[#5B8C76]/20 transition-all whitespace-nowrap text-muted cursor-pointer text-center justify-center flex items-center gap-1 w-full" id="btn-tab-scheduled">📅 Scheduled & Calendar</button>
+                <button type="button" onclick="switchCategoryTab('tab-templates')" class="category-tab-btn px-2 py-2 rounded-xl hover:bg-[#5B8C76]/20 transition-all whitespace-nowrap text-muted cursor-pointer text-center justify-center flex items-center gap-1 w-full" id="btn-tab-templates">📑 Template Library</button>
+                <button type="button" onclick="switchCategoryTab('tab-analytics')" class="category-tab-btn px-2 py-2 rounded-xl hover:bg-[#5B8C76]/20 transition-all whitespace-nowrap text-muted cursor-pointer text-center justify-center flex items-center gap-1 w-full" id="btn-tab-analytics">📈 Analytics & Reach</button>
+                <button type="button" onclick="switchCategoryTab('tab-audit')" class="category-tab-btn px-2 py-2 rounded-xl hover:bg-[#5B8C76]/20 transition-all whitespace-nowrap text-muted cursor-pointer text-center justify-center flex items-center gap-1 w-full" id="btn-tab-audit">🔍 Audit Logs</button>
+                <button type="button" onclick="switchCategoryTab('tab-previews')" class="category-tab-btn px-2 py-2 rounded-xl hover:bg-[#5B8C76]/20 transition-all whitespace-nowrap text-muted cursor-pointer text-center justify-center flex items-center gap-1 w-full" id="btn-tab-previews">📱 App Display Components</button>
+            </div>
+
+            <!-- ========================================== -->
+            <!-- 📁 TAB CONTENT 1: ALL ANNOUNCEMENTS DIRECTORY -->
+            <!-- ========================================== -->
+            <div id="tab-all" class="category-tab-content space-y-4">
+                <div class="apple-glass rounded-3xl p-6 shadow-xl space-y-4">
+                    <div class="flex items-center justify-between flex-wrap gap-2 border-b border-[#5B8C76]/20 pb-3">
+                        <div>
+                            <h3 class="font-extrabold text-lg">📢 All Platform Announcements Directory</h3>
+                            <p class="text-xs text-muted">Manage active campaigns, maintenance notices, and policy broadcasts.</p>
+                        </div>
+                        <button type="button" onclick="switchCategoryTab('tab-create')" class="btn-ui-primary text-xs">➕ Publish Announcement</button>
+                    </div>
+
+                    <!-- DIRECTORY TABLE (SYMMETRICAL ALIGNMENT) -->
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-xs border-collapse" id="announcements-directory-table">
+                            <thead>
+                                <tr class="theme-table-header uppercase text-[10px] font-extrabold tracking-wider border-b border-[#5B8C76]/25">
+                                    <th class="py-3 px-4 text-left">ANC ID & PRIORITY</th>
+                                    <th class="py-3 px-4 text-left">TITLE & CATEGORY</th>
+                                    <th class="py-3 px-4 text-left">TARGET AUDIENCE</th>
+                                    <th class="py-3 px-4 text-center">PUBLISH / EXPIRY DATE</th>
+                                    <th class="py-3 px-4 text-center">CHANNELS</th>
+                                    <th class="py-3 px-4 text-center">READ & ACK RATE</th>
+                                    <th class="py-3 px-4 text-center">STATUS</th>
+                                    <th class="py-3 px-4 text-center">ACTIONS</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-[#5B8C76]/15 font-semibold">
+                                <!-- ROW 1: CRITICAL ADOPTION DRIVE -->
+                                <tr class="hover:bg-[#5B8C76]/10 transition-colors bg-red-500/5">
+                                    <td class="py-3.5 px-4 text-left whitespace-nowrap">
+                                        <span class="font-extrabold block text-xs">#ANC-8021</span>
+                                        <span class="px-2 py-0.5 rounded-full bg-red-500/20 text-red-400 text-[10px] font-extrabold border border-red-500/30">🔴 CRITICAL</span>
+                                    </td>
+                                    <td class="py-3.5 px-4 text-left">
+                                        <span class="font-extrabold block text-emerald-400">🐾 New Adoption Drive This Weekend!</span>
+                                        <span class="text-[10px] text-muted font-bold">Category: Adoption Campaign</span>
+                                    </td>
+                                    <td class="py-3.5 px-4 text-left whitespace-nowrap">
+                                        <span class="block text-xs font-bold">All Customers & Shelters</span>
+                                        <span class="text-[10px] text-muted">1,500 Users Targeted</span>
+                                    </td>
+                                    <td class="py-3.5 px-4 text-center text-[11px] whitespace-nowrap">
+                                        <span class="block text-emerald-400 font-bold">Pub: 2026-08-25 10:00</span>
+                                        <span class="text-muted">Exp: 2026-08-30 23:59</span>
+                                    </td>
+                                    <td class="py-3.5 px-4 text-center whitespace-nowrap">
+                                        <span class="px-2 py-1 rounded-xl bg-[#5B8C76]/20 text-[#5B8C76] dark:text-[#A8D8B9] font-bold text-[10px]">Banner + Push + Email</span>
+                                    </td>
+                                    <td class="py-3.5 px-4 text-center whitespace-nowrap">
+                                        <span class="font-extrabold block text-emerald-400">88.4% Read</span>
+                                        <span class="text-[10px] text-sky-400 font-bold">42 Acknowledged</span>
+                                    </td>
+                                    <td class="py-3.5 px-4 text-center whitespace-nowrap">
+                                        <span class="px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-400 text-[10px] uppercase font-extrabold border border-emerald-500/30">Published Live ✅</span>
+                                    </td>
+                                    <td class="py-3.5 px-4 text-center whitespace-nowrap">
+                                        <div class="flex items-center justify-center gap-2">
+                                            <button type="button" onclick="openAnnouncementDetailModal('#ANC-8021', '🐾 New Adoption Drive This Weekend!', 'Join our special pet adoption campaign this weekend and help a shelter pet find a loving home.', 'Adoption Campaign', '🔴 Critical', 'All Customers & Shelters', '2026-08-25 10:00', '2026-08-30 23:59', 'Banner + Push + Email', 'Published Live', '88.4%', '42 Acknowledged')" class="name-hover-link font-bold text-xs text-[#5B8C76] dark:text-[#A8D8B9]">Inspect 🔍</button>
+                                            <button type="button" onclick="showProfessionalToast('Announcement Duplicated', 'Duplicated #ANC-8021 to draft.')" class="name-hover-link font-bold text-xs text-amber-400">Duplicate 📑</button>
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                <!-- ROW 2: SCHEDULED MAINTENANCE -->
+                                <tr class="hover:bg-[#5B8C76]/10 transition-colors">
+                                    <td class="py-3.5 px-4 text-left whitespace-nowrap">
+                                        <span class="font-extrabold block text-xs">#ANC-8020</span>
+                                        <span class="px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-400 text-[10px] font-extrabold border border-amber-500/30">🟠 HIGH</span>
+                                    </td>
+                                    <td class="py-3.5 px-4 text-left">
+                                        <span class="font-extrabold block text-amber-400">🛠️ Scheduled System Maintenance</span>
+                                        <span class="text-[10px] text-muted font-bold">Category: Maintenance</span>
+                                    </td>
+                                    <td class="py-3.5 px-4 text-left whitespace-nowrap">
+                                        <span class="block text-xs font-bold">All Platform Users</span>
+                                        <span class="text-[10px] text-muted">1,522 Users Targeted</span>
+                                    </td>
+                                    <td class="py-3.5 px-4 text-center text-[11px] whitespace-nowrap">
+                                        <span class="block text-purple-400 font-bold">Pub: 2026-08-28 02:00</span>
+                                        <span class="text-muted">Exp: 2026-08-28 06:00</span>
+                                    </td>
+                                    <td class="py-3.5 px-4 text-center whitespace-nowrap">
+                                        <span class="px-2 py-1 rounded-xl bg-[#5B8C76]/20 text-[#5B8C76] dark:text-[#A8D8B9] font-bold text-[10px]">In-App Banner + Push</span>
+                                    </td>
+                                    <td class="py-3.5 px-4 text-center whitespace-nowrap">
+                                        <span class="font-extrabold block text-purple-400">Pending Schedule</span>
+                                    </td>
+                                    <td class="py-3.5 px-4 text-center whitespace-nowrap">
+                                        <span class="px-2.5 py-1 rounded-full bg-purple-500/20 text-purple-400 text-[10px] uppercase font-extrabold border border-purple-500/30">Scheduled ⏱️</span>
+                                    </td>
+                                    <td class="py-3.5 px-4 text-center whitespace-nowrap">
+                                        <div class="flex items-center justify-center gap-2">
+                                            <button type="button" onclick="openAnnouncementDetailModal('#ANC-8020', '🛠️ Scheduled System Maintenance', 'Platform will undergo planned database optimization this Sunday 2 AM to 6 AM.', 'Maintenance', '🟠 High', 'All Platform Users', '2026-08-28 02:00', '2026-08-28 06:00', 'In-App Banner + Push', 'Scheduled', '0.0%', '0 Acknowledged')" class="name-hover-link font-bold text-xs text-[#5B8C76] dark:text-[#A8D8B9]">Inspect 🔍</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========================================== -->
+            <!-- 📁 TAB CONTENT 2: CREATE ANNOUNCEMENT FORM -->
+            <!-- ========================================== -->
+            <div id="tab-create" class="category-tab-content hidden space-y-6">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    
+                    <!-- FORM BUILDER (2 COLS) -->
+                    <div class="lg:col-span-2 apple-glass rounded-3xl p-6 shadow-xl space-y-5">
+                        <div class="border-b border-[#5B8C76]/20 pb-3">
+                            <h3 class="font-extrabold text-lg">➕ Create & Schedule Announcement</h3>
+                            <p class="text-xs text-muted">Configure title, rich-text message, audience targeting, priority, and distribution channels.</p>
+                        </div>
+
+                        <form onsubmit="event.preventDefault(); publishAnnouncementForm();" class="space-y-4 text-xs font-bold">
+                            <div>
+                                <label class="block font-bold text-muted mb-1">Announcement Title *</label>
+                                <input type="text" id="anc-title-input" required onkeyup="updateLiveBannerPreview()" value="🐾 New Adoption Drive This Weekend!" class="w-full input-box rounded-xl px-3.5 py-2.5 text-xs font-semibold">
+                            </div>
+
+                            <div>
+                                <label class="block font-bold text-muted mb-1">Short Description *</label>
+                                <input type="text" id="anc-desc-input" required onkeyup="updateLiveBannerPreview()" value="Join our special pet adoption campaign this weekend and help a shelter pet find a home." class="w-full input-box rounded-xl px-3.5 py-2.5 text-xs font-semibold">
+                            </div>
+
+                            <!-- RICH TEXT EDITOR TOOLBAR MOCKUP -->
+                            <div>
+                                <label class="block font-bold text-muted mb-1">Full Message Content (Rich-Text Editor) *</label>
+                                <div class="theme-card-bg rounded-xl border border-[#5B8C76]/30 overflow-hidden">
+                                    <div class="bg-[#111A15]/80 p-2 border-b border-[#5B8C76]/20 flex gap-2 text-xs flex-wrap">
+                                        <button type="button" class="px-2 py-1 bg-[#5B8C76]/20 rounded font-black">B</button>
+                                        <button type="button" class="px-2 py-1 bg-[#5B8C76]/20 rounded italic font-black">I</button>
+                                        <button type="button" class="px-2 py-1 bg-[#5B8C76]/20 rounded font-bold">H2</button>
+                                        <button type="button" class="px-2 py-1 bg-[#5B8C76]/20 rounded">🔗 Link</button>
+                                        <button type="button" class="px-2 py-1 bg-[#5B8C76]/20 rounded">• Bullet List</button>
+                                    </div>
+                                    <textarea id="anc-body-input" rows="4" onkeyup="updateLiveBannerPreview()" class="w-full bg-transparent p-3 text-xs font-semibold text-muted focus:outline-none">Join our special pet adoption campaign this weekend and help a shelter pet find a loving home. All adoption processing fees are 50% subsidized by platform sponsors!</textarea>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block font-bold text-muted mb-1">Category *</label>
+                                    <select id="anc-category-select" class="input-box rounded-xl py-2 px-3 text-xs font-semibold w-full cursor-pointer">
+                                        <option value="CAMP">🐾 Adoption Campaign</option>
+                                        <option value="GEN">📢 General Announcement</option>
+                                        <option value="SHELTER">🏠 Shelter Update</option>
+                                        <option value="DELIV">🚚 Delivery Update</option>
+                                        <option value="PAY">💳 Payment Update</option>
+                                        <option value="MAINT">🛠️ Maintenance</option>
+                                        <option value="EVENT">🎉 Promotion/Event</option>
+                                        <option value="NOTICE">⚠️ Important Notice</option>
+                                        <option value="POLICY">📋 Policy Update</option>
+                                        <option value="SEC">🔐 Security Notice</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block font-bold text-muted mb-1">Priority Level *</label>
+                                    <select id="anc-priority-select" class="input-box rounded-xl py-2 px-3 text-xs font-semibold w-full cursor-pointer">
+                                        <option value="CRITICAL">🔴 Critical (Mandatory Acknowledgment)</option>
+                                        <option value="HIGH">🟠 High Priority</option>
+                                        <option value="NORMAL">🟡 Normal Priority</option>
+                                        <option value="LOW">🔵 Low Priority</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- TARGET AUDIENCE SELECTOR -->
+                            <div>
+                                <label class="block font-bold text-muted mb-2">Target Audience Segments *</label>
+                                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                                    <label class="flex items-center gap-2 cursor-pointer p-2 theme-card-bg rounded-xl text-xs"><input type="checkbox" checked class="w-4 h-4 accent-[#5B8C76]"> All Users</label>
+                                    <label class="flex items-center gap-2 cursor-pointer p-2 theme-card-bg rounded-xl text-xs"><input type="checkbox" checked class="w-4 h-4 accent-[#5B8C76]"> Customers</label>
+                                    <label class="flex items-center gap-2 cursor-pointer p-2 theme-card-bg rounded-xl text-xs"><input type="checkbox" checked class="w-4 h-4 accent-[#5B8C76]"> Shelters</label>
+                                    <label class="flex items-center gap-2 cursor-pointer p-2 theme-card-bg rounded-xl text-xs"><input type="checkbox" class="w-4 h-4 accent-[#5B8C76]"> Drivers</label>
+                                </div>
+                            </div>
+
+                            <!-- MULTI-CHANNEL DISTRIBUTION -->
+                            <div>
+                                <label class="block font-bold text-muted mb-2">Distribution Channels *</label>
+                                <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                                    <label class="flex items-center gap-2 cursor-pointer p-2 theme-card-bg rounded-xl text-xs"><input type="checkbox" checked class="w-4 h-4 accent-[#5B8C76]"> In-App Banner 📢</label>
+                                    <label class="flex items-center gap-2 cursor-pointer p-2 theme-card-bg rounded-xl text-xs"><input type="checkbox" checked class="w-4 h-4 accent-[#5B8C76]"> Notif Center 🔔</label>
+                                    <label class="flex items-center gap-2 cursor-pointer p-2 theme-card-bg rounded-xl text-xs"><input type="checkbox" checked class="w-4 h-4 accent-[#5B8C76]"> Push Alert 📲</label>
+                                    <label class="flex items-center gap-2 cursor-pointer p-2 theme-card-bg rounded-xl text-xs"><input type="checkbox" class="w-4 h-4 accent-[#5B8C76]"> Email 📧</label>
+                                    <label class="flex items-center gap-2 cursor-pointer p-2 theme-card-bg rounded-xl text-xs"><input type="checkbox" class="w-4 h-4 accent-[#5B8C76]"> SMS 📱</label>
+                                    <label class="flex items-center gap-2 cursor-pointer p-2 theme-card-bg rounded-xl text-xs"><input type="checkbox" class="w-4 h-4 accent-[#5B8C76]"> WhatsApp 💬</label>
+                                </div>
+                            </div>
+
+                            <!-- CTA SETTINGS -->
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block font-bold text-muted mb-1">Call-to-Action Label</label>
+                                    <input type="text" id="anc-cta-label" value="View Available Pets 🐾" class="w-full input-box rounded-xl px-3 py-2 text-xs font-semibold">
+                                </div>
+                                <div>
+                                    <label class="block font-bold text-muted mb-1">Call-to-Action Link URL</label>
+                                    <input type="text" id="anc-cta-url" value="/pets/" class="w-full input-box rounded-xl px-3 py-2 text-xs font-semibold">
+                                </div>
+                            </div>
+
+                            <div class="flex justify-end gap-3 pt-2">
+                                <button type="button" onclick="showProfessionalToast('Draft Saved', 'Announcement saved as draft.')" class="btn-ui-secondary text-xs">Save Draft 💾</button>
+                                <button type="submit" class="btn-ui-primary text-xs">Publish Announcement 🚀</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- LIVE MOBILE/DESKTOP BANNER PREVIEW (1 COL) -->
+                    <div class="space-y-4">
+                        <div class="apple-glass rounded-3xl p-5 shadow-xl space-y-4 sticky top-24">
+                            <h4 class="font-extrabold text-sm border-b border-[#5B8C76]/20 pb-2">📱 Live App Banner Preview</h4>
+                            
+                            <div class="theme-card-bg p-4 rounded-2xl border-l-4 border-emerald-400 space-y-2 relative overflow-hidden shadow-lg">
+                                <span class="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-[9px] font-extrabold uppercase">NEW ANNOUNCEMENT</span>
+                                <h5 class="font-extrabold text-sm" id="preview-banner-title">🐾 New Adoption Drive This Weekend!</h5>
+                                <p class="text-xs text-muted leading-relaxed" id="preview-banner-desc">Join our special pet adoption campaign this weekend and help a shelter pet find a home.</p>
+                                <div class="pt-2">
+                                    <span class="inline-block px-3 py-1.5 rounded-xl bg-[#5B8C76] text-white font-extrabold text-[11px]" id="preview-banner-cta">View Available Pets 🐾</span>
+                                </div>
+                            </div>
+
+                            <div class="text-[11px] text-muted space-y-1 pt-2 border-t border-[#5B8C76]/15">
+                                <div class="flex justify-between"><span>Display Target:</span><span class="font-bold text-emerald-400">Home Screen Top Banner</span></div>
+                                <div class="flex justify-between"><span>Acknowledgement:</span><span class="font-bold text-red-400">Required ("I Understand")</span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- ========================================== -->
+            <!-- 📁 TAB CONTENT 3: SCHEDULED & CALENDAR -->
+            <!-- ========================================== -->
+            <div id="tab-scheduled" class="category-tab-content hidden space-y-6">
+                <div class="apple-glass rounded-3xl p-6 shadow-xl space-y-6">
+                    <div class="border-b border-[#5B8C76]/20 pb-3">
+                        <h3 class="font-extrabold text-lg">📅 Scheduled Announcements & Release Calendar</h3>
+                        <p class="text-xs text-muted">Manage scheduled releases and upcoming automated platform alerts.</p>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-xs border-collapse">
+                            <thead>
+                                <tr class="theme-table-header uppercase text-[10px] font-extrabold tracking-wider border-b border-[#5B8C76]/25">
+                                    <th class="py-3 px-4 text-left">TITLE</th>
+                                    <th class="py-3 px-4 text-left">CATEGORY</th>
+                                    <th class="py-3 px-4 text-left">TARGET SEGMENT</th>
+                                    <th class="py-3 px-4 text-center">SCHEDULED DATE/TIME</th>
+                                    <th class="py-3 px-4 text-center">STATUS</th>
+                                    <th class="py-3 px-4 text-center">ACTION</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-[#5B8C76]/15 font-semibold">
+                                <tr>
+                                    <td class="py-3.5 px-4 text-left font-bold">🛠️ Scheduled System Maintenance</td>
+                                    <td class="py-3.5 px-4 text-left text-muted">Maintenance</td>
+                                    <td class="py-3.5 px-4 text-left">All Platform Users</td>
+                                    <td class="py-3.5 px-4 text-center text-purple-400 font-extrabold">2026-08-28 02:00 AM</td>
+                                    <td class="py-3.5 px-4 text-center"><span class="px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-400 text-[10px] font-extrabold">Scheduled</span></td>
+                                    <td class="py-3.5 px-4 text-center"><button type="button" onclick="showProfessionalToast('Schedule Managed', 'Schedule updated.')" class="name-hover-link font-bold text-xs text-[#5B8C76] dark:text-[#A8D8B9]">Reschedule ✏️</button></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========================================== -->
+            <!-- 📁 TAB CONTENT 4: TEMPLATE LIBRARY -->
+            <!-- ========================================== -->
+            <div id="tab-templates" class="category-tab-content hidden space-y-6">
+                <div class="apple-glass rounded-3xl p-6 shadow-xl space-y-6">
+                    <div class="flex items-center justify-between flex-wrap gap-2 border-b border-[#5B8C76]/20 pb-3">
+                        <div>
+                            <h3 class="font-extrabold text-lg">📑 Announcement Template Library</h3>
+                            <p class="text-xs text-muted">Reusable announcement blueprints for rapid broadcast dispatches.</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                        <div class="theme-card-bg rounded-2xl p-5 space-y-3 border-l-4 border-emerald-400">
+                            <span class="text-[10px] text-muted font-bold block">#TPL-201 • Adoption Drive</span>
+                            <h4 class="font-extrabold text-sm">Special Adoption Campaign 🐾</h4>
+                            <p class="text-xs text-muted leading-relaxed">Prebuilt template for weekend adoption drives and pet shelter matching festivals.</p>
+                            <button type="button" onclick="switchCategoryTab('tab-create')" class="btn-ui-primary text-xs w-full">Use Template 🚀</button>
+                        </div>
+                        <div class="theme-card-bg rounded-2xl p-5 space-y-3 border-l-4 border-amber-400">
+                            <span class="text-[10px] text-muted font-bold block">#TPL-202 • System Ops</span>
+                            <h4 class="font-extrabold text-sm">Planned Platform Maintenance 🛠️</h4>
+                            <p class="text-xs text-muted leading-relaxed">Prebuilt template for scheduled infrastructure maintenance and database upgrades.</p>
+                            <button type="button" onclick="switchCategoryTab('tab-create')" class="btn-ui-primary text-xs w-full">Use Template 🚀</button>
+                        </div>
+                        <div class="theme-card-bg rounded-2xl p-5 space-y-3 border-l-4 border-blue-400">
+                            <span class="text-[10px] text-muted font-bold block">#TPL-203 • Governance</span>
+                            <h4 class="font-extrabold text-sm">Policy & Terms Update 📋</h4>
+                            <p class="text-xs text-muted leading-relaxed">Prebuilt announcement for updated adoption safety guidelines and shelter terms.</p>
+                            <button type="button" onclick="switchCategoryTab('tab-create')" class="btn-ui-primary text-xs w-full">Use Template 🚀</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========================================== -->
+            <!-- 📁 TAB CONTENT 5: ANALYTICS -->
+            <!-- ========================================== -->
+            <div id="tab-analytics" class="category-tab-content hidden space-y-6">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="apple-glass rounded-3xl p-6 shadow-xl space-y-4">
+                        <h3 class="font-extrabold text-base">📈 Announcement Reach & Engagement</h3>
+                        <div class="h-64 relative">
+                            <canvas id="ancReachChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="apple-glass rounded-3xl p-6 shadow-xl space-y-4">
+                        <h3 class="font-extrabold text-base">🍩 Distribution Channel Breakdown</h3>
+                        <div class="h-64 relative">
+                            <canvas id="ancChannelChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========================================== -->
+            <!-- 📁 TAB CONTENT 6: AUDIT LOGS -->
+            <!-- ========================================== -->
+            <div id="tab-audit" class="category-tab-content hidden space-y-6">
+                <div class="apple-glass rounded-3xl p-6 shadow-xl space-y-6">
+                    <div class="border-b border-[#5B8C76]/20 pb-3">
+                        <h3 class="font-extrabold text-lg">🔍 Platform Announcements Audit Trail</h3>
+                        <p class="text-xs text-muted">Immutable log of announcement creations, edits, broadcasts, and status updates.</p>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-xs border-collapse">
+                            <thead>
+                                <tr class="theme-table-header uppercase text-[10px] font-extrabold tracking-wider border-b border-[#5B8C76]/25">
+                                    <th class="py-3 px-4 text-left">TIMESTAMP</th>
+                                    <th class="py-3 px-4 text-left">USER & ROLE</th>
+                                    <th class="py-3 px-4 text-center">ACTION</th>
+                                    <th class="py-3 px-4 text-left">TARGET ANC ID</th>
+                                    <th class="py-3 px-4 text-left">DESCRIPTION</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-[#5B8C76]/15 font-semibold">
+                                <tr>
+                                    <td class="py-3.5 px-4 text-left">2026-08-24 09:15</td>
+                                    <td class="py-3.5 px-4 text-left">Admin (System)</td>
+                                    <td class="py-3.5 px-4 text-center"><span class="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 font-extrabold">PUBLISHED</span></td>
+                                    <td class="py-3.5 px-4 text-left">#ANC-8021</td>
+                                    <td class="py-3.5 px-4 text-left text-muted">Published "New Adoption Drive This Weekend!" to Customers and Shelters.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========================================== -->
+            <!-- 📁 TAB CONTENT 7: APP DISPLAY COMPONENTS -->
+            <!-- ========================================== -->
+            <div id="tab-previews" class="category-tab-content hidden space-y-6">
+                <div class="apple-glass rounded-3xl p-6 shadow-xl space-y-6">
+                    <div class="border-b border-[#5B8C76]/20 pb-3">
+                        <h3 class="font-extrabold text-lg">📱 User Application Announcement Display Components</h3>
+                        <p class="text-xs text-muted">Visual preview of how announcements render across Customer, Shelter, and Driver apps.</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- MOCKUP 1: HOME PAGE BANNER -->
+                        <div class="theme-card-bg p-5 rounded-2xl space-y-3">
+                            <span class="text-[10px] text-muted font-bold block uppercase">Component 1: Customer App Top Banner</span>
+                            <div class="p-4 rounded-xl bg-gradient-to-r from-[#5B8C76] to-[#3D6B56] text-white space-y-1 shadow-lg">
+                                <span class="px-2 py-0.5 bg-white/20 rounded-full text-[9px] font-black uppercase">NEW</span>
+                                <h4 class="font-extrabold text-sm">🐾 Special Adoption Drive This Weekend!</h4>
+                                <p class="text-xs text-white/90">Over 40 pets looking for loving homes with 50% subsidized adoption fees.</p>
+                            </div>
+                        </div>
+
+                        <!-- MOCKUP 2: ACKNOWLEDGEMENT MODAL -->
+                        <div class="theme-card-bg p-5 rounded-2xl space-y-3">
+                            <span class="text-[10px] text-muted font-bold block uppercase">Component 2: Mandatory Critical Acknowledgement</span>
+                            <div class="p-4 rounded-xl apple-glass border-l-4 border-red-500 space-y-2">
+                                <span class="px-2 py-0.5 bg-red-500/20 text-red-400 rounded-full text-[9px] font-extrabold uppercase">🔴 CRITICAL ALERT</span>
+                                <h4 class="font-extrabold text-sm">🛠️ Emergency Maintenance Notice</h4>
+                                <p class="text-xs text-muted">Platform services will be offline on Sunday 2 AM to 4 AM.</p>
+                                <button type="button" onclick="showProfessionalToast('Acknowledged', 'User acknowledgment logged.')" class="btn-ui-primary text-xs py-1 px-3">I Understand / Acknowledge ✅</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- 📄 ANNOUNCEMENT INSPECTION DETAIL MODAL -->
+    <div id="announcement-detail-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm hidden">
+        <div class="apple-glass rounded-3xl p-6 w-full max-w-2xl mx-4 space-y-4 shadow-2xl relative">
+            <button type="button" onclick="closeAnnouncementDetailModal()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-red-500/20 text-red-400 font-extrabold flex items-center justify-center cursor-pointer">✕</button>
+            <h3 class="font-extrabold text-lg" id="modal-anc-title">Announcement Inspection</h3>
+            
+            <div class="theme-card-bg p-4 rounded-2xl space-y-3 text-xs">
+                <div class="grid grid-cols-2 gap-2 border-b border-[#5B8C76]/20 pb-2">
+                    <div><span class="text-muted block">Announcement ID:</span> <span id="modal-anc-id" class="font-extrabold text-emerald-400">#ANC-8021</span></div>
+                    <div><span class="text-muted block">Priority:</span> <span id="modal-anc-priority" class="font-extrabold text-red-400">🔴 Critical</span></div>
+                    <div><span class="text-muted block">Category:</span> <span id="modal-anc-category" class="font-extrabold">Adoption Campaign</span></div>
+                    <div><span class="text-muted block">Status:</span> <span id="modal-anc-status" class="font-extrabold text-emerald-400">Published Live</span></div>
+                </div>
+                <div>
+                    <span class="text-muted block font-bold mb-1">Message Content:</span>
+                    <p id="modal-anc-body" class="p-3 bg-[#111A15]/80 rounded-xl text-muted font-medium leading-relaxed"></p>
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-2">
+                <button type="button" onclick="closeAnnouncementDetailModal()" class="btn-ui-primary text-xs">Close Inspection</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JS DASHBOARD LOGIC -->
+    <script>
+        // 🔔 PROFESSIONAL TOAST SYSTEM
+        window.showProfessionalToast = function(title, message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            if (!container) return;
+
+            const toast = document.createElement('div');
+            const bgClass = type === 'error' 
+                ? 'bg-red-500/90 text-white' 
+                : 'bg-gradient-to-r from-[#5B8C76] to-[#3D6B56] text-white';
+
+            toast.className = `toast-animate pointer-events-auto flex items-center gap-3 px-4 py-3 rounded-2xl shadow-2xl text-xs font-extrabold border border-white/20 ${bgClass}`;
+            toast.innerHTML = `
+                <span class="text-base">${type === 'error' ? '🚨' : '✨'}</span>
+                <div>
+                    <div class="font-black text-sm tracking-tight">${title}</div>
+                    <div class="font-medium text-white/90">${message}</div>
+                </div>
+            `;
+
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transition = 'all 0.3s ease';
+                setTimeout(() => toast.remove(), 300);
+            }, 3200);
+        };
+
+        // 🌓 THEME TOGGLER
+        window.toggleTheme = function() {
+            const isDark = document.documentElement.classList.contains('dark');
+            if (isDark) {
+                document.documentElement.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+                document.getElementById('theme-icon').textContent = '☀️';
+                showProfessionalToast('Theme Switched', 'Switched to Light Theme mode.');
+            } else {
+                document.documentElement.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+                document.getElementById('theme-icon').textContent = '🌙';
+                showProfessionalToast('Theme Switched', 'Switched to Dark Theme mode.');
+            }
+        };
+        if (localStorage.getItem('theme') === 'light') {
+            document.documentElement.classList.remove('dark');
+            if (document.getElementById('theme-icon')) document.getElementById('theme-icon').textContent = '☀️';
+        }
+
+        // 📌 CATEGORY TAB SWITCHING
+        window.switchCategoryTab = function(tabId) {
+            document.querySelectorAll('.category-tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.category-tab-btn').forEach(btn => {
+                btn.classList.remove('tab-btn-active');
+                btn.classList.add('hover:bg-[#5B8C76]/20', 'text-muted');
+            });
+
+            const targetTab = document.getElementById(tabId);
+            if (targetTab) targetTab.classList.remove('hidden');
+            
+            const targetBtn = document.querySelector(`[onclick="switchCategoryTab('${tabId}')"]`);
+            if (targetBtn) {
+                targetBtn.classList.add('tab-btn-active');
+                targetBtn.classList.remove('hover:bg-[#5B8C76]/20', 'text-muted');
+            }
+        };
+
+        // 🔍 FILTER ANNOUNCEMENTS
+        window.filterAnnouncementsTable = function() {
+            showProfessionalToast('Filter Applied', 'Filtered platform announcements directory.');
+        };
+
+        window.resetAnnouncementFilters = function() {
+            if (document.getElementById('filter-anc-category')) document.getElementById('filter-anc-category').value = 'all';
+            if (document.getElementById('filter-anc-priority')) document.getElementById('filter-anc-priority').value = 'all';
+            if (document.getElementById('filter-anc-audience')) document.getElementById('filter-anc-audience').value = 'all';
+            if (document.getElementById('filter-anc-status')) document.getElementById('filter-anc-status').value = 'all';
+            if (document.getElementById('filter-anc-channel')) document.getElementById('filter-anc-channel').value = 'all';
+            if (document.getElementById('anc-search-input')) document.getElementById('anc-search-input').value = '';
+            
+            if (typeof updateCustomDropdownsUI === 'function') updateCustomDropdownsUI();
+            showProfessionalToast('Filters Reset', 'All announcement filters reset to defaults.');
+        };
+
+        window.filterByStatus = function(status) {
+            switchCategoryTab('tab-all');
+            showProfessionalToast('Status Filtered', `Showing announcements for status: ${status}`);
+        };
+
+        // 📱 LIVE BANNER PREVIEW UPDATER
+        window.updateLiveBannerPreview = function() {
+            const title = document.getElementById('anc-title-input').value || 'Announcement Title';
+            const desc = document.getElementById('anc-desc-input').value || 'Announcement Description';
+            const cta = document.getElementById('anc-cta-label').value || 'View Details';
+
+            document.getElementById('preview-banner-title').textContent = title;
+            document.getElementById('preview-banner-desc').textContent = desc;
+            document.getElementById('preview-banner-cta').textContent = cta;
+        };
+
+        // 📄 ANNOUNCEMENT DETAIL MODAL
+        window.openAnnouncementDetailModal = function(id, title, body, category, priority, audience, pubDate, expDate, channels, status, readRate, acks) {
+            document.getElementById('modal-anc-id').textContent = id;
+            document.getElementById('modal-anc-title').textContent = title;
+            document.getElementById('modal-anc-body').textContent = body;
+            document.getElementById('modal-anc-category').textContent = category;
+            document.getElementById('modal-anc-priority').textContent = priority;
+            document.getElementById('modal-anc-status').textContent = status;
+
+            document.getElementById('announcement-detail-modal').classList.remove('hidden');
+        };
+
+        window.closeAnnouncementDetailModal = function() {
+            document.getElementById('announcement-detail-modal').classList.add('hidden');
+        };
+
+        window.publishAnnouncementForm = function() {
+            showProfessionalToast('Announcement Published', 'Platform announcement successfully broadcasted live!');
+            switchCategoryTab('tab-all');
+        };
+
+        // 🎛️ AUTOMATIC GLASS UI DROPDOWN INITIALIZER
+        function autoConvertGlassDropdowns() {
+            document.querySelectorAll('select.input-box, select').forEach(select => {
+                if (select.dataset.glassConverted === 'true' || select.classList.contains('hidden')) return;
+                select.dataset.glassConverted = 'true';
+                select.classList.add('hidden');
+
+                const wrapper = document.createElement('div');
+                wrapper.className = 'relative custom-dropdown-group inline-block w-full';
+                
+                select.parentNode.insertBefore(wrapper, select);
+                wrapper.appendChild(select);
+
+                const currentOpt = select.options[select.selectedIndex] || select.options[0];
+                const initialLabel = currentOpt ? currentOpt.textContent : 'Select...';
+
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'w-full py-2 px-3 input-box rounded-xl text-xs font-bold flex items-center justify-between cursor-pointer custom-dropdown-btn';
+                btn.innerHTML = `
+                    <span class="custom-dropdown-label truncate">${initialLabel}</span>
+                    <svg class="w-3.5 h-3.5 text-[#5B8C76] dark:text-[#A8D8B9] transition-transform duration-200 custom-dropdown-arrow ml-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
+                `;
+
+                const menu = document.createElement('div');
+                menu.className = 'absolute top-full left-0 right-0 mt-1.5 z-50 rounded-2xl apple-glass shadow-2xl p-1.5 space-y-1 hidden custom-dropdown-menu border border-[#5B8C76]/30 dark:border-[#A8D8B9]/30 max-h-60 overflow-y-auto';
+
+                Array.from(select.options).forEach((opt, idx) => {
+                    const item = document.createElement('div');
+                    const isActive = idx === select.selectedIndex;
+                    item.className = `px-3 py-2 rounded-xl text-xs font-bold cursor-pointer hover:bg-[#5B8C76]/20 dark:hover:bg-[#A8D8B9]/20 transition-all flex items-center justify-between custom-opt-item ${isActive ? 'bg-[#5B8C76]/20 text-[#5B8C76] dark:text-[#A8D8B9]' : ''}`;
+                    item.innerHTML = `<span>${opt.textContent}</span>`;
+                    
+                    item.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        select.value = opt.value;
+                        btn.querySelector('.custom-dropdown-label').textContent = opt.textContent;
+                        
+                        menu.querySelectorAll('.custom-opt-item').forEach(i => i.classList.remove('bg-[#5B8C76]/20', 'text-[#5B8C76]', 'dark:text-[#A8D8B9]'));
+                        item.classList.add('bg-[#5B8C76]/20', 'text-[#5B8C76]', 'dark:text-[#A8D8B9]');
+                        
+                        menu.classList.add('hidden');
+                        btn.querySelector('.custom-dropdown-arrow').classList.remove('rotate-180');
+
+                        select.dispatchEvent(new Event('change', { bubbles: true }));
+                    });
+
+                    menu.appendChild(item);
+                });
+
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const isHidden = menu.classList.contains('hidden');
+                    document.querySelectorAll('.custom-dropdown-menu').forEach(m => m.classList.add('hidden'));
+                    document.querySelectorAll('.custom-dropdown-arrow').forEach(a => a.classList.remove('rotate-180'));
+
+                    if (isHidden) {
+                        menu.classList.remove('hidden');
+                        btn.querySelector('.custom-dropdown-arrow').classList.add('rotate-180');
+                    }
+                });
+
+                wrapper.appendChild(btn);
+                wrapper.appendChild(menu);
+            });
+        }
+
+        function updateCustomDropdownsUI() {
+            document.querySelectorAll('.custom-dropdown-group').forEach(group => {
+                const select = group.querySelector('select');
+                if (!select) return;
+                const currentOpt = select.options[select.selectedIndex] || select.options[0];
+                const label = group.querySelector('.custom-dropdown-label');
+                if (label && currentOpt) label.textContent = currentOpt.textContent;
+            });
+        }
+
+        document.addEventListener('click', () => {
+            document.querySelectorAll('.custom-dropdown-menu').forEach(m => m.classList.add('hidden'));
+            document.querySelectorAll('.custom-dropdown-arrow').forEach(a => a.classList.remove('rotate-180'));
+        });
+
+        // 📊 INITIALIZE CHARTS ON LOAD
+        window.addEventListener('DOMContentLoaded', () => {
+            autoConvertGlassDropdowns();
+
+            const ctx1 = document.getElementById('ancReachChart').getContext('2d');
+            new Chart(ctx1, {
+                type: 'line',
+                data: {
+                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                    datasets: [{ label: 'Announcement Views', data: [420, 680, 850, 990, 1120, 1288, 1450], borderColor: '#5B8C76', tension: 0.3 }]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+
+            const ctx2 = document.getElementById('ancChannelChart').getContext('2d');
+            new Chart(ctx2, {
+                type: 'doughnut',
+                data: {
+                    labels: ['In-App Banner', 'Notif Center', 'Push Alert', 'Email', 'SMS'],
+                    datasets: [{ data: [50, 25, 15, 7, 3], backgroundColor: ['#5B8C76', '#A8D8B9', '#F59E0B', '#3B82F6', '#10B981'] }]
+                },
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom', labels: { color: '#8EA89B', font: { size: 10, weight: 'bold' } } } }
+                }
+            });
+        });
+    </script>
+</body>
+</html>

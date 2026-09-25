@@ -1,0 +1,816 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payments & Financial Audit Management - Pet Adoption Suite</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS v4 Browser Build -->
+    <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+    <style type="text/css">
+        :root {
+            --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        * {
+            transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease;
+        }
+
+        /* 🚫 GLOBALLY HIDE ALL SCROLLBARS SYSTEM-WIDE (FIREFOX, CHROME, EDGE, SAFARI) */
+        *, html, body, main, div, aside, section {
+            -ms-overflow-style: none !important;
+            scrollbar-width: none !important;
+        }
+
+        *::-webkit-scrollbar,
+        html::-webkit-scrollbar,
+        body::-webkit-scrollbar,
+        main::-webkit-scrollbar,
+        div::-webkit-scrollbar,
+        aside::-webkit-scrollbar {
+            display: none !important;
+            width: 0px !important;
+            height: 0px !important;
+            background: transparent !important;
+        }
+
+        /* ☀️ LIGHT MODE: HORIZON UI ALABASTER CREAM (#F4EDE2) */
+        html:not(.dark) body { background-color: #F4EDE2 !important; color: #111A15 !important; }
+        
+        html:not(.dark) .apple-glass { 
+            background: #FFFFFF !important; 
+            border: 1px solid rgba(91, 140, 118, 0.30) !important; 
+            box-shadow: 0 16px 36px rgba(91, 140, 118, 0.10) !important; 
+        }
+        
+        html:not(.dark) .sidebar-bg { 
+            background: #EFE8DC !important; 
+            border-right: 1px solid rgba(91, 140, 118, 0.25) !important; 
+        }
+
+        html:not(.dark) .modal-bg { 
+            background: #FFFFFF !important; 
+            border: 1px solid rgba(91, 140, 118, 0.35) !important; 
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.20) !important; 
+        }
+
+        html:not(.dark) .user-name-text { color: #111A15 !important; font-weight: 800 !important; }
+        html:not(.dark) .text-muted { color: #4B5563 !important; font-weight: 600 !important; }
+        html:not(.dark) .theme-accent-text { color: #1E3A2B !important; font-weight: 800 !important; }
+        html:not(.dark) .table-header-text { color: #111A15 !important; font-weight: 800 !important; }
+        
+        html:not(.dark) .card-inner-box {
+            background: #F4EDE2 !important;
+            border: 1px solid #A3C4B5 !important;
+            color: #111A15 !important;
+        }
+
+        html:not(.dark) .input-box {
+            background: #FFFFFF !important;
+            border: 1px solid #789D8C !important;
+            color: #111A15 !important;
+            font-weight: 600 !important;
+        }
+
+        /* UNIFORM BUTTON STYLES */
+        .btn-ui-primary {
+            background-color: #5B8C76 !important;
+            color: #FFFFFF !important;
+            font-weight: 800 !important;
+            font-size: 0.75rem !important;
+            padding: 0.4rem 0.85rem !important;
+            border-radius: 0.85rem !important;
+            box-shadow: 0 4px 14px rgba(91, 140, 118, 0.35) !important;
+            transition: all 0.2s ease !important;
+            cursor: pointer !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            gap: 0.375rem !important;
+            white-space: nowrap !important;
+        }
+        .btn-ui-primary:hover {
+            background-color: #2D4C3E !important;
+            transform: translateY(-1px) !important;
+        }
+
+        .btn-ui-secondary {
+            background-color: rgba(91, 140, 118, 0.2) !important;
+            color: #F4EDE2 !important;
+            border: 1px solid rgba(168, 216, 185, 0.3) !important;
+            font-weight: 800 !important;
+            font-size: 0.75rem !important;
+            padding: 0.4rem 0.85rem !important;
+            border-radius: 0.85rem !important;
+            transition: all 0.2s ease !important;
+            cursor: pointer !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            gap: 0.375rem !important;
+            white-space: nowrap !important;
+        }
+        .btn-ui-secondary:hover {
+            background-color: rgba(91, 140, 118, 0.35) !important;
+            transform: translateY(-1px) !important;
+        }
+
+        html:not(.dark) .btn-ui-secondary {
+            background-color: #E5E7EB !important;
+            color: #111827 !important;
+            border: 1px solid #9CA3AF !important;
+        }
+
+        .btn-ui-danger {
+            background-color: rgba(239, 68, 68, 0.2) !important;
+            color: #F87171 !important;
+            border: 1px solid rgba(239, 68, 68, 0.3) !important;
+            font-weight: 800 !important;
+            font-size: 0.75rem !important;
+            padding: 0.4rem 0.85rem !important;
+            border-radius: 0.85rem !important;
+            transition: all 0.2s ease !important;
+            cursor: pointer !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            gap: 0.375rem !important;
+            white-space: nowrap !important;
+        }
+        .btn-ui-danger:hover {
+            background-color: rgba(239, 68, 68, 0.35) !important;
+            transform: translateY(-1px) !important;
+        }
+
+        html:not(.dark) .btn-ui-danger {
+            background-color: #FEE2E2 !important;
+            color: #7F1D1D !important;
+            border: 1px solid #FCA5A5 !important;
+        }
+
+        /* 🌙 DARK MODE: ELEGANT DEEP EMERALD GLASS */
+        .dark body { background-color: #111A15 !important; color: #F4EDE2 !important; }
+        
+        .dark .apple-glass { 
+            background: rgba(27, 41, 33, 0.85) !important; 
+            backdrop-filter: blur(25px); 
+            border: 1px solid rgba(168, 216, 185, 0.22) !important; 
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.45) !important;
+        }
+        
+        .dark .sidebar-bg { 
+            background: rgba(14, 22, 18, 0.90) !important; 
+            border-right: 1px solid rgba(168, 216, 185, 0.15) !important; 
+        }
+
+        .dark .modal-bg { 
+            background: rgba(22, 33, 27, 0.96) !important; 
+            border: 1px solid rgba(168, 216, 185, 0.3) !important; 
+        }
+
+        .dark .user-name-text { color: #FFFFFF !important; font-weight: 800 !important; }
+        .dark .text-muted { color: #9CA3AF !important; font-weight: 500 !important; }
+        .dark .theme-accent-text { color: #A8D8B9 !important; font-weight: 800 !important; }
+        .dark .table-header-text { color: #A8D8B9 !important; font-weight: 800 !important; }
+
+        .dark .card-inner-box {
+            background: rgba(17, 26, 21, 0.6) !important;
+            border: 1px solid rgba(168, 216, 185, 0.2) !important;
+            color: #F4EDE2 !important;
+        }
+
+        .dark .input-box {
+            background: rgba(17, 26, 21, 0.8) !important;
+            border: 1px solid rgba(168, 216, 185, 0.25) !important;
+            color: #F4EDE2 !important;
+        }
+
+        .dark .badge-verified {
+            background-color: rgba(91, 140, 118, 0.3) !important;
+            color: #A8D8B9 !important;
+            border: 1px solid rgba(168, 216, 185, 0.3) !important;
+        }
+
+        .nav-item-active {
+            background: linear-gradient(135deg, #5B8C76 0%, #2D4C3E 100%) !important;
+            color: #FFFFFF !important;
+            box-shadow: 0 8px 20px rgba(91, 140, 118, 0.45) !important;
+        }
+
+        .nav-item-hover-transform {
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .nav-item-hover-transform:hover {
+            background: rgba(91, 140, 118, 0.25);
+            transform: translateX(4px);
+        }
+
+        /* FLOATING TOAST ANIMATIONS */
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        .toast-animate {
+            animation: slideInRight 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+    </style>
+</head>
+<body class="min-h-screen font-sans">
+
+    <!-- FLOATING TOAST NOTIFICATION CONTAINER -->
+    <div id="toast-container" class="fixed top-6 right-6 z-50 space-y-3 pointer-events-none"></div>
+
+    <div class="flex min-h-screen">
+        
+        <!-- SIDEBAR -->
+        <aside class="w-64 sidebar-bg flex flex-col justify-between p-6 sticky top-0 h-screen z-30 overflow-y-auto">
+            <div>
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#5B8C76] to-[#A8D8B9] flex items-center justify-center text-[#111A15] font-extrabold text-xl shadow-lg shadow-[#5B8C76]/30">
+                        👨‍💼
+                    </div>
+                    <div>
+                        <span class="font-extrabold text-lg tracking-tight block">HORIZON <span class="text-[#5B8C76] dark:text-[#A8D8B9]">UI</span></span>
+                        <span class="text-[10px] theme-accent-text font-extrabold uppercase tracking-widest">Pet Adoption Suite</span>
+                    </div>
+                </div>
+
+                <nav class="space-y-1 text-xs font-bold">
+                    <a href="{% url 'admin_dashboard' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>📊</span> Dashboard Overview</a>
+                    <a href="{% url 'admin_users' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>👥</span> User Management</a>
+                    
+                    <div class="space-y-1 my-2 py-2 border-y border-[#5B8C76]/25">
+                        <a href="{% url 'admin_shelters' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>🏠</span> Shelter Management</a>
+                        <a href="{% url 'admin_pets' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>🐶</span> Pet Management</a>
+                        <a href="{% url 'admin_requests' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>🐾</span> Adoption Requests</a>
+                        <a href="{% url 'admin_payments' %}" class="nav-item-active flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>💳</span> Payments</a>
+                        <a href="{% url 'admin_deliveries' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>🚚</span> Delivery Control</a>
+                        <a href="{% url 'admin_audit_logs' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>🔍</span> Audit Logs</a>
+                        <a href="{% url 'admin_revenue' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>💰</span> Revenue & Profit</a>
+                    </div>
+
+                    <a href="{% url 'admin_reports' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>📈</span> Reports & Analytics</a>
+                    <a href="{% url 'admin_notifications' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>🔔</span> Notifications</a>
+                    <a href="{% url 'admin_announcements' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>📢</span> Announcements</a>
+                    <a href="{% url 'admin_health' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>🩺</span> Pet Health</a>
+                    <a href="{% url 'admin_settings' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>⚙️</span> System Settings</a>
+                    <a href="{% url 'admin_roles' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>🔐</span> Roles & Permissions</a>
+                </nav>
+            </div>
+            
+            <div class="pt-4 border-t border-[#5B8C76]/25 space-y-1">
+                <a href="{% url 'home' %}" class="flex items-center gap-3 px-4 py-2 hover:bg-[#5B8C76]/20 rounded-2xl text-xs font-bold"><span>🌐</span> Main Website</a>
+                <a href="{% url 'login' %}" class="flex items-center gap-3 px-4 py-2 hover:bg-red-500/20 text-red-500 rounded-2xl text-xs font-bold"><span>🚪</span> Logout</a>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT CONTAINER -->
+        <main class="flex-1 p-8 overflow-y-auto space-y-8">
+            
+            <!-- 🚀 HORIZON CLEAN TOP HEADER NAVBAR -->
+            <header class="flex items-center justify-between mb-8 pb-2">
+                <!-- BREADCRUMB & PAGE TITLE -->
+                <div>
+                    <div class="text-xs text-muted font-bold mb-0.5">
+                        <span>Pages</span> / <span class="theme-accent-text font-extrabold">Payments Audit</span>
+                    </div>
+                    <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight">Payments & Transaction Audit 💳</h1>
+                </div>
+
+                <!-- CLEAN ACTION PILL CONTAINER -->
+                <div class="apple-glass rounded-full px-4 py-2 flex items-center gap-3 shadow-lg">
+                    <!-- THEME TOGGLER -->
+                    <button type="button" onclick="toggleTheme()" class="w-8 h-8 bg-[#5B8C76]/20 hover:bg-[#5B8C76]/30 border border-[#5B8C76]/40 rounded-full text-sm font-extrabold flex items-center justify-center cursor-pointer shadow-sm" title="Toggle Light/Dark Theme">
+                        <span id="theme-icon">🌙</span>
+                    </button>
+
+                    <!-- NOTIFICATION BELL -->
+                    <a href="{% url 'admin_notifications' %}" class="w-8 h-8 bg-[#5B8C76]/20 hover:bg-[#5B8C76]/30 border border-[#5B8C76]/40 rounded-full text-xs font-extrabold flex items-center justify-center relative shadow-sm" title="Notifications">
+                        🔔 <span class="w-2 h-2 rounded-full bg-red-500 absolute top-1 right-1 animate-ping"></span>
+                    </a>
+
+                    <!-- USER AVATAR PILL -->
+                    <div class="w-8 h-8 rounded-full bg-gradient-to-br from-[#5B8C76] to-[#A8D8B9] flex items-center justify-center font-extrabold text-xs text-[#111A15] shadow-sm" title="Admin User">
+                        A
+                    </div>
+                </div>
+            </header>
+
+            <!-- 📊 5 FINANCIAL KPI CARDS -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5">
+                <div class="apple-glass rounded-[28px] p-6 flex items-center justify-between shadow-sm">
+                    <div>
+                        <span class="text-xs text-muted font-bold uppercase tracking-wider block">Total Revenue</span>
+                        <span class="text-emerald-400 text-3xl font-black mt-1 block">₹48,500</span>
+                    </div>
+                    <div class="w-12 h-12 rounded-2xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xl font-bold">💰</div>
+                </div>
+
+                <div class="apple-glass rounded-[28px] p-6 flex items-center justify-between shadow-sm">
+                    <div>
+                        <span class="text-xs text-muted font-bold uppercase tracking-wider block">Successful Payments</span>
+                        <span class="user-name-text text-3xl font-black mt-1 block">4</span>
+                    </div>
+                    <div class="w-12 h-12 rounded-2xl bg-[#5B8C76]/20 text-[#5B8C76] dark:text-[#A8D8B9] flex items-center justify-center text-xl font-bold">💳</div>
+                </div>
+
+                <div class="apple-glass rounded-[28px] p-6 flex items-center justify-between shadow-sm">
+                    <div>
+                        <span class="text-xs text-muted font-bold uppercase tracking-wider block">Pending Payments</span>
+                        <span class="text-amber-400 text-3xl font-black mt-1 block">1</span>
+                    </div>
+                    <div class="w-12 h-12 rounded-2xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-xl font-bold">⏳</div>
+                </div>
+
+                <div class="apple-glass rounded-[28px] p-6 flex items-center justify-between shadow-sm">
+                    <div>
+                        <span class="text-xs text-muted font-bold uppercase tracking-wider block">Failed Payments</span>
+                        <span class="text-rose-400 text-3xl font-black mt-1 block">1</span>
+                    </div>
+                    <div class="w-12 h-12 rounded-2xl bg-rose-500/20 text-rose-400 flex items-center justify-center text-xl font-bold">❌</div>
+                </div>
+
+                <div class="apple-glass rounded-[28px] p-6 flex items-center justify-between shadow-sm">
+                    <div>
+                        <span class="text-xs text-muted font-bold uppercase tracking-wider block">Refunded Amount</span>
+                        <span class="text-purple-400 text-3xl font-black mt-1 block">₹2,500</span>
+                    </div>
+                    <div class="w-12 h-12 rounded-2xl bg-purple-500/20 text-purple-400 flex items-center justify-center text-xl font-bold">💸</div>
+                </div>
+            </div>
+
+            <!-- 📋 PROPORTIONED TRANSACTION DATA TABLE -->
+            <div class="apple-glass rounded-[28px] p-5 shadow-xl space-y-5">
+                
+                <div class="flex flex-col sm:flex-row justify-between items-center gap-4 border-b border-[#5B8C76]/15 pb-4">
+                    <h3 class="text-lg font-extrabold user-name-text">Payment Transactions Directory</h3>
+
+                    <div class="flex flex-wrap items-center gap-3 w-full sm:w-auto">
+                        <div class="relative w-full sm:w-64">
+                            <input type="text" id="payment-search-input" onkeyup="filterPaymentsTable()" placeholder="Search TXN ID, req ID, customer..." class="w-full py-2.5 px-3.5 pr-8 input-box rounded-2xl text-xs font-semibold">
+                            <span class="absolute right-3 top-3 text-xs text-muted">🔍</span>
+                        </div>
+
+                        <select id="filter-payment-status" onchange="filterPaymentsTable()" class="py-2.5 px-3.5 input-box rounded-2xl text-xs font-semibold cursor-pointer">
+                            <option value="ALL">All Statuses</option>
+                            <option value="SUCCESSFUL">Successful ✅</option>
+                            <option value="PENDING">Pending ⏳</option>
+                            <option value="PROCESSING">Processing 🔄</option>
+                            <option value="FAILED">Failed ❌</option>
+                            <option value="CANCELLED">Cancelled 🛑</option>
+                            <option value="REFUNDED">Refunded 💸</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- 14-COLUMN TABLE WITH NO OVERLAP AND NO CUT-OFFS -->
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs" id="main-payments-table">
+                        <thead>
+                            <tr class="border-b border-[#5B8C76]/20 table-header-text uppercase tracking-wider">
+                                <th class="pl-4 pr-2 py-3 text-left font-black whitespace-nowrap">TRANSACTION ID</th>
+                                <th class="px-2 py-3 text-left font-black whitespace-nowrap">ADOPTION REQ</th>
+                                <th class="px-2 py-3 text-left font-black whitespace-nowrap">CUSTOMER</th>
+                                <th class="px-2 py-3 text-left font-black whitespace-nowrap">PET</th>
+                                <th class="px-2 py-3 text-left font-black whitespace-nowrap">SHELTER</th>
+                                <th class="px-2 py-3 text-center font-black whitespace-nowrap">ADOPTION FEE</th>
+                                <th class="px-2 py-3 text-center font-black whitespace-nowrap">DELIVERY FEE</th>
+                                <th class="px-2 py-3 text-center font-black whitespace-nowrap">TOTAL AMOUNT</th>
+                                <th class="px-2 py-3 text-left font-black whitespace-nowrap">METHOD</th>
+                                <th class="px-2 py-3 text-left font-black whitespace-nowrap">GATEWAY</th>
+                                <th class="px-2 py-3 text-center font-black whitespace-nowrap">DATE & TIME</th>
+                                <th class="px-2 py-3 text-center font-black whitespace-nowrap">PAYMENT STATUS</th>
+                                <th class="px-2 py-3 text-center font-black whitespace-nowrap">REFUND STATUS</th>
+                                <th class="pl-2 pr-4 py-3 text-right font-black whitespace-nowrap">ACTIONS</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-[#5B8C76]/10 font-medium" id="payments-tbody">
+                            
+                            <!-- TXN 1: RAHUL SHARMA (SUCCESSFUL) -->
+                            <tr class="payment-row" data-[#TXN-2026-1001] data-txnid="TXN-2026-1001" data-reqid="REQ-1001" data-status="SUCCESSFUL" data-customer="Rahul Sharma" data-pet="Bruno 🐶" data-shelter="Kochi Animal Shelter" data-total="₹4,600 ($195)">
+                                <td class="pl-4 pr-2 py-3.5 font-black whitespace-nowrap text-left">
+                                    <button type="button" onclick="openPaymentDetailModal('TXN-2026-1001')" class="theme-accent-text hover:text-[#5B8C76] font-black cursor-pointer">#TXN-2026-1001</button>
+                                </td>
+                                <td class="px-2 py-3.5 whitespace-nowrap text-left">
+                                    <a href="{% url 'admin_requests' %}" class="user-name-text hover:text-[#5B8C76] font-black">#REQ-1001</a>
+                                </td>
+                                <td class="px-2 py-3.5 font-extrabold user-name-text whitespace-nowrap text-left">Rahul Sharma</td>
+                                <td class="px-2 py-3.5 font-bold user-name-text whitespace-nowrap text-left">Bruno 🐶</td>
+                                <td class="px-2 py-3.5 text-muted font-semibold whitespace-nowrap text-left">Kochi Shelter</td>
+                                <td class="px-2 py-3.5 text-muted font-bold whitespace-nowrap text-center">₹3,500</td>
+                                <td class="px-2 py-3.5 text-muted font-bold whitespace-nowrap text-center">₹1,100</td>
+                                <td class="px-2 py-3.5 font-black text-emerald-400 whitespace-nowrap text-center">₹4,600 ($195)</td>
+                                <td class="px-2 py-3.5 text-muted whitespace-nowrap text-left font-bold">UPI / GPay</td>
+                                <td class="px-2 py-3.5 text-muted whitespace-nowrap text-left font-bold">Razorpay</td>
+                                <td class="px-2 py-3.5 text-muted whitespace-nowrap text-center">20 Aug 2026, 02:15 PM</td>
+                                <td class="px-2 py-3.5 whitespace-nowrap text-center"><span class="px-2.5 py-0.5 bg-emerald-500/20 text-emerald-400 font-extrabold text-[10px] rounded-full">Successful ✅</span></td>
+                                <td class="px-2 py-3.5 whitespace-nowrap text-center"><span class="px-2.5 py-0.5 bg-gray-500/20 text-gray-400 font-extrabold text-[10px] rounded-full">None</span></td>
+                                <td class="pl-2 pr-4 py-3.5 text-right whitespace-nowrap space-x-1">
+                                    <button type="button" onclick="openPaymentDetailModal('TXN-2026-1001')" class="btn-ui-primary">View Details</button>
+                                </td>
+                            </tr>
+
+                            <!-- TXN 2: PRIYA PATEL (SUCCESSFUL) -->
+                            <tr class="payment-row" data-txnid="TXN-2026-1002" data-reqid="REQ-1002" data-status="SUCCESSFUL" data-customer="Priya Patel" data-pet="Luna 🐱" data-shelter="Happy Paws Rescue" data-total="₹3,600 ($155)">
+                                <td class="pl-4 pr-2 py-3.5 font-black whitespace-nowrap text-left">
+                                    <button type="button" onclick="openPaymentDetailModal('TXN-2026-1002')" class="theme-accent-text hover:text-[#5B8C76] font-black cursor-pointer">#TXN-2026-1002</button>
+                                </td>
+                                <td class="px-2 py-3.5 whitespace-nowrap text-left">
+                                    <a href="{% url 'admin_requests' %}" class="user-name-text hover:text-[#5B8C76] font-black">#REQ-1002</a>
+                                </td>
+                                <td class="px-2 py-3.5 font-extrabold user-name-text whitespace-nowrap text-left">Priya Patel</td>
+                                <td class="px-2 py-3.5 font-bold user-name-text whitespace-nowrap text-left">Luna 🐱</td>
+                                <td class="px-2 py-3.5 text-muted font-semibold whitespace-nowrap text-left">Happy Paws</td>
+                                <td class="px-2 py-3.5 text-muted font-bold whitespace-nowrap text-center">₹2,800</td>
+                                <td class="px-2 py-3.5 text-muted font-bold whitespace-nowrap text-center">₹800</td>
+                                <td class="px-2 py-3.5 font-black text-emerald-400 whitespace-nowrap text-center">₹3,600 ($155)</td>
+                                <td class="px-2 py-3.5 text-muted whitespace-nowrap text-left font-bold">Credit Card</td>
+                                <td class="px-2 py-3.5 text-muted whitespace-nowrap text-left font-bold">Stripe</td>
+                                <td class="px-2 py-3.5 text-muted whitespace-nowrap text-center">19 Aug 2026, 11:30 AM</td>
+                                <td class="px-2 py-3.5 whitespace-nowrap text-center"><span class="px-2.5 py-0.5 bg-emerald-500/20 text-emerald-400 font-extrabold text-[10px] rounded-full">Successful ✅</span></td>
+                                <td class="px-2 py-3.5 whitespace-nowrap text-center"><span class="px-2.5 py-0.5 bg-gray-500/20 text-gray-400 font-extrabold text-[10px] rounded-full">None</span></td>
+                                <td class="pl-2 pr-4 py-3.5 text-right whitespace-nowrap space-x-1">
+                                    <button type="button" onclick="openPaymentDetailModal('TXN-2026-1002')" class="btn-ui-primary">View Details</button>
+                                </td>
+                            </tr>
+
+                            <!-- TXN 3: AMIT KUMAR (PENDING) -->
+                            <tr class="payment-row" data-txnid="TXN-2026-1003" data-reqid="REQ-1003" data-status="PENDING" data-customer="Amit Kumar" data-pet="Max 🐶" data-shelter="ABC Animal Shelter" data-total="₹5,400 ($230)">
+                                <td class="pl-4 pr-2 py-3.5 font-black whitespace-nowrap text-left">
+                                    <button type="button" onclick="openPaymentDetailModal('TXN-2026-1003')" class="theme-accent-text hover:text-[#5B8C76] font-black cursor-pointer">#TXN-2026-1003</button>
+                                </td>
+                                <td class="px-2 py-3.5 whitespace-nowrap text-left">
+                                    <a href="{% url 'admin_requests' %}" class="user-name-text hover:text-[#5B8C76] font-black">#REQ-1003</a>
+                                </td>
+                                <td class="px-2 py-3.5 font-extrabold user-name-text whitespace-nowrap text-left">Amit Kumar</td>
+                                <td class="px-2 py-3.5 font-bold user-name-text whitespace-nowrap text-left">Max 🐶</td>
+                                <td class="px-2 py-3.5 text-muted font-semibold whitespace-nowrap text-left">ABC Shelter</td>
+                                <td class="px-2 py-3.5 text-muted font-bold whitespace-nowrap text-center">₹4,200</td>
+                                <td class="px-2 py-3.5 text-muted font-bold whitespace-nowrap text-center">₹1,200</td>
+                                <td class="px-2 py-3.5 font-black text-amber-400 whitespace-nowrap text-center">₹5,400 ($230)</td>
+                                <td class="px-2 py-3.5 text-muted whitespace-nowrap text-left font-bold">NetBanking</td>
+                                <td class="px-2 py-3.5 text-muted whitespace-nowrap text-left font-bold">Razorpay</td>
+                                <td class="px-2 py-3.5 text-muted whitespace-nowrap text-center">21 Aug 2026, 05:45 PM</td>
+                                <td class="px-2 py-3.5 whitespace-nowrap text-center"><span class="px-2.5 py-0.5 bg-amber-500/20 text-amber-400 font-extrabold text-[10px] rounded-full">Pending ⏳</span></td>
+                                <td class="px-2 py-3.5 whitespace-nowrap text-center"><span class="px-2.5 py-0.5 bg-gray-500/20 text-gray-400 font-extrabold text-[10px] rounded-full">None</span></td>
+                                <td class="pl-2 pr-4 py-3.5 text-right whitespace-nowrap space-x-1">
+                                    <button type="button" onclick="openPaymentDetailModal('TXN-2026-1003')" class="btn-ui-primary">View Details</button>
+                                </td>
+                            </tr>
+
+                            <!-- TXN 4: SNEHA ROY (REFUNDED) -->
+                            <tr class="payment-row" data-txnid="TXN-2026-1004" data-reqid="REQ-1004" data-status="REFUNDED" data-customer="Sneha Roy" data-pet="Bella 🐶" data-shelter="Save-a-Pet Foundation" data-total="₹3,300 ($140)">
+                                <td class="pl-4 pr-2 py-3.5 font-black whitespace-nowrap text-left">
+                                    <button type="button" onclick="openPaymentDetailModal('TXN-2026-1004')" class="theme-accent-text hover:text-[#5B8C76] font-black cursor-pointer">#TXN-2026-1004</button>
+                                </td>
+                                <td class="px-2 py-3.5 whitespace-nowrap text-left">
+                                    <a href="{% url 'admin_requests' %}" class="user-name-text hover:text-[#5B8C76] font-black">#REQ-1004</a>
+                                </td>
+                                <td class="px-2 py-3.5 font-extrabold user-name-text whitespace-nowrap text-left">Sneha Roy</td>
+                                <td class="px-2 py-3.5 font-bold user-name-text whitespace-nowrap text-left">Bella 🐶</td>
+                                <td class="px-2 py-3.5 text-muted font-semibold whitespace-nowrap text-left">Save-a-Pet</td>
+                                <td class="px-2 py-3.5 text-muted font-bold whitespace-nowrap text-center">₹2,600</td>
+                                <td class="px-2 py-3.5 text-muted font-bold whitespace-nowrap text-center">₹700</td>
+                                <td class="px-2 py-3.5 font-black text-purple-400 whitespace-nowrap text-center">₹3,300 ($140)</td>
+                                <td class="px-2 py-3.5 text-muted whitespace-nowrap text-left font-bold">PayPal</td>
+                                <td class="px-2 py-3.5 text-muted whitespace-nowrap text-left font-bold">PayPal Express</td>
+                                <td class="px-2 py-3.5 text-muted whitespace-nowrap text-center">15 Aug 2026, 03:20 PM</td>
+                                <td class="px-2 py-3.5 whitespace-nowrap text-center"><span class="px-2.5 py-0.5 bg-purple-500/20 text-purple-300 font-extrabold text-[10px] rounded-full">Refunded 💸</span></td>
+                                <td class="px-2 py-3.5 whitespace-nowrap text-center"><span class="px-2.5 py-0.5 bg-purple-500/20 text-purple-300 font-extrabold text-[10px] rounded-full">Completed ✅</span></td>
+                                <td class="pl-2 pr-4 py-3.5 text-right whitespace-nowrap space-x-1">
+                                    <button type="button" onclick="openPaymentDetailModal('TXN-2026-1004')" class="btn-ui-primary">View Details</button>
+                                </td>
+                            </tr>
+
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- 📄 PAYMENT DETAILS VIEW DRAWER / MODAL -->
+    <div id="payment-detail-modal" class="fixed inset-0 bg-black/80 backdrop-blur-lg z-50 flex items-center justify-center p-4 hidden">
+        <div class="apple-glass rounded-[32px] p-6 sm:p-8 max-w-4xl w-full shadow-2xl space-y-6 max-h-[92vh] overflow-y-auto">
+            
+            <!-- HEADER -->
+            <div class="flex items-center justify-between border-b border-[#5B8C76]/20 pb-4">
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs font-black theme-accent-text uppercase tracking-widest" id="modal-txn-id">TXN-2026-1001</span>
+                        <span class="text-xs text-muted font-bold" id="modal-req-link">• Linked Request: #REQ-1001</span>
+                    </div>
+                    <h2 class="text-xl font-black user-name-text tracking-tight mt-0.5" id="modal-txn-title">
+                        Financial Audit Profile: Rahul Sharma ➔ ₹4,600 ($195)
+                    </h2>
+                </div>
+
+                <div class="flex items-center gap-3">
+                    <span class="px-3.5 py-1 bg-emerald-500/20 text-emerald-400 font-extrabold text-xs rounded-full shadow-xs" id="modal-txn-status">SUCCESSFUL ✅</span>
+                    <button onclick="closePaymentDetailModal()" class="w-8 h-8 rounded-full bg-gray-200 dark:bg-[#5B8C76]/20 hover:bg-gray-300 text-muted hover:text-[#5B8C76] font-black text-sm flex items-center justify-center cursor-pointer">✕</button>
+                </div>
+            </div>
+
+            <!-- CROSS-MODULE LINKAGE BAR -->
+            <div class="flex items-center justify-between p-3 card-inner-box rounded-2xl text-xs font-bold">
+                <div class="flex items-center gap-2">
+                    <a href="{% url 'admin_requests' %}" class="btn-ui-secondary">🐾 Adoption Request (#REQ-1001)</a>
+                    <a href="{% url 'admin_deliveries' %}" class="btn-ui-secondary">🚚 Delivery Route (#DEL-2026-00125)</a>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <button type="button" onclick="showToast('Downloading Invoice PDF...', 'success')" class="btn-ui-primary">Download Invoice 📄</button>
+                    <button type="button" onclick="openRefundModal()" class="btn-ui-danger">Issue Refund 💸</button>
+                </div>
+            </div>
+
+            <!-- UNIFORM 4-CARD FINANCIAL GRID (ALL CARDS EXACT SAME min-h-[215px] SIZE) -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs items-stretch">
+                
+                <!-- COLUMN 1: TRANSACTION INFO & FEE BREAKDOWN -->
+                <div class="space-y-4 flex flex-col justify-between">
+                    <div class="p-4.5 card-inner-box rounded-2xl flex-1 flex flex-col justify-between space-y-2 min-h-[215px]">
+                        <div class="text-xs font-extrabold theme-accent-text uppercase tracking-wider">
+                            <span>💳 Payment Gateway Specification</span>
+                        </div>
+                        <div class="space-y-1 text-muted text-[11px]">
+                            <div>Gateway Reference: <strong class="user-name-text font-black">pay_NxF928172635</strong></div>
+                            <div>Payment Method: <strong class="user-name-text">UPI / GooglePay</strong></div>
+                            <div>Payment Gateway: <strong class="user-name-text">Razorpay Standard</strong></div>
+                            <div>Gateway Auth Code: <strong class="text-emerald-400">AUTH-992182</strong></div>
+                            <div>Transaction Timestamp: <strong class="user-name-text">20 Aug 2026, 02:15 PM</strong></div>
+                        </div>
+                    </div>
+
+                    <div class="p-4.5 card-inner-box rounded-2xl flex-1 flex flex-col justify-between space-y-2 min-h-[215px]">
+                        <div class="text-xs font-extrabold theme-accent-text uppercase tracking-wider flex items-center justify-between">
+                            <span>💰 Complete Fee Breakdown</span>
+                            <span class="text-emerald-400 font-extrabold">PAID IN FULL</span>
+                        </div>
+                        <div class="space-y-1 text-muted text-[11px]">
+                            <div class="flex justify-between"><span>Pet Adoption Fee:</span><span class="user-name-text">₹3,500 ($150)</span></div>
+                            <div class="flex justify-between"><span>Logistics Base Fee:</span><span class="user-name-text">₹500</span></div>
+                            <div class="flex justify-between"><span>Distance Fee:</span><span class="user-name-text">₹300</span></div>
+                            <div class="flex justify-between"><span>Pet Transport Safe Care:</span><span class="user-name-text">₹200</span></div>
+                            <div class="flex justify-between"><span>Handling & Medical Docs:</span><span class="user-name-text">₹100</span></div>
+                            <div class="flex justify-between pt-1 border-t border-[#5B8C76]/20 font-extrabold text-xs"><span class="user-name-text">Grand Total Paid:</span><span class="text-emerald-400" id="modal-total-paid">₹4,600 ($195)</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- COLUMN 2: CUSTOMER, SHELTER & REFUND INFO -->
+                <div class="space-y-4 flex flex-col justify-between">
+                    <div class="p-4.5 card-inner-box rounded-2xl flex-1 flex flex-col justify-between space-y-2 min-h-[215px]">
+                        <div class="text-xs font-extrabold theme-accent-text uppercase tracking-wider">
+                            <span>🧑 Payer & Settlement Entity</span>
+                        </div>
+                        <div class="space-y-1 text-muted text-[11px]">
+                            <div>Customer Name: <strong class="user-name-text block">Rahul Sharma (CUS-1025)</strong></div>
+                            <div>Customer Phone: <strong class="user-name-text">+91 98765 43210</strong></div>
+                            <div>Beneficiary Shelter: <strong class="user-name-text block">Kochi Animal Shelter (SH-102)</strong></div>
+                            <div>Shelter Settlement: <strong class="text-emerald-400">Settled to Shelter HDFC Bank (AC-****8901) ✅</strong></div>
+                        </div>
+                    </div>
+
+                    <div class="p-4.5 card-inner-box rounded-2xl flex-1 flex flex-col justify-between space-y-2 min-h-[215px]">
+                        <div class="text-xs font-extrabold theme-accent-text uppercase tracking-wider flex items-center justify-between">
+                            <span>💸 Refund & Audit History</span>
+                            <span class="text-muted font-bold">No Refund Claimed</span>
+                        </div>
+                        <div class="space-y-1 text-muted text-[11px]">
+                            <div>Refund Status: <strong class="user-name-text">NONE</strong></div>
+                            <div>Refund Amount: <strong class="user-name-text">₹0.00</strong></div>
+                            <div>Chargeback Risk: <strong class="text-emerald-400">0.0% (Verified Customer ✅)</strong></div>
+                            <div>Invoice ID: <strong class="user-name-text">INV-2026-00125</strong></div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- CLOSE BUTTON -->
+            <div class="pt-3 border-t border-[#5B8C76]/20 flex justify-end gap-3">
+                <button type="button" onclick="closePaymentDetailModal()" class="btn-ui-secondary">
+                    Close Details
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- 💸 REFUND MODAL -->
+    <div id="refund-modal" class="fixed inset-0 bg-black/80 backdrop-blur-lg z-50 flex items-center justify-center p-4 hidden">
+        <div class="modal-bg rounded-[32px] p-6 max-w-md w-full shadow-2xl relative space-y-4">
+            <button onclick="closeRefundModal()" class="absolute top-6 right-6 text-muted hover:text-[#5B8C76] font-extrabold text-lg cursor-pointer">✕</button>
+            <h3 class="text-lg font-extrabold text-purple-400 flex items-center gap-2"><span>💸</span> Process Transaction Refund</h3>
+            <p class="text-xs text-muted font-semibold">Select refund type and specify reason. Funds will be sent back to original payment gateway.</p>
+
+            <form onsubmit="submitRefund(event)" class="space-y-4 text-xs font-bold">
+                <div>
+                    <label class="block text-muted mb-1">Refund Amount:</label>
+                    <input type="text" id="refund-amount-input" required value="₹4,600" class="w-full py-2.5 px-3.5 input-box rounded-2xl text-xs font-semibold">
+                </div>
+
+                <div>
+                    <label class="block text-muted mb-1">Reason for Refund:</label>
+                    <textarea id="refund-reason-input" rows="2" required class="w-full p-3 input-box rounded-2xl text-xs font-semibold">Full refund due to adoption cancellation by shelter.</textarea>
+                </div>
+
+                <div class="flex justify-end gap-3 pt-2">
+                    <button type="button" onclick="closeRefundModal()" class="btn-ui-secondary">Cancel</button>
+                    <button type="submit" class="btn-ui-danger">Execute Refund 💸</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ⚡ CONTROLLERS -->
+    <script>
+        let currentTxnId = 'TXN-2026-1001';
+
+        /* 📢 FLOATING TOAST NOTIFICATION SYSTEM */
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            if (!container) return;
+
+            const toast = document.createElement('div');
+            
+            let bgStyle = 'bg-[#5B8C76] text-white border border-[#A8D8B9]/30';
+            let icon = '✅';
+            if (type === 'danger' || type === 'error') {
+                bgStyle = 'bg-red-600 text-white border border-red-400/30';
+                icon = '❌';
+            } else if (type === 'warning') {
+                bgStyle = 'bg-amber-600 text-white border border-amber-400/30';
+                icon = '⏳';
+            }
+
+            toast.className = `flex items-center gap-3 px-5 py-3.5 rounded-2xl shadow-2xl text-xs font-bold pointer-events-auto toast-animate ${bgStyle}`;
+            toast.innerHTML = `
+                <span class="text-base">${icon}</span>
+                <span>${message}</span>
+            `;
+
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(100%)';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        function filterPaymentsTable() {
+            const query = document.getElementById('payment-search-input').value.toLowerCase();
+            const statusFilter = document.getElementById('filter-payment-status').value;
+            
+            document.querySelectorAll('.payment-row').forEach(row => {
+                const id = row.getAttribute('data-txnid').toLowerCase();
+                const reqid = row.getAttribute('data-reqid').toLowerCase();
+                const customer = row.getAttribute('data-customer').toLowerCase();
+                const status = row.getAttribute('data-status');
+                
+                const matchesStatus = (statusFilter === 'ALL') || (status === statusFilter);
+                const matchesQuery = id.includes(query) || reqid.includes(query) || customer.includes(query);
+
+                row.style.display = (matchesStatus && matchesQuery) ? '' : 'none';
+            });
+        }
+
+        function openPaymentDetailModal(txnId) {
+            currentTxnId = txnId;
+            document.getElementById('modal-txn-id').textContent = `#${txnId}`;
+            document.getElementById('payment-detail-modal').classList.remove('hidden');
+        }
+
+        function closePaymentDetailModal() {
+            document.getElementById('payment-detail-modal').classList.add('hidden');
+        }
+
+        function openRefundModal() {
+            document.getElementById('refund-modal').classList.remove('hidden');
+        }
+
+        function closeRefundModal() {
+            document.getElementById('refund-modal').classList.add('hidden');
+        }
+
+        function submitRefund(event) {
+            event.preventDefault();
+            const amount = document.getElementById('refund-amount-input').value;
+            const row = document.querySelector(`.payment-row[data-txnid="${currentTxnId}"]`);
+            if (row) {
+                row.setAttribute('data-status', 'REFUNDED');
+                showToast(`💸 Refund of ${amount} for #${currentTxnId} successfully processed via Razorpay API!`, 'success');
+            }
+            closeRefundModal();
+            closePaymentDetailModal();
+            filterPaymentsTable();
+        }
+
+        function toggleTheme() {
+            const isDark = document.documentElement.classList.contains('dark');
+            const themeIcon = document.getElementById('theme-icon');
+            if (isDark) { 
+                document.documentElement.classList.remove('dark'); 
+                localStorage.setItem('theme', 'light'); 
+                if (themeIcon) themeIcon.textContent = '☀️';
+            } else { 
+                document.documentElement.classList.add('dark'); 
+                localStorage.setItem('theme', 'dark'); 
+                if (themeIcon) themeIcon.textContent = '🌙';
+            }
+        }
+
+        /* 🎛️ AUTOMATIC GLASS UI DROPDOWN INITIALIZER */
+        function autoConvertGlassDropdowns() {
+            document.querySelectorAll('select.input-box, select').forEach(select => {
+                if (select.dataset.glassConverted === 'true' || select.classList.contains('hidden')) return;
+                select.dataset.glassConverted = 'true';
+                select.classList.add('hidden');
+
+                const wrapper = document.createElement('div');
+                wrapper.className = 'relative custom-dropdown-group inline-block w-full';
+                
+                select.parentNode.insertBefore(wrapper, select);
+                wrapper.appendChild(select);
+
+                const currentOpt = select.options[select.selectedIndex] || select.options[0];
+                const initialLabel = currentOpt ? currentOpt.textContent : 'Select...';
+
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'w-full py-2.5 px-3.5 input-box rounded-xl text-xs font-bold flex items-center justify-between cursor-pointer custom-dropdown-btn';
+                btn.innerHTML = `
+                    <span class="custom-dropdown-label">${initialLabel}</span>
+                    <svg class="w-3.5 h-3.5 text-[#5B8C76] dark:text-[#A8D8B9] transition-transform duration-200 custom-dropdown-arrow ml-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
+                `;
+
+                const menu = document.createElement('div');
+                menu.className = 'absolute top-full left-0 right-0 mt-1.5 z-50 rounded-2xl apple-glass shadow-2xl p-1.5 space-y-1 hidden custom-dropdown-menu border border-[#5B8C76]/30 dark:border-[#A8D8B9]/30 max-h-60 overflow-y-auto';
+
+                Array.from(select.options).forEach((opt, idx) => {
+                    const item = document.createElement('div');
+                    const isActive = idx === select.selectedIndex;
+                    item.className = `px-3 py-2 rounded-xl text-xs font-bold cursor-pointer hover:bg-[#5B8C76]/20 dark:hover:bg-[#A8D8B9]/20 transition-all flex items-center justify-between custom-opt-item ${isActive ? 'bg-[#5B8C76]/20 text-[#5B8C76] dark:text-[#A8D8B9]' : ''}`;
+                    item.innerHTML = `<span>${opt.textContent}</span>`;
+                    
+                    item.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        select.value = opt.value;
+                        btn.querySelector('.custom-dropdown-label').textContent = opt.textContent;
+                        
+                        menu.querySelectorAll('.custom-opt-item').forEach(i => i.classList.remove('bg-[#5B8C76]/20', 'text-[#5B8C76]', 'dark:text-[#A8D8B9]'));
+                        item.classList.add('bg-[#5B8C76]/20', 'text-[#5B8C76]', 'dark:text-[#A8D8B9]');
+                        
+                        menu.classList.add('hidden');
+                        btn.querySelector('.custom-dropdown-arrow').classList.remove('rotate-180');
+
+                        select.dispatchEvent(new Event('change', { bubbles: true }));
+                    });
+
+                    menu.appendChild(item);
+                });
+
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const isHidden = menu.classList.contains('hidden');
+                    document.querySelectorAll('.custom-dropdown-menu').forEach(m => m.classList.add('hidden'));
+                    document.querySelectorAll('.custom-dropdown-arrow').forEach(a => a.classList.remove('rotate-180'));
+
+                    if (isHidden) {
+                        menu.classList.remove('hidden');
+                        btn.querySelector('.custom-dropdown-arrow').classList.add('rotate-180');
+                    }
+                });
+
+                wrapper.appendChild(btn);
+                wrapper.appendChild(menu);
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', autoConvertGlassDropdowns);
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.custom-dropdown-group')) {
+                document.querySelectorAll('.custom-dropdown-menu').forEach(m => m.classList.add('hidden'));
+                document.querySelectorAll('.custom-dropdown-arrow').forEach(a => a.classList.remove('rotate-180'));
+            }
+        });
+
+        if (localStorage.getItem('theme') === 'light') {
+            document.documentElement.classList.remove('dark');
+            const themeIcon = document.getElementById('theme-icon');
+            if (themeIcon) themeIcon.textContent = '☀️';
+        } else {
+            const themeIcon = document.getElementById('theme-icon');
+            if (themeIcon) themeIcon.textContent = '🌙';
+        }
+    </script>
+</body>
+</html>

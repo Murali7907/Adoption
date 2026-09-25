@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Dashboard - PetAdoption</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS v4 Browser Build -->
+    <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+    <style type="text/css">
+        @import "tailwindcss";
+
+        .dark body { background-color: #111810; color: #E6E6E6; }
+        .dark .glass-card { background-color: rgba(28, 37, 27, 0.85); border-color: rgba(186, 200, 177, 0.2); }
+        .dark .sidebar-bg { background-color: rgba(17, 24, 16, 0.95); border-color: rgba(186, 200, 177, 0.15); }
+        
+        html:not(.dark) body { background-color: #F4F7F2; color: #202D1F; }
+        html:not(.dark) .glass-card { background-color: #FFFFFF; border-color: #D2DED0; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
+        html:not(.dark) .sidebar-bg { background-color: #EBF1E8; border-color: #D2DED0; }
+        html:not(.dark) .text-muted { color: #526650; }
+    </style>
+</head>
+<body class="min-h-screen font-sans transition-colors duration-300">
+
+    <div class="flex min-h-screen">
+        
+        <!-- CUSTOMER SIDEBAR -->
+        <aside class="w-64 sidebar-bg border-r flex flex-col justify-between p-6 sticky top-0 h-screen z-30 transition-colors">
+            <div>
+                <div class="flex items-center gap-3 mb-10">
+                    <div class="w-10 h-10 rounded-2xl bg-[#7B9669] flex items-center justify-center text-white font-extrabold text-xl shadow-lg">
+                        🧑
+                    </div>
+                    <div>
+                        <span class="font-extrabold text-base tracking-wider block">CUSTOMER</span>
+                        <span class="text-[10px] text-[#7B9669] font-bold uppercase tracking-widest">Adopter Portal</span>
+                    </div>
+                </div>
+
+                <nav class="space-y-1.5 text-xs font-bold">
+                    <a href="{% url 'customer_dashboard' %}" class="flex items-center gap-3 px-4 py-3 bg-[#7B9669] text-white rounded-xl shadow-md">
+                        <span>🏠</span> Home
+                    </a>
+                    <a href="{% url 'customer_find_pet' %}" class="flex items-center gap-3 px-4 py-3 hover:bg-[#7B9669]/20 rounded-xl transition-all">
+                        <span>🔎</span> Find a Pet
+                    </a>
+                    <a href="{% url 'customer_requests' %}" class="flex items-center gap-3 px-4 py-3 hover:bg-[#7B9669]/20 rounded-xl transition-all">
+                        <span>📋</span> My Adoption Requests
+                    </a>
+                    <a href="{% url 'customer_adopted' %}" class="flex items-center gap-3 px-4 py-3 hover:bg-[#7B9669]/20 rounded-xl transition-all">
+                        <span>🐾</span> My Adopted Pets
+                    </a>
+                    <a href="{% url 'customer_favorites' %}" class="flex items-center gap-3 px-4 py-3 hover:bg-[#7B9669]/20 rounded-xl transition-all">
+                        <span>❤️</span> Favorites
+                    </a>
+                    <a href="{% url 'customer_delivery_tracking' %}" class="flex items-center gap-3 px-4 py-3 hover:bg-[#7B9669]/20 rounded-xl transition-all">
+                        <span>🚚</span> Delivery Tracking
+                    </a>
+                    <a href="{% url 'profile' %}" class="flex items-center gap-3 px-4 py-3 hover:bg-[#7B9669]/20 rounded-xl transition-all">
+                        <span>👤</span> My Profile
+                    </a>
+                </nav>
+            </div>
+
+            <div class="pt-6 border-t border-[#BAC8B1]/20 space-y-2">
+                <a href="{% url 'home' %}" class="flex items-center gap-3 px-4 py-2.5 hover:bg-[#7B9669]/20 rounded-xl text-xs font-bold">
+                    <span>🌐</span> Main Website
+                </a>
+                <a href="{% url 'login' %}" class="flex items-center gap-3 px-4 py-2.5 hover:bg-red-500/20 text-red-400 rounded-xl text-xs font-bold">
+                    <span>🚪</span> Logout
+                </a>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT AREA -->
+        <main class="flex-1 p-8 overflow-y-auto">
+            
+            <!-- HEADER -->
+            <header class="flex items-center justify-between mb-8 pb-4 border-b border-[#BAC8B1]/20">
+                <div>
+                    <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight">Customer Dashboard</h1>
+                    <p class="text-xs text-muted font-medium mt-1">Find your new best friend & track your adoption applications.</p>
+                </div>
+
+                <div class="flex items-center gap-4">
+                    <button type="button" onclick="toggleTheme()" class="px-4 py-2 bg-[#7B9669]/20 hover:bg-[#7B9669]/30 border border-[#7B9669]/40 rounded-xl text-xs font-extrabold flex items-center gap-2 cursor-pointer transition-all">
+                        <span id="theme-icon">🌙</span> <span id="theme-text">Dark Mode</span>
+                    </button>
+                    
+                    <div class="flex items-center gap-3 px-3 py-1.5 glass-card border rounded-2xl">
+                        <div class="w-8 h-8 rounded-xl bg-[#7B9669] flex items-center justify-center font-bold text-white text-xs">
+                            RS
+                        </div>
+                        <span class="text-xs font-bold pr-2">Rahul Sharma</span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- HERO SEARCH CARD -->
+            <section class="glass-card border rounded-3xl p-8 mb-10 text-center shadow-xl">
+                <h2 class="text-3xl sm:text-4xl font-extrabold mb-3">Find Your New Best Friend 🐶</h2>
+                <p class="text-xs sm:text-sm text-muted mb-6">Discover dogs, cats, birds, and rabbits from verified animal shelters.</p>
+
+                <div class="max-w-xl mx-auto flex items-center gap-3">
+                    <input type="text" placeholder="Search by breed, species, or city..." class="w-full py-3.5 px-4 bg-[#111810]/40 border border-[#BAC8B1]/30 rounded-2xl text-sm focus:outline-none focus:border-[#7B9669]">
+                    <a href="{% url 'customer_find_pet' %}" class="px-6 py-3.5 bg-[#7B9669] hover:bg-[#6C8480] text-white text-xs font-extrabold uppercase rounded-2xl shadow-lg transition-all">
+                        Search
+                    </a>
+                </div>
+
+                <!-- Species Pills -->
+                <div class="flex justify-center gap-3 mt-6 text-xs font-bold">
+                    <span class="px-4 py-2 bg-[#7B9669]/20 rounded-xl cursor-pointer">Dogs 🐶</span>
+                    <span class="px-4 py-2 bg-[#7B9669]/20 rounded-xl cursor-pointer">Cats 🐱</span>
+                    <span class="px-4 py-2 bg-[#7B9669]/20 rounded-xl cursor-pointer">Birds 🦜</span>
+                    <span class="px-4 py-2 bg-[#7B9669]/20 rounded-xl cursor-pointer">Rabbits 🐰</span>
+                </div>
+            </section>
+
+            <!-- FEATURED PETS -->
+            <section>
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xl font-extrabold">Featured Pets Ready for You</h3>
+                    <a href="{% url 'customer_find_pet' %}" class="text-xs font-bold text-[#7B9669] hover:underline">Explore All Pets →</a>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                    <div class="glass-card border rounded-3xl overflow-hidden shadow-lg p-4">
+                        <img class="w-full h-44 object-cover rounded-2xl mb-3" src="https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&q=80&w=400" alt="Bruno">
+                        <h4 class="font-extrabold text-lg">Bruno 🐶</h4>
+                        <p class="text-xs text-muted">Golden Retriever • 2.5 Yrs • Male</p>
+                        <div class="flex justify-between items-center mt-4">
+                            <a href="{% url 'pet_detail_sample' %}" class="px-4 py-2 bg-[#7B9669] text-white text-xs font-bold rounded-xl">View Details</a>
+                            <button class="text-xl">❤️</button>
+                        </div>
+                    </div>
+
+                    <div class="glass-card border rounded-3xl overflow-hidden shadow-lg p-4">
+                        <img class="w-full h-44 object-cover rounded-2xl mb-3" src="https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?auto=format&fit=crop&q=80&w=400" alt="Milo">
+                        <h4 class="font-extrabold text-lg">Milo 🐱</h4>
+                        <p class="text-xs text-muted">Domestic Shorthair • 1.5 Yrs • Female</p>
+                        <div class="flex justify-between items-center mt-4">
+                            <a href="{% url 'pet_detail_sample' %}" class="px-4 py-2 bg-[#7B9669] text-white text-xs font-bold rounded-xl">View Details</a>
+                            <button class="text-xl">❤️</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <script>
+        function toggleTheme() {
+            const isDark = document.documentElement.classList.contains('dark');
+            if (isDark) { document.documentElement.classList.remove('dark'); localStorage.setItem('theme', 'light'); }
+            else { document.documentElement.classList.add('dark'); localStorage.setItem('theme', 'dark'); }
+        }
+        if (localStorage.getItem('theme') === 'light') document.documentElement.classList.remove('dark');
+    </script>
+</body>
+</html>

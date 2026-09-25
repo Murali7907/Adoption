@@ -1,0 +1,1084 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reviews & Ratings Moderation - Admin Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style type="text/css">
+        @import "tailwindcss";
+
+        body {
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        /* 🌙 DARK MODE STYLES */
+        .dark body { background-color: #111A15 !important; color: #F4EDE2 !important; }
+        .dark .apple-glass { 
+            background: rgba(27, 41, 33, 0.85) !important; 
+            backdrop-filter: blur(25px); 
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid rgba(168, 216, 185, 0.22) !important; 
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.45) !important;
+        }
+        .dark .sidebar-bg { 
+            background: rgba(14, 22, 18, 0.90) !important; 
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            border-right: 1px solid rgba(168, 216, 185, 0.15) !important; 
+        }
+        .dark .theme-card-bg {
+            background: rgba(22, 34, 28, 0.65);
+            border: 1px solid rgba(91, 140, 118, 0.18);
+        }
+        .dark .theme-table-header {
+            background: rgba(13, 20, 16, 0.85);
+            color: #A8D8B9;
+        }
+        .dark .input-box {
+            background: rgba(17, 26, 21, 0.9);
+            border: 1px solid rgba(91, 140, 118, 0.3);
+            color: #F4EDE2;
+        }
+        .dark .text-muted { color: #8EA89B; }
+
+        /* ☀️ LIGHT MODE STYLES */
+        html:not(.dark) body { background-color: #F4EDE2 !important; color: #111A15 !important; }
+        html:not(.dark) .apple-glass { 
+            background: rgba(255, 255, 255, 0.88) !important; 
+            backdrop-filter: blur(25px); 
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid rgba(91, 140, 118, 0.3) !important; 
+            box-shadow: 0 15px 35px rgba(91, 140, 118, 0.12) !important; 
+        }
+        html:not(.dark) .sidebar-bg { 
+            background: rgba(244, 237, 226, 0.95) !important; 
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            border-right: 1px solid rgba(91, 140, 118, 0.25) !important; 
+        }
+        html:not(.dark) .theme-card-bg {
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(91, 140, 118, 0.25);
+        }
+        html:not(.dark) .theme-table-header {
+            background: rgba(235, 243, 238, 0.95);
+            color: #2D4A3E;
+        }
+        html:not(.dark) .input-box {
+            background: #FFFFFF;
+            border: 1px solid rgba(91, 140, 118, 0.35);
+            color: #111A15;
+        }
+        html:not(.dark) .text-muted { color: #5B8C76; }
+
+        /* ACTIVE NAV & BUTTONS (NO TEXT UNDERLINES, TACTILE HOVER) */
+        .nav-item-active {
+            background: linear-gradient(135deg, #5B8C76 0%, #3D6B56 100%) !important;
+            color: #FFFFFF !important;
+            box-shadow: 0 8px 20px rgba(91, 140, 118, 0.4) !important;
+        }
+
+        .nav-item-hover-transform {
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .nav-item-hover-transform:hover {
+            background: rgba(91, 140, 118, 0.2);
+            transform: translateX(4px);
+        }
+
+        .tab-btn-active {
+            background: #5B8C76 !important;
+            color: #FFFFFF !important;
+            box-shadow: 0 4px 14px rgba(91, 140, 118, 0.35);
+        }
+
+        /* TACTILE BUTTON SYSTEM */
+        .btn-ui-primary {
+            background: linear-gradient(135deg, #5B8C76 0%, #3D6B56 100%) !important;
+            color: #FFFFFF !important;
+            font-weight: 800 !important;
+            font-size: 0.75rem !important;
+            padding: 0.5rem 1.1rem !important;
+            border-radius: 0.85rem !important;
+            border: 1px solid rgba(168, 216, 185, 0.3) !important;
+            box-shadow: 0 4px 14px rgba(91, 140, 118, 0.35) !important;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+            cursor: pointer !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            gap: 0.375rem !important;
+            white-space: nowrap !important;
+            text-decoration: none !important;
+        }
+        .btn-ui-primary:hover {
+            transform: translateY(-2px) scale(1.02) !important;
+            box-shadow: 0 8px 22px rgba(91, 140, 118, 0.55) !important;
+            background: linear-gradient(135deg, #689D85 0%, #44745E 100%) !important;
+            border-color: rgba(168, 216, 185, 0.6) !important;
+            text-decoration: none !important;
+        }
+        .btn-ui-primary:active {
+            transform: translateY(0) scale(0.97) !important;
+            box-shadow: 0 2px 8px rgba(91, 140, 118, 0.3) !important;
+        }
+
+        .btn-ui-secondary {
+            background-color: rgba(91, 140, 118, 0.18) !important;
+            color: #A8D8B9 !important;
+            border: 1px solid rgba(168, 216, 185, 0.3) !important;
+            font-weight: 800 !important;
+            font-size: 0.75rem !important;
+            padding: 0.5rem 1.1rem !important;
+            border-radius: 0.85rem !important;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+            cursor: pointer !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            gap: 0.375rem !important;
+            white-space: nowrap !important;
+            text-decoration: none !important;
+        }
+        .btn-ui-secondary:hover {
+            background-color: rgba(91, 140, 118, 0.35) !important;
+            transform: translateY(-2px) scale(1.02) !important;
+            border-color: rgba(168, 216, 185, 0.5) !important;
+            box-shadow: 0 6px 18px rgba(91, 140, 118, 0.25) !important;
+            text-decoration: none !important;
+        }
+        .btn-ui-secondary:active {
+            transform: translateY(0) scale(0.97) !important;
+        }
+
+        /* ZERO UNDERLINE HOVER GLOW LINKS */
+        a, button, .name-hover-link {
+            text-decoration: none !important;
+        }
+        .name-hover-link {
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+            cursor: pointer !important;
+            text-decoration: none !important;
+            display: inline-block !important;
+        }
+        .name-hover-link:hover {
+            text-decoration: none !important;
+            transform: translateY(-1px) scale(1.01) !important;
+            color: #A8D8B9 !important;
+            text-shadow: 0 0 10px rgba(168, 216, 185, 0.4) !important;
+        }
+
+        /* CUSTOM SCROLLBAR REMOVAL SYSTEM-WIDE */
+        * { scrollbar-width: none !important; }
+        *::-webkit-scrollbar { display: none !important; }
+
+        /* TOAST ANIMATION */
+        @keyframes toastSlideIn {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .toast-animate {
+            animation: slideInRight 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+    </style>
+</head>
+<body class="min-h-screen font-sans transition-colors duration-300">
+
+    <!-- 🔔 PROFESSIONAL TOAST NOTIFICATION CONTAINER -->
+    <div id="toast-container" class="fixed bottom-6 right-6 z-50 flex flex-col gap-3 pointer-events-none"></div>
+
+    <div class="flex min-h-screen">
+        
+        <!-- 🚀 HORIZON STANDARDIZED SIDEBAR -->
+        <aside class="w-64 sidebar-bg flex flex-col justify-between p-6 sticky top-0 h-screen z-30 overflow-y-auto">
+            <div>
+                <!-- BRAND HEADER -->
+                <div class="flex items-center gap-3 mb-8 px-2">
+                    <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#5B8C76] to-[#A8D8B9] flex items-center justify-center font-extrabold text-xl text-[#111A15] shadow-md">
+                        👨‍💼
+                    </div>
+                    <div>
+                        <span class="font-extrabold text-lg tracking-tight block">HORIZON <span class="text-[#5B8C76] dark:text-[#A8D8B9]">UI</span></span>
+                        <span class="text-[10px] theme-accent-text font-extrabold uppercase tracking-widest">Pet Adoption Suite</span>
+                    </div>
+                </div>
+
+                <!-- NAVIGATION -->
+                <nav class="space-y-1 text-xs font-bold">
+                    <a href="{% url 'admin_dashboard' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>📊</span> Dashboard Overview</a>
+                    <a href="{% url 'admin_users' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>👥</span> User Management</a>
+                    
+                    <div class="space-y-1 my-2 py-2 border-y border-[#5B8C76]/25">
+                        <a href="{% url 'admin_shelters' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>🏠</span> Shelter Management</a>
+                        <a href="{% url 'admin_pets' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>🐶</span> Pet Management</a>
+                        <a href="{% url 'admin_requests' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>🐾</span> Adoption Requests</a>
+                        <a href="{% url 'admin_payments' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>💳</span> Payments</a>
+                        <a href="{% url 'admin_deliveries' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>🚚</span> Delivery Control</a>
+                        <a href="{% url 'admin_audit_logs' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>🔍</span> Audit Logs</a>
+                        <a href="{% url 'admin_revenue' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>💰</span> Revenue & Profit</a>
+                    </div>
+
+                    <a href="{% url 'admin_reports' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>📈</span> Reports & Analytics</a>
+                    <a href="{% url 'admin_notifications' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>🔔</span> Notifications</a>
+                    <a href="{% url 'admin_announcements' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>📢</span> Announcements</a>
+                    <a href="{% url 'admin_reviews' %}" class="nav-item-active flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>⭐</span> Reviews & Ratings</a>
+                    <a href="{% url 'admin_complaints' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>🚨</span> Support Desk</a>
+                    <a href="{% url 'admin_health' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>🩺</span> Pet Health</a>
+                    <a href="{% url 'admin_settings' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>⚙️</span> System Settings</a>
+                    <a href="{% url 'admin_roles' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>🔐</span> Roles & Permissions</a>
+                </nav>
+            </div>
+
+            <!-- FOOTER LINKS -->
+            <div class="pt-4 border-t border-[#5B8C76]/25 space-y-1">
+                <a href="{% url 'home' %}" class="flex items-center gap-3 px-4 py-2 hover:bg-[#5B8C76]/20 rounded-2xl text-xs font-bold"><span>🌐</span> Main Website</a>
+                <a href="{% url 'login' %}" class="flex items-center gap-3 px-4 py-2 hover:bg-red-500/20 text-red-500 rounded-2xl text-xs font-bold"><span>🚪</span> Logout</a>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT CONTAINER -->
+        <main class="flex-1 p-6 md:p-8 overflow-y-auto space-y-7 max-w-7xl mx-auto">
+            
+            <!-- 🚀 TOP HEADER NAVBAR -->
+            <header class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2 border-b border-[#5B8C76]/15">
+                <div>
+                    <div class="text-xs text-muted font-bold mb-1 flex items-center gap-1.5">
+                        <span>Pages</span> / <span class="text-[#5B8C76] dark:text-[#A8D8B9] font-extrabold">Reviews & Ratings</span>
+                    </div>
+                    <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight">Reviews & Ratings Moderation ⭐</h1>
+                    <p class="text-xs text-muted font-medium mt-1">Audit customer feedback, investigate reported reviews, and monitor shelter & driver rating performance.</p>
+                </div>
+
+                <!-- TOP QUICK ACTION CONTROLS -->
+                <div class="apple-glass rounded-full px-4 py-2 flex items-center gap-3 shadow-lg self-start md:self-auto flex-wrap">
+                    <button type="button" onclick="switchCategoryTab('tab-moderation')" class="btn-ui-primary text-xs">
+                        <span>⚖️</span> Moderation Queue (12)
+                    </button>
+                    <button type="button" onclick="switchCategoryTab('tab-reported')" class="px-3.5 py-1.5 rounded-full bg-red-500/20 hover:bg-red-500/30 text-xs font-bold text-red-400 border border-red-500/30 transition-all cursor-pointer">
+                        <span>🚨</span> Reported Items (8)
+                    </button>
+
+                    <!-- THEME TOGGLER -->
+                    <button type="button" onclick="toggleTheme()" class="w-8 h-8 bg-[#5B8C76]/20 hover:bg-[#5B8C76]/30 border border-[#5B8C76]/40 rounded-full text-sm font-extrabold flex items-center justify-center cursor-pointer shadow-sm" title="Toggle Light/Dark Theme">
+                        <span id="theme-icon">🌙</span>
+                    </button>
+
+                    <!-- NOTIFICATION BELL -->
+                    <a href="{% url 'admin_notifications' %}" class="w-8 h-8 bg-[#5B8C76]/20 hover:bg-[#5B8C76]/30 border border-[#5B8C76]/40 rounded-full text-xs font-extrabold flex items-center justify-center relative shadow-sm" title="Notifications">
+                        🔔 <span class="w-2 h-2 rounded-full bg-red-500 absolute top-1 right-1 animate-ping"></span>
+                    </a>
+
+                    <!-- USER AVATAR PILL -->
+                    <div class="w-8 h-8 rounded-full bg-gradient-to-br from-[#5B8C76] to-[#A8D8B9] flex items-center justify-center font-extrabold text-xs text-[#111A15] shadow-sm" title="Admin User">
+                        A
+                    </div>
+                </div>
+            </header>
+
+            <!-- 🏆 11 EXECUTIVE REVIEWS & RATINGS KPI CARDS -->
+            <section class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-11 gap-2.5">
+                <div class="theme-card-bg rounded-2xl p-3 space-y-1 border-l-4 border-emerald-400 cursor-pointer hover:scale-[1.02] transition-all" onclick="filterByRating('all')">
+                    <span class="text-[9px] text-muted font-bold uppercase tracking-wider block">Total Reviews</span>
+                    <div class="text-lg font-extrabold">1,420</div>
+                    <span class="text-[9px] font-bold text-emerald-400">+14.2% 📈</span>
+                </div>
+                <div class="theme-card-bg rounded-2xl p-3 space-y-1 border-l-4 border-amber-400 cursor-pointer hover:scale-[1.02] transition-all" onclick="filterByRating('AVG')">
+                    <span class="text-[9px] text-muted font-bold uppercase tracking-wider block">Avg Rating</span>
+                    <div class="text-lg font-extrabold text-amber-400">4.8 ⭐</div>
+                    <span class="text-[9px] font-bold text-amber-400">96.0% Positive</span>
+                </div>
+                <div class="theme-card-bg rounded-2xl p-3 space-y-1 border-l-4 border-emerald-400 cursor-pointer hover:scale-[1.02] transition-all" onclick="filterByRating('5')">
+                    <span class="text-[9px] text-muted font-bold uppercase tracking-wider block">5-Star</span>
+                    <div class="text-lg font-extrabold text-emerald-400">1,120</div>
+                    <span class="text-[9px] font-bold text-emerald-400">78.9%</span>
+                </div>
+                <div class="theme-card-bg rounded-2xl p-3 space-y-1 border-l-4 border-emerald-400 cursor-pointer hover:scale-[1.02] transition-all" onclick="filterByRating('4')">
+                    <span class="text-[9px] text-muted font-bold uppercase tracking-wider block">4-Star</span>
+                    <div class="text-lg font-extrabold text-emerald-400">210</div>
+                    <span class="text-[9px] font-bold text-emerald-400">14.8%</span>
+                </div>
+                <div class="theme-card-bg rounded-2xl p-3 space-y-1 border-l-4 border-blue-400 cursor-pointer hover:scale-[1.02] transition-all" onclick="filterByRating('3')">
+                    <span class="text-[9px] text-muted font-bold uppercase tracking-wider block">3-Star</span>
+                    <div class="text-lg font-extrabold text-blue-400">45</div>
+                    <span class="text-[9px] font-bold text-blue-400">3.2%</span>
+                </div>
+                <div class="theme-card-bg rounded-2xl p-3 space-y-1 border-l-4 border-amber-400 cursor-pointer hover:scale-[1.02] transition-all" onclick="filterByRating('2')">
+                    <span class="text-[9px] text-muted font-bold uppercase tracking-wider block">2-Star</span>
+                    <div class="text-lg font-extrabold text-amber-400">28</div>
+                    <span class="text-[9px] font-bold text-amber-400">2.0%</span>
+                </div>
+                <div class="theme-card-bg rounded-2xl p-3 space-y-1 border-l-4 border-red-500 cursor-pointer hover:scale-[1.02] transition-all" onclick="filterByRating('1')">
+                    <span class="text-[9px] text-muted font-bold uppercase tracking-wider block">1-Star</span>
+                    <div class="text-lg font-extrabold text-red-400">17</div>
+                    <span class="text-[9px] font-bold text-red-400">1.2%</span>
+                </div>
+                <div class="theme-card-bg rounded-2xl p-3 space-y-1 border-l-4 border-purple-400 cursor-pointer hover:scale-[1.02] transition-all" onclick="switchCategoryTab('tab-moderation')">
+                    <span class="text-[9px] text-muted font-bold uppercase tracking-wider block">Pending Queue</span>
+                    <div class="text-lg font-extrabold text-purple-400">12</div>
+                    <span class="text-[9px] font-bold text-purple-400">To Review ⏱️</span>
+                </div>
+                <div class="theme-card-bg rounded-2xl p-3 space-y-1 border-l-4 border-red-500 cursor-pointer hover:scale-[1.02] transition-all" onclick="switchCategoryTab('tab-reported')">
+                    <span class="text-[9px] text-muted font-bold uppercase tracking-wider block">Reported</span>
+                    <div class="text-lg font-extrabold text-red-400">8</div>
+                    <span class="text-[9px] font-bold text-red-400">Flagged 🚨</span>
+                </div>
+                <div class="theme-card-bg rounded-2xl p-3 space-y-1 border-l-4 border-gray-400 cursor-pointer hover:scale-[1.02] transition-all" onclick="filterByStatus('HIDDEN')">
+                    <span class="text-[9px] text-muted font-bold uppercase tracking-wider block">Hidden</span>
+                    <div class="text-lg font-extrabold text-gray-400">14</div>
+                    <span class="text-[9px] font-bold text-gray-400">Moderated 👁️</span>
+                </div>
+                <div class="theme-card-bg rounded-2xl p-3 space-y-1 border-l-4 border-red-600 cursor-pointer hover:scale-[1.02] transition-all" onclick="filterByStatus('REMOVED')">
+                    <span class="text-[9px] text-muted font-bold uppercase tracking-wider block">Removed</span>
+                    <div class="text-lg font-extrabold text-red-400">6</div>
+                    <span class="text-[9px] font-bold text-red-400">Purged 🗑️</span>
+                </div>
+            </section>
+
+            <!-- 📊 RATING DISTRIBUTION BREAKDOWN BAR CARD -->
+            <section class="apple-glass rounded-3xl p-5 shadow-lg space-y-4">
+                <div class="flex items-center justify-between flex-wrap gap-2 border-b border-[#5B8C76]/20 pb-3">
+                    <div>
+                        <h3 class="font-extrabold text-base flex items-center gap-2">
+                            <span>⭐</span> Rating Score Breakdown & Distribution
+                        </h3>
+                        <p class="text-xs text-muted">Average Rating Formula: Total Points (6,816) ÷ Reviews (1,420) = 4.8 ⭐</p>
+                    </div>
+                    <span class="px-3 py-1 bg-emerald-500/10 text-emerald-400 text-xs font-extrabold rounded-full border border-emerald-500/20">96.0% Positive Sentiment 😊</span>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-5 gap-3 text-xs font-bold">
+                    <div class="space-y-1.5">
+                        <div class="flex justify-between"><span>5 Stars ⭐⭐⭐⭐⭐</span><span class="text-emerald-400">78.9% (1,120)</span></div>
+                        <div class="w-full bg-[#5B8C76]/20 h-2 rounded-full"><div class="bg-emerald-400 h-2 rounded-full" style="width: 78.9%"></div></div>
+                    </div>
+                    <div class="space-y-1.5">
+                        <div class="flex justify-between"><span>4 Stars ⭐⭐⭐⭐</span><span class="text-emerald-400">14.8% (210)</span></div>
+                        <div class="w-full bg-[#5B8C76]/20 h-2 rounded-full"><div class="bg-emerald-400 h-2 rounded-full" style="width: 14.8%"></div></div>
+                    </div>
+                    <div class="space-y-1.5">
+                        <div class="flex justify-between"><span>3 Stars ⭐⭐⭐</span><span class="text-blue-400">3.2% (45)</span></div>
+                        <div class="w-full bg-[#5B8C76]/20 h-2 rounded-full"><div class="bg-blue-400 h-2 rounded-full" style="width: 3.2%"></div></div>
+                    </div>
+                    <div class="space-y-1.5">
+                        <div class="flex justify-between"><span>2 Stars ⭐⭐</span><span class="text-amber-400">2.0% (28)</span></div>
+                        <div class="w-full bg-[#5B8C76]/20 h-2 rounded-full"><div class="bg-amber-400 h-2 rounded-full" style="width: 2.0%"></div></div>
+                    </div>
+                    <div class="space-y-1.5">
+                        <div class="flex justify-between"><span>1 Star ⭐</span><span class="text-red-400">1.2% (17)</span></div>
+                        <div class="w-full bg-[#5B8C76]/20 h-2 rounded-full"><div class="bg-red-400 h-2 rounded-full" style="width: 1.2%"></div></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 🎛️ ADVANCED MULTI-FILTER TOOLBAR -->
+            <section class="apple-glass rounded-3xl p-5 shadow-lg space-y-3">
+                <div class="flex items-center justify-between flex-wrap gap-3">
+                    <div class="flex items-center gap-2">
+                        <span class="text-lg">🎛️</span>
+                        <div>
+                            <h2 class="font-extrabold text-sm tracking-wide">Filter Customer Reviews & Ratings</h2>
+                            <span class="text-[11px] text-muted font-medium">Filter by category, rating stars, verification badge, sentiment, and moderation state.</span>
+                        </div>
+                    </div>
+
+                    <!-- SEARCH BAR -->
+                    <div class="w-full sm:w-72 relative">
+                        <input type="text" id="rev-search-input" onkeyup="filterReviewsTable()" placeholder="Search review ID, customer, shelter, pet..." class="input-box rounded-xl py-2 px-3 pl-8 text-xs font-semibold w-full">
+                        <span class="absolute left-2.5 top-2.5 text-xs text-muted">🔍</span>
+                    </div>
+                </div>
+
+                <!-- DROPDOWN FILTERS GRID -->
+                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 text-xs pt-2 border-t border-[#5B8C76]/15">
+                    <div>
+                        <label class="block font-bold text-muted mb-1">Review Category</label>
+                        <select id="filter-rev-category" onchange="filterReviewsTable()" class="input-box rounded-xl py-2 px-3 text-xs font-semibold w-full cursor-pointer">
+                            <option value="all">All Categories (4)</option>
+                            <option value="ADOPTION">🐾 Pet Adoption Experience</option>
+                            <option value="SHELTER">🏠 Shelter Review</option>
+                            <option value="DRIVER">🚚 Driver / Delivery Review</option>
+                            <option value="PLATFORM">⭐ Platform Experience</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-bold text-muted mb-1">Star Rating</label>
+                        <select id="filter-rev-rating" onchange="filterReviewsTable()" class="input-box rounded-xl py-2 px-3 text-xs font-semibold w-full cursor-pointer">
+                            <option value="all">All Ratings (1-5 ⭐)</option>
+                            <option value="5">5 Stars ⭐⭐⭐⭐⭐</option>
+                            <option value="4">4 Stars ⭐⭐⭐⭐</option>
+                            <option value="3">3 Stars ⭐⭐⭐</option>
+                            <option value="2">2 Stars ⭐⭐</option>
+                            <option value="1">1 Star ⭐</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-bold text-muted mb-1">Verification Badge</label>
+                        <select id="filter-rev-verified" onchange="filterReviewsTable()" class="input-box rounded-xl py-2 px-3 text-xs font-semibold w-full cursor-pointer">
+                            <option value="all">All Submissions</option>
+                            <option value="VERIFIED">✓ Verified Adoption</option>
+                            <option value="UNVERIFIED">Unverified User</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-bold text-muted mb-1">Sentiment Analysis</label>
+                        <select id="filter-rev-sentiment" onchange="filterReviewsTable()" class="input-box rounded-xl py-2 px-3 text-xs font-semibold w-full cursor-pointer">
+                            <option value="all">All Sentiments</option>
+                            <option value="POS">Positive 😊</option>
+                            <option value="NEU">Neutral 😐</option>
+                            <option value="NEG">Negative 😡</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-bold text-muted mb-1">Moderation Status</label>
+                        <select id="filter-rev-status" onchange="filterReviewsTable()" class="input-box rounded-xl py-2 px-3 text-xs font-semibold w-full cursor-pointer">
+                            <option value="all">All Statuses</option>
+                            <option value="PUBLISHED">Published Live</option>
+                            <option value="FLAGGED">Flagged for Review</option>
+                            <option value="PENDING">Pending Moderation</option>
+                            <option value="HIDDEN">Hidden</option>
+                            <option value="REMOVED">Removed</option>
+                        </select>
+                    </div>
+                    <div class="flex items-end">
+                        <button type="button" onclick="resetReviewFilters()" class="w-full px-3 py-2 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 text-xs font-bold border border-red-500/20 transition-all cursor-pointer text-center">Reset Filters</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 📌 10 RECOMMENDED ADMIN SUB-MENU NAVIGATION TABS -->
+            <div class="apple-glass rounded-2xl p-2 grid grid-cols-2 sm:grid-cols-5 lg:grid-cols-10 gap-1.5 text-[11px] font-bold shadow-md w-full">
+                <button type="button" onclick="switchCategoryTab('tab-all')" class="category-tab-btn tab-btn-active px-2 py-2 rounded-xl transition-all whitespace-nowrap cursor-pointer text-center justify-center flex items-center gap-1 w-full" id="btn-tab-all">⭐ All Reviews</button>
+                <button type="button" onclick="switchCategoryTab('tab-moderation')" class="category-tab-btn px-2 py-2 rounded-xl hover:bg-[#5B8C76]/20 transition-all whitespace-nowrap text-muted cursor-pointer text-center justify-center flex items-center gap-1 w-full" id="btn-tab-moderation">⚖️ Queue (12)</button>
+                <button type="button" onclick="switchCategoryTab('tab-reported')" class="category-tab-btn px-2 py-2 rounded-xl hover:bg-[#5B8C76]/20 transition-all whitespace-nowrap text-muted cursor-pointer text-center justify-center flex items-center gap-1 w-full" id="btn-tab-reported">🚨 Reported (8)</button>
+                <button type="button" onclick="switchCategoryTab('tab-shelters')" class="category-tab-btn px-2 py-2 rounded-xl hover:bg-[#5B8C76]/20 transition-all whitespace-nowrap text-muted cursor-pointer text-center justify-center flex items-center gap-1 w-full" id="btn-tab-shelters">🏠 Shelter Ratings</button>
+                <button type="button" onclick="switchCategoryTab('tab-drivers')" class="category-tab-btn px-2 py-2 rounded-xl hover:bg-[#5B8C76]/20 transition-all whitespace-nowrap text-muted cursor-pointer text-center justify-center flex items-center gap-1 w-full" id="btn-tab-drivers">🚚 Driver Ratings</button>
+                <button type="button" onclick="switchCategoryTab('tab-responses')" class="category-tab-btn px-2 py-2 rounded-xl hover:bg-[#5B8C76]/20 transition-all whitespace-nowrap text-muted cursor-pointer text-center justify-center flex items-center gap-1 w-full" id="btn-tab-responses">💬 Responses</button>
+                <button type="button" onclick="switchCategoryTab('tab-analytics')" class="category-tab-btn px-2 py-2 rounded-xl hover:bg-[#5B8C76]/20 transition-all whitespace-nowrap text-muted cursor-pointer text-center justify-center flex items-center gap-1 w-full" id="btn-tab-analytics">📈 Analytics</button>
+                <button type="button" onclick="switchCategoryTab('tab-audit')" class="category-tab-btn px-2 py-2 rounded-xl hover:bg-[#5B8C76]/20 transition-all whitespace-nowrap text-muted cursor-pointer text-center justify-center flex items-center gap-1 w-full" id="btn-tab-audit">🔍 Audit Logs</button>
+                <button type="button" onclick="switchCategoryTab('tab-rules')" class="category-tab-btn px-2 py-2 rounded-xl hover:bg-[#5B8C76]/20 transition-all whitespace-nowrap text-muted cursor-pointer text-center justify-center flex items-center gap-1 w-full" id="btn-tab-rules">⚙️ Auto Rules</button>
+                <button type="button" onclick="switchCategoryTab('tab-customer-view')" class="category-tab-btn px-2 py-2 rounded-xl hover:bg-[#5B8C76]/20 transition-all whitespace-nowrap text-muted cursor-pointer text-center justify-center flex items-center gap-1 w-full" id="btn-tab-customer-view">👤 Review Profiles</button>
+            </div>
+
+            <!-- ========================================== -->
+            <!-- 📁 TAB CONTENT 1: ALL REVIEWS DIRECTORY -->
+            <!-- ========================================== -->
+            <div id="tab-all" class="category-tab-content space-y-4">
+                <div class="apple-glass rounded-3xl p-6 shadow-xl space-y-4">
+                    <div class="flex items-center justify-between flex-wrap gap-2 border-b border-[#5B8C76]/20 pb-3">
+                        <div>
+                            <h3 class="font-extrabold text-lg">⭐ Centralized Reviews Directory</h3>
+                            <p class="text-xs text-muted">Audited feed of all customer reviews across pets, shelters, drivers, and platform services.</p>
+                        </div>
+                    </div>
+
+                    <!-- DIRECTORY TABLE (SYMMETRICAL ALIGNMENT) -->
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-xs border-collapse" id="reviews-directory-table">
+                            <thead>
+                                <tr class="theme-table-header uppercase text-[10px] font-extrabold tracking-wider border-b border-[#5B8C76]/25">
+                                    <th class="py-3 px-4 text-left">REV ID & VERIFICATION</th>
+                                    <th class="py-3 px-4 text-left">CUSTOMER & TYPE</th>
+                                    <th class="py-3 px-4 text-left">TARGET PET / SHELTER</th>
+                                    <th class="py-3 px-4 text-center">RATING & SENTIMENT</th>
+                                    <th class="py-3 px-4 text-left">REVIEW TITLE & CONTENT</th>
+                                    <th class="py-3 px-4 text-center">SUBMITTED DATE</th>
+                                    <th class="py-3 px-4 text-center">STATUS</th>
+                                    <th class="py-3 px-4 text-center">ACTIONS</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-[#5B8C76]/15 font-semibold">
+                                <!-- ROW 1: 5-STAR VERIFIED -->
+                                <tr class="hover:bg-[#5B8C76]/10 transition-colors">
+                                    <td class="py-3.5 px-4 text-left whitespace-nowrap">
+                                        <span class="font-extrabold block text-xs">#REV-9042</span>
+                                        <span class="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-[9px] font-extrabold border border-emerald-500/30">✓ Verified Adoption</span>
+                                    </td>
+                                    <td class="py-3.5 px-4 text-left whitespace-nowrap">
+                                        <span class="font-extrabold block">Rahul Sharma</span>
+                                        <span class="text-[10px] text-muted font-bold">Shelter Review 🏠</span>
+                                    </td>
+                                    <td class="py-3.5 px-4 text-left whitespace-nowrap">
+                                        <span class="block text-xs font-bold">Kochi Animal Shelter</span>
+                                        <span class="text-[10px] text-muted">Pet: Bruno 🐶 (#REQ-8824)</span>
+                                    </td>
+                                    <td class="py-3.5 px-4 text-center whitespace-nowrap">
+                                        <span class="font-black text-amber-400 block text-xs">⭐⭐⭐⭐⭐ (5.0)</span>
+                                        <span class="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 text-[9px] font-bold">Positive 😊</span>
+                                    </td>
+                                    <td class="py-3.5 px-4 text-left">
+                                        <span class="font-extrabold block text-emerald-400">Smooth Adoption & Cooperative Staff!</span>
+                                        <span class="text-[11px] text-muted block truncate max-w-xs">"The shelter staff provided complete health documents and immunization history..."</span>
+                                    </td>
+                                    <td class="py-3.5 px-4 text-center text-[11px] whitespace-nowrap text-muted">
+                                        2026-08-23 14:15
+                                    </td>
+                                    <td class="py-3.5 px-4 text-center whitespace-nowrap">
+                                        <span class="px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-400 text-[10px] uppercase font-extrabold border border-emerald-500/30">Published Live ✅</span>
+                                    </td>
+                                    <td class="py-3.5 px-4 text-center whitespace-nowrap">
+                                        <div class="flex items-center justify-center gap-2">
+                                            <button type="button" onclick="openReviewDetailModal('#REV-9042', 'Rahul Sharma', 'Kochi Animal Shelter', 'Bruno 🐶', '#REQ-8824', '5.0 ⭐', 'Smooth Adoption & Cooperative Staff!', 'The shelter staff provided complete health documents and immunization history promptly!', '2026-08-23 14:15', 'Published Live', 'Positive 😊', '✓ Verified Adoption')" class="name-hover-link font-bold text-xs text-[#5B8C76] dark:text-[#A8D8B9]">Inspect 🔍</button>
+                                            <button type="button" onclick="showProfessionalToast('Review Hidden', 'Review #REV-9042 hidden from public feed.')" class="name-hover-link font-bold text-xs text-amber-400">Hide 👁️</button>
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                <!-- ROW 2: FLAGGED REVIEW -->
+                                <tr class="hover:bg-[#5B8C76]/10 transition-colors bg-red-500/5">
+                                    <td class="py-3.5 px-4 text-left whitespace-nowrap">
+                                        <span class="font-extrabold block text-xs">#REV-9039</span>
+                                        <span class="px-2 py-0.5 rounded-full bg-red-500/20 text-red-400 text-[9px] font-extrabold border border-red-500/30">🔴 FLAGGED</span>
+                                    </td>
+                                    <td class="py-3.5 px-4 text-left whitespace-nowrap">
+                                        <span class="font-extrabold block">Vikram Mehta</span>
+                                        <span class="text-[10px] text-muted font-bold">Driver Review 🚚</span>
+                                    </td>
+                                    <td class="py-3.5 px-4 text-left whitespace-nowrap">
+                                        <span class="block text-xs font-bold">Ramesh Kumar (Driver)</span>
+                                        <span class="text-[10px] text-muted">#DEL-1024</span>
+                                    </td>
+                                    <td class="py-3.5 px-4 text-center whitespace-nowrap">
+                                        <span class="font-black text-red-400 block text-xs">⭐ (1.0)</span>
+                                        <span class="px-2 py-0.5 rounded-full bg-red-500/10 text-red-400 text-[9px] font-bold">Negative 😡</span>
+                                    </td>
+                                    <td class="py-3.5 px-4 text-left">
+                                        <span class="font-extrabold block text-red-400">Driver Arrived Late!</span>
+                                        <span class="text-[11px] text-muted block truncate max-w-xs">"Driver was 45 minutes late for pet delivery..."</span>
+                                    </td>
+                                    <td class="py-3.5 px-4 text-center text-[11px] whitespace-nowrap text-muted">
+                                        2026-08-23 11:20
+                                    </td>
+                                    <td class="py-3.5 px-4 text-center whitespace-nowrap">
+                                        <span class="px-2.5 py-1 rounded-full bg-red-500/20 text-red-400 text-[10px] uppercase font-extrabold border border-red-500/30">Under Review ⚖️</span>
+                                    </td>
+                                    <td class="py-3.5 px-4 text-center whitespace-nowrap">
+                                        <div class="flex items-center justify-center gap-2">
+                                            <button type="button" onclick="openReviewDetailModal('#REV-9039', 'Vikram Mehta', 'Ramesh Kumar Driver', 'Luna 🐱', '#REQ-8819', '1.0 ⭐', 'Driver Arrived Late!', 'Driver was 45 minutes late for pet delivery. Call me at 9895000000.', '2026-08-23 11:20', 'Under Review (Abusive Language Flag)', 'Negative 😡', 'Unverified')" class="btn-ui-primary text-[11px] py-1 px-3">Moderate ⚖️</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========================================== -->
+            <!-- 📁 TAB CONTENT 2: MODERATION QUEUE -->
+            <!-- ========================================== -->
+            <div id="tab-moderation" class="category-tab-content hidden space-y-6">
+                <div class="apple-glass rounded-3xl p-6 shadow-xl space-y-6">
+                    <div class="border-b border-[#5B8C76]/20 pb-3">
+                        <h3 class="font-extrabold text-lg">⚖️ High-Priority Review Moderation Queue</h3>
+                        <p class="text-xs text-muted">Process reviews flagged automatically for profanity, phone numbers, or external links.</p>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div class="theme-card-bg p-5 rounded-2xl border-l-4 border-red-500 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                            <div class="space-y-1">
+                                <div class="flex items-center gap-2">
+                                    <span class="font-extrabold text-sm text-red-400">#REV-9039 • Vikram Mehta</span>
+                                    <span class="px-2 py-0.5 rounded-full bg-red-500/20 text-red-400 text-[10px] font-bold">🔴 Abusive Language Flag</span>
+                                </div>
+                                <p class="text-xs text-muted italic">"Driver was late for delivery. Call me at 9895000000 to resolve."</p>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <button type="button" onclick="showProfessionalToast('Review Approved', 'Approved review #REV-9039 for publication.')" class="btn-ui-primary text-xs">Approve ✅</button>
+                                <button type="button" onclick="showProfessionalToast('Review Hidden', 'Hidden review #REV-9039.')" class="btn-ui-secondary text-xs">Hide 👁️</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========================================== -->
+            <!-- 📁 TAB CONTENT 3: REPORTED REVIEWS -->
+            <!-- ========================================== -->
+            <div id="tab-reported" class="category-tab-content hidden space-y-6">
+                <div class="apple-glass rounded-3xl p-6 shadow-xl space-y-6">
+                    <div class="border-b border-[#5B8C76]/20 pb-3">
+                        <h3 class="font-extrabold text-lg">🚨 Reported Reviews Desk</h3>
+                        <p class="text-xs text-muted">Investigate customer-reported reviews for spam, harassment, or fake feedback.</p>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-xs border-collapse">
+                            <thead>
+                                <tr class="theme-table-header uppercase text-[10px] font-extrabold tracking-wider border-b border-[#5B8C76]/25">
+                                    <th class="py-3 px-4 text-left">REPORT ID</th>
+                                    <th class="py-3 px-4 text-left">REVIEW ID</th>
+                                    <th class="py-3 px-4 text-left">REPORTER</th>
+                                    <th class="py-3 px-4 text-left">REPORT REASON</th>
+                                    <th class="py-3 px-4 text-center">DATE</th>
+                                    <th class="py-3 px-4 text-center">STATUS</th>
+                                    <th class="py-3 px-4 text-center">ACTION</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-[#5B8C76]/15 font-semibold">
+                                <tr class="hover:bg-[#5B8C76]/10 transition-colors bg-red-500/5">
+                                    <td class="py-3.5 px-4 text-left font-extrabold">#RPT-401</td>
+                                    <td class="py-3.5 px-4 text-left font-bold text-emerald-400">#REV-9039</td>
+                                    <td class="py-3.5 px-4 text-left">Kochi Shelter Manager</td>
+                                    <td class="py-3.5 px-4 text-left text-red-400 font-bold">Personal Info / Phone Number Posted</td>
+                                    <td class="py-3.5 px-4 text-center text-muted">2026-08-23 12:00</td>
+                                    <td class="py-3.5 px-4 text-center"><span class="px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-400 font-extrabold text-[10px]">Investigating 🕵️</span></td>
+                                    <td class="py-3.5 px-4 text-center"><button type="button" onclick="showProfessionalToast('Report Resolved', 'Report #RPT-401 marked as resolved.')" class="btn-ui-primary text-xs py-1 px-3">Resolve ⚖️</button></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========================================== -->
+            <!-- 📁 TAB CONTENT 4: SHELTER RATINGS -->
+            <!-- ========================================== -->
+            <div id="tab-shelters" class="category-tab-content hidden space-y-6">
+                <div class="apple-glass rounded-3xl p-6 shadow-xl space-y-6">
+                    <div class="border-b border-[#5B8C76]/20 pb-3">
+                        <h3 class="font-extrabold text-lg">🏠 Shelter Partner Rating Leaderboard</h3>
+                        <p class="text-xs text-muted">Monitor shelter ratings for pet care, staff communication, and adopter support.</p>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-xs border-collapse">
+                            <thead>
+                                <tr class="theme-table-header uppercase text-[10px] font-extrabold tracking-wider border-b border-[#5B8C76]/25">
+                                    <th class="py-3 px-4 text-left">SHELTER NAME</th>
+                                    <th class="py-3 px-4 text-center">TOTAL REVIEWS</th>
+                                    <th class="py-3 px-4 text-right">AVG RATING</th>
+                                    <th class="py-3 px-4 text-right">5-STAR %</th>
+                                    <th class="py-3 px-4 text-right">PET CARE</th>
+                                    <th class="py-3 px-4 text-right">COMMUNICATION</th>
+                                    <th class="py-3 px-4 text-center">RATING TREND</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-[#5B8C76]/15 font-semibold">
+                                <tr class="hover:bg-[#5B8C76]/10 transition-colors">
+                                    <td class="py-3.5 px-4 text-left font-extrabold">Kochi Animal Shelter 🏠</td>
+                                    <td class="py-3.5 px-4 text-center">78 Reviews</td>
+                                    <td class="py-3.5 px-4 text-right font-black text-amber-400">4.9 ⭐</td>
+                                    <td class="py-3.5 px-4 text-right text-emerald-400 font-bold">92.3%</td>
+                                    <td class="py-3.5 px-4 text-right text-emerald-400 font-bold">4.9 / 5.0</td>
+                                    <td class="py-3.5 px-4 text-right text-emerald-400 font-bold">4.8 / 5.0</td>
+                                    <td class="py-3.5 px-4 text-center"><span class="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-[10px] font-bold">↑ 0.2 YoY</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========================================== -->
+            <!-- 📁 TAB CONTENT 5: DRIVER RATINGS -->
+            <!-- ========================================== -->
+            <div id="tab-drivers" class="category-tab-content hidden space-y-6">
+                <div class="apple-glass rounded-3xl p-6 shadow-xl space-y-6">
+                    <div class="border-b border-[#5B8C76]/20 pb-3">
+                        <h3 class="font-extrabold text-lg">🚚 Delivery Driver Performance Ratings</h3>
+                        <p class="text-xs text-muted">Audit driver pet handling, on-time delivery rates, and customer feedback.</p>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-xs border-collapse">
+                            <thead>
+                                <tr class="theme-table-header uppercase text-[10px] font-extrabold tracking-wider border-b border-[#5B8C76]/25">
+                                    <th class="py-3 px-4 text-left">DRIVER NAME</th>
+                                    <th class="py-3 px-4 text-center">TOTAL DELIVERIES</th>
+                                    <th class="py-3 px-4 text-right">AVG RATING</th>
+                                    <th class="py-3 px-4 text-right">ON-TIME DELIVERY %</th>
+                                    <th class="py-3 px-4 text-right">PET HANDLING</th>
+                                    <th class="py-3 px-4 text-center">STATUS</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-[#5B8C76]/15 font-semibold">
+                                <tr class="hover:bg-[#5B8C76]/10 transition-colors">
+                                    <td class="py-3.5 px-4 text-left font-extrabold">Ramesh Kumar 🚚</td>
+                                    <td class="py-3.5 px-4 text-center">142 Deliveries</td>
+                                    <td class="py-3.5 px-4 text-right font-black text-amber-400">4.7 ⭐</td>
+                                    <td class="py-3.5 px-4 text-right text-emerald-400 font-bold">96.5%</td>
+                                    <td class="py-3.5 px-4 text-right text-emerald-400 font-bold">4.8 / 5.0</td>
+                                    <td class="py-3.5 px-4 text-center"><span class="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-[10px] font-bold">Top Driver 🏆</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========================================== -->
+            <!-- 📁 TAB CONTENT 6: RESPONSES -->
+            <!-- ========================================== -->
+            <div id="tab-responses" class="category-tab-content hidden space-y-6">
+                <div class="apple-glass rounded-3xl p-6 shadow-xl space-y-6">
+                    <div class="border-b border-[#5B8C76]/20 pb-3">
+                        <h3 class="font-extrabold text-lg">💬 Shelter & Driver Response Moderation Desk</h3>
+                        <p class="text-xs text-muted">Review official replies submitted by partner shelters and drivers to customer feedback.</p>
+                    </div>
+
+                    <div class="theme-card-bg p-4 rounded-2xl space-y-2 border-l-4 border-emerald-400">
+                        <span class="text-[10px] text-muted font-bold block">Response to #REV-9042 by Kochi Animal Shelter Manager</span>
+                        <p class="text-xs font-semibold text-emerald-400 italic">"Thank you Rahul! We are delighted Bruno found a wonderful home with your family."</p>
+                        <div class="flex justify-end gap-2 pt-1">
+                            <button type="button" onclick="showProfessionalToast('Response Approved', 'Shelter response approved.')" class="btn-ui-primary text-[11px] py-1 px-3">Approve Response ✅</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========================================== -->
+            <!-- 📁 TAB CONTENT 7: ANALYTICS -->
+            <!-- ========================================== -->
+            <div id="tab-analytics" class="category-tab-content hidden space-y-6">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="apple-glass rounded-3xl p-6 shadow-xl space-y-4">
+                        <h3 class="font-extrabold text-base">📈 Rating Trends Over Time</h3>
+                        <div class="h-64 relative">
+                            <canvas id="revRatingTrendChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="apple-glass rounded-3xl p-6 shadow-xl space-y-4">
+                        <h3 class="font-extrabold text-base">🍩 Sentiment Analysis Breakdown</h3>
+                        <div class="h-64 relative">
+                            <canvas id="revSentimentChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========================================== -->
+            <!-- 📁 TAB CONTENT 8: AUDIT LOGS -->
+            <!-- ========================================== -->
+            <div id="tab-audit" class="category-tab-content hidden space-y-6">
+                <div class="apple-glass rounded-3xl p-6 shadow-xl space-y-6">
+                    <div class="border-b border-[#5B8C76]/20 pb-3">
+                        <h3 class="font-extrabold text-lg">🔍 Reviews Moderation Audit Trail</h3>
+                        <p class="text-xs text-muted">Immutable trail of review reports, moderation decisions, and status changes.</p>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-xs border-collapse">
+                            <thead>
+                                <tr class="theme-table-header uppercase text-[10px] font-extrabold tracking-wider border-b border-[#5B8C76]/25">
+                                    <th class="py-3 px-4 text-left">TIMESTAMP</th>
+                                    <th class="py-3 px-4 text-left">USER & ROLE</th>
+                                    <th class="py-3 px-4 text-center">ACTION</th>
+                                    <th class="py-3 px-4 text-left">TARGET REV ID</th>
+                                    <th class="py-3 px-4 text-left">DESCRIPTION</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-[#5B8C76]/15 font-semibold">
+                                <tr>
+                                    <td class="py-3.5 px-4 text-left">2026-08-23 14:15</td>
+                                    <td class="py-3.5 px-4 text-left">Rahul Sharma (Customer)</td>
+                                    <td class="py-3.5 px-4 text-center"><span class="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 font-extrabold">REVIEW_CREATED</span></td>
+                                    <td class="py-3.5 px-4 text-left">#REV-9042</td>
+                                    <td class="py-3.5 px-4 text-left text-muted">Submitted 5-Star verified review for Kochi Animal Shelter.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========================================== -->
+            <!-- 📁 TAB CONTENT 9: AUTOMATED RULES -->
+            <!-- ========================================== -->
+            <div id="tab-rules" class="category-tab-content hidden space-y-6">
+                <div class="apple-glass rounded-3xl p-6 shadow-xl space-y-6">
+                    <div class="border-b border-[#5B8C76]/20 pb-3">
+                        <h3 class="font-extrabold text-lg">⚙️ Automated Review Moderation Rules</h3>
+                        <p class="text-xs text-muted">Configure automated profanity filters, spam detectors, and low rating alerts.</p>
+                    </div>
+
+                    <div class="space-y-4 text-xs font-bold">
+                        <div class="theme-card-bg p-4 rounded-2xl flex justify-between items-center">
+                            <div>
+                                <span class="font-extrabold text-sm block">Rule 1: Phone Number & Contact Filter</span>
+                                <span class="text-muted text-[11px]">Automatically flag reviews containing 10-digit phone numbers for manual review.</span>
+                            </div>
+                            <span class="px-2.5 py-1 bg-emerald-500/20 text-emerald-400 text-[10px] font-extrabold rounded-full">Active ✅</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========================================== -->
+            <!-- 📁 TAB CONTENT 10: CUSTOMER REVIEW PROFILES -->
+            <!-- ========================================== -->
+            <div id="tab-customer-view" class="category-tab-content hidden space-y-6">
+                <div class="apple-glass rounded-3xl p-6 shadow-xl space-y-6">
+                    <div class="border-b border-[#5B8C76]/20 pb-3">
+                        <h3 class="font-extrabold text-lg">👤 Customer Feedback Profile Inspection</h3>
+                        <p class="text-xs text-muted">Inspect customer review history, total ratings submitted, and reported reviews.</p>
+                    </div>
+
+                    <div class="theme-card-bg p-5 rounded-2xl space-y-3">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <h4 class="font-extrabold text-sm">Rahul Sharma (Verified Adopter)</h4>
+                                <span class="text-muted text-[11px]">Total Reviews Submitted: 3 • Avg Rating Given: 5.0 ⭐</span>
+                            </div>
+                            <span class="px-2.5 py-1 bg-emerald-500/20 text-emerald-400 text-[10px] font-extrabold rounded-full">Good Standing</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- 📄 REVIEW INSPECTION DETAIL MODAL -->
+    <div id="review-detail-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm hidden">
+        <div class="apple-glass rounded-3xl p-6 w-full max-w-2xl mx-4 space-y-4 shadow-2xl relative">
+            <button type="button" onclick="closeReviewDetailModal()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-red-500/20 text-red-400 font-extrabold flex items-center justify-center cursor-pointer">✕</button>
+            <h3 class="font-extrabold text-lg" id="modal-rev-title">Review Inspection</h3>
+            
+            <div class="theme-card-bg p-4 rounded-2xl space-y-3 text-xs">
+                <div class="grid grid-cols-2 gap-2 border-b border-[#5B8C76]/20 pb-2">
+                    <div><span class="text-muted block">Review ID:</span> <span id="modal-rev-id" class="font-extrabold text-emerald-400">#REV-9042</span></div>
+                    <div><span class="text-muted block">Reviewer:</span> <span id="modal-rev-customer" class="font-extrabold">Rahul Sharma</span></div>
+                    <div><span class="text-muted block">Target Shelter / Pet:</span> <span id="modal-rev-target" class="font-extrabold">Kochi Animal Shelter</span></div>
+                    <div><span class="text-muted block">Rating:</span> <span id="modal-rev-rating" class="font-extrabold text-amber-400">5.0 ⭐</span></div>
+                </div>
+                <div>
+                    <span class="text-muted block font-bold mb-1">Review Content:</span>
+                    <p id="modal-rev-body" class="p-3 bg-[#111A15]/80 rounded-xl text-muted font-medium leading-relaxed"></p>
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-2">
+                <button type="button" onclick="closeReviewDetailModal()" class="btn-ui-primary text-xs">Close Inspection</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JS DASHBOARD LOGIC -->
+    <script>
+        // 🔔 PROFESSIONAL TOAST SYSTEM
+        window.showProfessionalToast = function(title, message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            if (!container) return;
+
+            const toast = document.createElement('div');
+            const bgClass = type === 'error' 
+                ? 'bg-red-500/90 text-white' 
+                : 'bg-gradient-to-r from-[#5B8C76] to-[#3D6B56] text-white';
+
+            toast.className = `toast-animate pointer-events-auto flex items-center gap-3 px-4 py-3 rounded-2xl shadow-2xl text-xs font-extrabold border border-white/20 ${bgClass}`;
+            toast.innerHTML = `
+                <span class="text-base">${type === 'error' ? '🚨' : '✨'}</span>
+                <div>
+                    <div class="font-black text-sm tracking-tight">${title}</div>
+                    <div class="font-medium text-white/90">${message}</div>
+                </div>
+            `;
+
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transition = 'all 0.3s ease';
+                setTimeout(() => toast.remove(), 300);
+            }, 3200);
+        };
+
+        // 🌓 THEME TOGGLER
+        window.toggleTheme = function() {
+            const isDark = document.documentElement.classList.contains('dark');
+            if (isDark) {
+                document.documentElement.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+                document.getElementById('theme-icon').textContent = '☀️';
+                showProfessionalToast('Theme Switched', 'Switched to Light Theme mode.');
+            } else {
+                document.documentElement.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+                document.getElementById('theme-icon').textContent = '🌙';
+                showProfessionalToast('Theme Switched', 'Switched to Dark Theme mode.');
+            }
+        };
+        if (localStorage.getItem('theme') === 'light') {
+            document.documentElement.classList.remove('dark');
+            if (document.getElementById('theme-icon')) document.getElementById('theme-icon').textContent = '☀️';
+        }
+
+        // 📌 CATEGORY TAB SWITCHING
+        window.switchCategoryTab = function(tabId) {
+            document.querySelectorAll('.category-tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.category-tab-btn').forEach(btn => {
+                btn.classList.remove('tab-btn-active');
+                btn.classList.add('hover:bg-[#5B8C76]/20', 'text-muted');
+            });
+
+            const targetTab = document.getElementById(tabId);
+            if (targetTab) targetTab.classList.remove('hidden');
+            
+            const targetBtn = document.querySelector(`[onclick="switchCategoryTab('${tabId}')"]`);
+            if (targetBtn) {
+                targetBtn.classList.add('tab-btn-active');
+                targetBtn.classList.remove('hover:bg-[#5B8C76]/20', 'text-muted');
+            }
+        };
+
+        // 🔍 FILTER REVIEWS
+        window.filterReviewsTable = function() {
+            showProfessionalToast('Filter Applied', 'Filtered customer reviews directory.');
+        };
+
+        window.resetReviewFilters = function() {
+            if (document.getElementById('filter-rev-category')) document.getElementById('filter-rev-category').value = 'all';
+            if (document.getElementById('filter-rev-rating')) document.getElementById('filter-rev-rating').value = 'all';
+            if (document.getElementById('filter-rev-verified')) document.getElementById('filter-rev-verified').value = 'all';
+            if (document.getElementById('filter-rev-sentiment')) document.getElementById('filter-rev-sentiment').value = 'all';
+            if (document.getElementById('filter-rev-status')) document.getElementById('filter-rev-status').value = 'all';
+            if (document.getElementById('rev-search-input')) document.getElementById('rev-search-input').value = '';
+            
+            if (typeof updateCustomDropdownsUI === 'function') updateCustomDropdownsUI();
+            showProfessionalToast('Filters Reset', 'All review filters reset to defaults.');
+        };
+
+        window.filterByRating = function(rating) {
+            switchCategoryTab('tab-all');
+            showProfessionalToast('Rating Filtered', `Showing reviews for rating: ${rating} Stars`);
+        };
+
+        window.filterByStatus = function(status) {
+            switchCategoryTab('tab-all');
+            showProfessionalToast('Status Filtered', `Showing reviews for status: ${status}`);
+        };
+
+        // 📄 REVIEW DETAIL MODAL
+        window.openReviewDetailModal = function(id, customer, shelter, pet, req, rating, title, body, date, status, sentiment, verified) {
+            document.getElementById('modal-rev-id').textContent = id;
+            document.getElementById('modal-rev-customer').textContent = customer;
+            document.getElementById('modal-rev-target').textContent = `${shelter} (${pet})`;
+            document.getElementById('modal-rev-rating').textContent = rating;
+            document.getElementById('modal-rev-title').textContent = title;
+            document.getElementById('modal-rev-body').textContent = body;
+
+            document.getElementById('review-detail-modal').classList.remove('hidden');
+        };
+
+        window.closeReviewDetailModal = function() {
+            document.getElementById('review-detail-modal').classList.add('hidden');
+        };
+
+        // 🎛️ AUTOMATIC GLASS UI DROPDOWN INITIALIZER
+        function autoConvertGlassDropdowns() {
+            document.querySelectorAll('select.input-box, select').forEach(select => {
+                if (select.dataset.glassConverted === 'true' || select.classList.contains('hidden')) return;
+                select.dataset.glassConverted = 'true';
+                select.classList.add('hidden');
+
+                const wrapper = document.createElement('div');
+                wrapper.className = 'relative custom-dropdown-group inline-block w-full';
+                
+                select.parentNode.insertBefore(wrapper, select);
+                wrapper.appendChild(select);
+
+                const currentOpt = select.options[select.selectedIndex] || select.options[0];
+                const initialLabel = currentOpt ? currentOpt.textContent : 'Select...';
+
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'w-full py-2 px-3 input-box rounded-xl text-xs font-bold flex items-center justify-between cursor-pointer custom-dropdown-btn';
+                btn.innerHTML = `
+                    <span class="custom-dropdown-label truncate">${initialLabel}</span>
+                    <svg class="w-3.5 h-3.5 text-[#5B8C76] dark:text-[#A8D8B9] transition-transform duration-200 custom-dropdown-arrow ml-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
+                `;
+
+                const menu = document.createElement('div');
+                menu.className = 'absolute top-full left-0 right-0 mt-1.5 z-50 rounded-2xl apple-glass shadow-2xl p-1.5 space-y-1 hidden custom-dropdown-menu border border-[#5B8C76]/30 dark:border-[#A8D8B9]/30 max-h-60 overflow-y-auto';
+
+                Array.from(select.options).forEach((opt, idx) => {
+                    const item = document.createElement('div');
+                    const isActive = idx === select.selectedIndex;
+                    item.className = `px-3 py-2 rounded-xl text-xs font-bold cursor-pointer hover:bg-[#5B8C76]/20 dark:hover:bg-[#A8D8B9]/20 transition-all flex items-center justify-between custom-opt-item ${isActive ? 'bg-[#5B8C76]/20 text-[#5B8C76] dark:text-[#A8D8B9]' : ''}`;
+                    item.innerHTML = `<span>${opt.textContent}</span>`;
+                    
+                    item.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        select.value = opt.value;
+                        btn.querySelector('.custom-dropdown-label').textContent = opt.textContent;
+                        
+                        menu.querySelectorAll('.custom-opt-item').forEach(i => i.classList.remove('bg-[#5B8C76]/20', 'text-[#5B8C76]', 'dark:text-[#A8D8B9]'));
+                        item.classList.add('bg-[#5B8C76]/20', 'text-[#5B8C76]', 'dark:text-[#A8D8B9]');
+                        
+                        menu.classList.add('hidden');
+                        btn.querySelector('.custom-dropdown-arrow').classList.remove('rotate-180');
+
+                        select.dispatchEvent(new Event('change', { bubbles: true }));
+                    });
+
+                    menu.appendChild(item);
+                });
+
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const isHidden = menu.classList.contains('hidden');
+                    document.querySelectorAll('.custom-dropdown-menu').forEach(m => m.classList.add('hidden'));
+                    document.querySelectorAll('.custom-dropdown-arrow').forEach(a => a.classList.remove('rotate-180'));
+
+                    if (isHidden) {
+                        menu.classList.remove('hidden');
+                        btn.querySelector('.custom-dropdown-arrow').classList.add('rotate-180');
+                    }
+                });
+
+                wrapper.appendChild(btn);
+                wrapper.appendChild(menu);
+            });
+        }
+
+        function updateCustomDropdownsUI() {
+            document.querySelectorAll('.custom-dropdown-group').forEach(group => {
+                const select = group.querySelector('select');
+                if (!select) return;
+                const currentOpt = select.options[select.selectedIndex] || select.options[0];
+                const label = group.querySelector('.custom-dropdown-label');
+                if (label && currentOpt) label.textContent = currentOpt.textContent;
+            });
+        }
+
+        document.addEventListener('click', () => {
+            document.querySelectorAll('.custom-dropdown-menu').forEach(m => m.classList.add('hidden'));
+            document.querySelectorAll('.custom-dropdown-arrow').forEach(a => a.classList.remove('rotate-180'));
+        });
+
+        // 📊 INITIALIZE CHARTS ON LOAD
+        window.addEventListener('DOMContentLoaded', () => {
+            autoConvertGlassDropdowns();
+
+            const ctx1 = document.getElementById('revRatingTrendChart').getContext('2d');
+            new Chart(ctx1, {
+                type: 'line',
+                data: {
+                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                    datasets: [{ label: 'Average Rating', data: [4.7, 4.8, 4.8, 4.9, 4.7, 4.8, 4.85], borderColor: '#F59E0B', tension: 0.3 }]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+
+            const ctx2 = document.getElementById('revSentimentChart').getContext('2d');
+            new Chart(ctx2, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Positive 😊', 'Neutral 😐', 'Negative 😡'],
+                    datasets: [{ data: [85, 10, 5], backgroundColor: ['#10B981', '#3B82F6', '#EF4444'] }]
+                },
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom', labels: { color: '#8EA89B', font: { size: 10, weight: 'bold' } } } }
+                }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,1064 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pet Operations - Registered Shelter Auto-Population</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS v4 Browser Build -->
+    <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+    <style type="text/css">
+        :root {
+            --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        * {
+            transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease;
+        }
+
+        /* 🚫 GLOBALLY HIDE ALL SCROLLBARS SYSTEM-WIDE (FIREFOX, CHROME, EDGE, SAFARI) */
+        *, html, body, main, div, aside, section {
+            -ms-overflow-style: none !important;
+            scrollbar-width: none !important;
+        }
+
+        *::-webkit-scrollbar,
+        html::-webkit-scrollbar,
+        body::-webkit-scrollbar,
+        main::-webkit-scrollbar,
+        div::-webkit-scrollbar,
+        aside::-webkit-scrollbar {
+            display: none !important;
+            width: 0px !important;
+            height: 0px !important;
+            background: transparent !important;
+        }
+
+        /* ☀️ LIGHT MODE: HORIZON UI ALABASTER CREAM (#F4EDE2) */
+        html:not(.dark) body { background-color: #F4EDE2 !important; color: #111A15 !important; }
+        
+        html:not(.dark) .apple-glass { 
+            background: #FFFFFF !important; 
+            border: 1px solid rgba(91, 140, 118, 0.30) !important; 
+            box-shadow: 0 16px 36px rgba(91, 140, 118, 0.10) !important; 
+        }
+        
+        html:not(.dark) .sidebar-bg { 
+            background: #EFE8DC !important; 
+            border-right: 1px solid rgba(91, 140, 118, 0.25) !important; 
+        }
+
+        html:not(.dark) .modal-bg { 
+            background: #FFFFFF !important; 
+            border: 1px solid rgba(91, 140, 118, 0.35) !important; 
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.20) !important; 
+        }
+
+        html:not(.dark) .user-name-text { color: #111A15 !important; font-weight: 800 !important; }
+        html:not(.dark) .text-muted { color: #4B5563 !important; font-weight: 600 !important; }
+        html:not(.dark) .theme-accent-text { color: #1E3A2B !important; font-weight: 800 !important; }
+        html:not(.dark) .table-header-text { color: #111A15 !important; font-weight: 800 !important; }
+        
+        html:not(.dark) .card-inner-box {
+            background: #F4EDE2 !important;
+            border: 1px solid #A3C4B5 !important;
+            color: #111A15 !important;
+        }
+
+        html:not(.dark) .input-box {
+            background: #FFFFFF !important;
+            border: 1px solid #789D8C !important;
+            color: #111A15 !important;
+            font-weight: 600 !important;
+        }
+
+        /* PRIMARY SOLID GREEN BUTTON */
+        .btn-design-primary {
+            background-color: #5B8C76 !important;
+            color: #FFFFFF !important;
+            font-weight: 900 !important;
+            letter-spacing: 0.03em !important;
+            border-radius: 1rem !important;
+            box-shadow: 0 6px 18px rgba(91, 140, 118, 0.4) !important;
+            transition: all 0.2s ease !important;
+        }
+        .btn-design-primary:hover {
+            background-color: #2D4C3E !important;
+            transform: translateY(-1px) !important;
+            box-shadow: 0 8px 24px rgba(45, 76, 62, 0.5) !important;
+        }
+
+        /* SECONDARY GRAY BUTTON */
+        .btn-design-secondary {
+            background-color: #A3B8AD !important;
+            color: #111A15 !important;
+            font-weight: 800 !important;
+            border-radius: 1rem !important;
+            transition: all 0.2s ease !important;
+        }
+        .btn-design-secondary:hover {
+            background-color: #789D8C !important;
+            color: #FFFFFF !important;
+            transform: translateY(-1px) !important;
+        }
+
+        /* LIGHT MODE BADGES */
+        html:not(.dark) .badge-verified {
+            background-color: #D1FAE5 !important;
+            color: #065F46 !important;
+            border: 1px solid #6EE7B7 !important;
+            font-weight: 800 !important;
+        }
+
+        html:not(.dark) .badge-pending {
+            background-color: #FEF3C7 !important;
+            color: #78350F !important;
+            border: 1px solid #FCD34D !important;
+            font-weight: 800 !important;
+        }
+
+        html:not(.dark) .btn-secondary-action {
+            background-color: #E5E7EB !important;
+            color: #111827 !important;
+            border: 1px solid #9CA3AF !important;
+            font-weight: 800 !important;
+        }
+
+        html:not(.dark) .btn-danger-action {
+            background-color: #FEE2E2 !important;
+            color: #7F1D1D !important;
+            border: 1px solid #FCA5A5 !important;
+            font-weight: 800 !important;
+        }
+
+        /* 🌙 DARK MODE: ELEGANT DEEP EMERALD GLASS */
+        .dark body { background-color: #111A15 !important; color: #F4EDE2 !important; }
+        
+        .dark .apple-glass { 
+            background: rgba(27, 41, 33, 0.85) !important; 
+            backdrop-filter: blur(25px); 
+            border: 1px solid rgba(168, 216, 185, 0.22) !important; 
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.45) !important;
+        }
+        
+        .dark .sidebar-bg { 
+            background: rgba(14, 22, 18, 0.90) !important; 
+            border-right: 1px solid rgba(168, 216, 185, 0.15) !important; 
+        }
+
+        .dark .modal-bg { 
+            background: rgba(22, 33, 27, 0.96) !important; 
+            border: 1px solid rgba(168, 216, 185, 0.3) !important; 
+        }
+
+        .dark .user-name-text { color: #FFFFFF !important; font-weight: 800 !important; }
+        .dark .text-muted { color: #9CA3AF !important; font-weight: 500 !important; }
+        .dark .theme-accent-text { color: #A8D8B9 !important; font-weight: 800 !important; }
+        .dark .table-header-text { color: #A8D8B9 !important; font-weight: 800 !important; }
+
+        .dark .card-inner-box {
+            background: rgba(17, 26, 21, 0.6) !important;
+            border: 1px solid rgba(168, 216, 185, 0.2) !important;
+            color: #F4EDE2 !important;
+        }
+
+        .dark .input-box {
+            background: rgba(17, 26, 21, 0.8) !important;
+            border: 1px solid rgba(168, 216, 185, 0.25) !important;
+            color: #F4EDE2 !important;
+        }
+
+        .dark .badge-verified {
+            background-color: rgba(91, 140, 118, 0.3) !important;
+            color: #A8D8B9 !important;
+            border: 1px solid rgba(168, 216, 185, 0.3) !important;
+        }
+
+        .dark .badge-pending {
+            background-color: rgba(245, 158, 11, 0.2) !important;
+            color: #FBBF24 !important;
+            border: 1px solid rgba(251, 191, 36, 0.3) !important;
+        }
+
+        .dark .btn-secondary-action {
+            background-color: rgba(91, 140, 118, 0.2) !important;
+            color: #F4EDE2 !important;
+            border: 1px solid rgba(168, 216, 185, 0.2) !important;
+        }
+
+        .dark .btn-danger-action {
+            background-color: rgba(239, 68, 68, 0.2) !important;
+            color: #F87171 !important;
+            border: 1px solid rgba(239, 68, 68, 0.3) !important;
+        }
+
+        .nav-item-active {
+            background: linear-gradient(135deg, #5B8C76 0%, #2D4C3E 100%) !important;
+            color: #FFFFFF !important;
+            box-shadow: 0 8px 20px rgba(91, 140, 118, 0.45) !important;
+        }
+
+        .nav-item-hover-transform {
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .nav-item-hover-transform:hover {
+            background: rgba(91, 140, 118, 0.25);
+            transform: translateX(4px);
+        }
+    </style>
+</head>
+<body class="min-h-screen font-sans">
+
+    <div class="flex min-h-screen">
+        
+        <!-- SIDEBAR -->
+        <aside class="w-64 sidebar-bg flex flex-col justify-between p-6 sticky top-0 h-screen z-30 overflow-y-auto">
+            <div>
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#5B8C76] to-[#A8D8B9] flex items-center justify-center text-[#111A15] font-extrabold text-xl shadow-lg shadow-[#5B8C76]/30">
+                        👨‍💼
+                    </div>
+                    <div>
+                        <span class="font-extrabold text-lg tracking-tight block">HORIZON <span class="text-[#5B8C76] dark:text-[#A8D8B9]">UI</span></span>
+                        <span class="text-[10px] theme-accent-text font-extrabold uppercase tracking-widest">Pet Adoption Suite</span>
+                    </div>
+                </div>
+
+                <nav class="space-y-1 text-xs font-bold">
+                    <a href="{% url 'admin_dashboard' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>📊</span> Dashboard Overview</a>
+                    <a href="{% url 'admin_users' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>👥</span> User Management</a>
+                    
+                    <div class="space-y-1 my-2 py-2 border-y border-[#5B8C76]/25">
+                        <a href="{% url 'admin_shelters' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>🏠</span> Shelter Management</a>
+                        <a href="{% url 'admin_pets' %}" class="nav-item-active flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>🐶</span> Pet Management</a>
+                        <a href="{% url 'admin_requests' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>🐾</span> Adoption Requests</a>
+                        <a href="{% url 'admin_payments' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>💳</span> Payments</a>
+                        <a href="{% url 'admin_deliveries' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>🚚</span> Delivery Control</a>
+                        <a href="{% url 'admin_audit_logs' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>🔍</span> Audit Logs</a>
+                        <a href="{% url 'admin_revenue' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>💰</span> Revenue & Profit</a>
+                    </div>
+
+                    <a href="{% url 'admin_reports' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>📈</span> Reports & Analytics</a>
+                    <a href="{% url 'admin_notifications' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>🔔</span> Notifications</a>
+                    <a href="{% url 'admin_announcements' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>📢</span> Announcements</a>
+                    <a href="{% url 'admin_health' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>🩺</span> Pet Health</a>
+                    <a href="{% url 'admin_settings' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>⚙️</span> System Settings</a>
+                    <a href="{% url 'admin_roles' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>🔐</span> Roles & Permissions</a>
+                </nav>
+            </div>
+            
+            <div class="pt-4 border-t border-[#5B8C76]/25 space-y-1">
+                <a href="{% url 'home' %}" class="flex items-center gap-3 px-4 py-2 hover:bg-[#5B8C76]/20 rounded-2xl text-xs font-bold"><span>🌐</span> Main Website</a>
+                <a href="{% url 'login' %}" class="flex items-center gap-3 px-4 py-2 hover:bg-red-500/20 text-red-500 rounded-2xl text-xs font-bold"><span>🚪</span> Logout</a>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT CONTAINER -->
+        <main class="flex-1 p-8 overflow-y-auto">
+            
+            <!-- 🚀 HORIZON CLEAN TOP HEADER NAVBAR -->
+            <header class="flex items-center justify-between mb-8 pb-2">
+                <!-- BREADCRUMB & PAGE TITLE -->
+                <div>
+                    <div class="text-xs text-muted font-bold mb-0.5">
+                        <span>Pages</span> / <span class="theme-accent-text font-extrabold">Pet Management</span>
+                    </div>
+                    <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight">Registered Pets Directory 🐶</h1>
+                </div>
+
+                <!-- CLEAN ACTION PILL CONTAINER -->
+                <div class="apple-glass rounded-full px-4 py-2 flex items-center gap-3 shadow-lg">
+                    <!-- ADD PET BTN -->
+                    <button type="button" onclick="openAddPetModal()" class="btn-ui-primary">
+                        <span>➕</span> Add New Pet
+                    </button>
+
+                    <!-- THEME TOGGLER -->
+                    <button type="button" onclick="toggleTheme()" class="w-8 h-8 bg-[#5B8C76]/20 hover:bg-[#5B8C76]/30 border border-[#5B8C76]/40 rounded-full text-sm font-extrabold flex items-center justify-center cursor-pointer shadow-sm" title="Toggle Light/Dark Theme">
+                        <span id="theme-icon">🌙</span>
+                    </button>
+
+                    <!-- NOTIFICATION BELL -->
+                    <a href="{% url 'admin_notifications' %}" class="w-8 h-8 bg-[#5B8C76]/20 hover:bg-[#5B8C76]/30 border border-[#5B8C76]/40 rounded-full text-xs font-extrabold flex items-center justify-center relative shadow-sm" title="Notifications">
+                        🔔 <span class="w-2 h-2 rounded-full bg-red-500 absolute top-1 right-1 animate-ping"></span>
+                    </a>
+
+                    <!-- USER AVATAR PILL -->
+                    <div class="w-8 h-8 rounded-full bg-gradient-to-br from-[#5B8C76] to-[#A8D8B9] flex items-center justify-center font-extrabold text-xs text-[#111A15] shadow-sm" title="Admin User">
+                        A
+                    </div>
+                </div>
+            </header>
+
+            <!-- 4 STAT METRIC CARDS -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
+                <div class="apple-glass rounded-[28px] p-5 flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-2xl bg-[#5B8C76]/20 text-[#5B8C76] dark:text-[#A8D8B9] flex items-center justify-center text-2xl font-bold shadow-sm">🐶</div>
+                    <div>
+                        <div class="text-xs text-muted font-extrabold uppercase">Total Pets</div>
+                        <div class="user-name-text text-3xl font-black mt-0.5" id="stat-total-pets">18</div>
+                    </div>
+                </div>
+                
+                <div class="apple-glass rounded-[28px] p-5 flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-2xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-2xl font-bold shadow-sm">✅</div>
+                    <div>
+                        <div class="text-xs text-muted font-extrabold uppercase">Available</div>
+                        <div class="text-emerald-500 text-3xl font-black mt-0.5" id="stat-available-pets">14</div>
+                    </div>
+                </div>
+
+                <div class="apple-glass rounded-[28px] p-5 flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-2xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-2xl font-bold shadow-sm">⏳</div>
+                    <div>
+                        <div class="text-xs text-muted font-extrabold uppercase">Pending Queue</div>
+                        <div class="text-amber-500 text-3xl font-black mt-0.5">3</div>
+                    </div>
+                </div>
+
+                <div class="apple-glass rounded-[28px] p-5 flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-2xl bg-purple-500/20 text-purple-400 flex items-center justify-center text-2xl font-bold shadow-sm">🏠</div>
+                    <div>
+                        <div class="text-xs text-muted font-extrabold uppercase">Adopted / Reserved</div>
+                        <div class="text-purple-400 text-3xl font-black mt-0.5">1</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 📋 DIRECTORY TABLE -->
+            <div class="apple-glass rounded-[28px] p-6 shadow-xl space-y-4 mb-8">
+                <div class="flex flex-col sm:flex-row justify-between items-center gap-3">
+                    <h3 class="text-lg font-extrabold user-name-text">📋 Registered Pets Directory</h3>
+                    <div class="relative w-full sm:w-72">
+                        <input type="text" id="pet-search-input" onkeyup="filterPetsTable()" placeholder="Search by name, breed, shelter..." class="w-full py-2 px-3.5 pr-8 input-box rounded-2xl text-xs font-semibold">
+                        <span class="absolute right-3 top-2.5 text-xs text-muted">🔍</span>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs" id="main-pets-table">
+                        <thead>
+                            <tr class="border-b border-[#5B8C76]/20 table-header-text uppercase tracking-wider">
+                                <th class="px-4 py-3.5 whitespace-nowrap">Pet ID & Name</th>
+                                <th class="px-4 py-3.5 whitespace-nowrap">Category & Breed</th>
+                                <th class="px-4 py-3.5 whitespace-nowrap">Shelter & Owner</th>
+                                <th class="px-4 py-3.5 whitespace-nowrap">Status</th>
+                                <th class="px-4 py-3.5 text-right whitespace-nowrap">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-[#5B8C76]/15 font-medium">
+                            
+                            <!-- ROW 1: BRUNO (GOLDEN RETRIEVER) -->
+                            <tr class="pet-row" data-id="1" data-status="VERIFIED" data-name="Bruno" data-type="Dog" data-breed="Golden Retriever" data-shelter="ABC Animal Shelter" data-owner="Dr. Ananya Roy" data-email="contact@abcshelter.org" data-phone="+1 555-0192" data-location="San Francisco, CA" data-address="45 Rescue Lane, San Francisco, CA" data-fee="$150 (₹3,500)" data-vaccination="Fully Vaccinated ✅" data-passport="Healthy & Active ✅" data-doc="VACCINATION-CERT-BRUNO.pdf" data-age="2 Years" data-gender="Male" data-weight="28 kg" data-img="{% static 'pets/images/bruno_landscape.jpg' %}">
+                                <td class="px-4 py-4 font-bold whitespace-nowrap">
+                                    <button onclick="openPetProfileModal(1)" class="text-left group flex items-center gap-3 cursor-pointer">
+                                        <img src="{% static 'pets/images/bruno_landscape.jpg' %}" onerror="this.src='https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&w=1200&q=80'" alt="Bruno" class="w-12 h-9 rounded-xl object-cover border-2 border-[#5B8C76] shadow-sm">
+                                        <div>
+                                            <div class="text-sm font-extrabold user-name-text group-hover:text-[#5B8C76] flex items-center gap-1">
+                                                <span id="row-name-1">Bruno</span> 🐶
+                                            </div>
+                                            <div class="text-[10px] theme-accent-text">ID: #PET-001 • <span id="row-breed-1">Golden Retriever</span></div>
+                                        </div>
+                                    </button>
+                                </td>
+                                <td class="px-4 py-4 font-bold user-name-text whitespace-nowrap">Dog 🐶</td>
+                                <td class="px-4 py-4 text-muted whitespace-nowrap"><span id="row-shelter-1">ABC Animal Shelter</span><br><span class="text-[11px] font-semibold" id="row-email-1">contact@abcshelter.org</span></td>
+                                <td class="px-4 py-4 whitespace-nowrap"><span class="px-3 py-1 badge-verified text-[10px] rounded-full" id="row-status-1">Active Verified ✅</span></td>
+                                <td class="px-4 py-4 text-right whitespace-nowrap">
+                                    <button onclick="openPetProfileModal(1)" class="px-4 py-2 btn-design-primary text-xs font-black cursor-pointer shadow-md">View Profile</button>
+                                </td>
+                            </tr>
+
+                            <!-- ROW 2: LUNA (PERSIAN CAT) -->
+                            <tr class="pet-row" data-id="2" data-status="PENDING" data-name="Luna" data-type="Cat" data-breed="Persian Cat" data-shelter="Happy Paws Rescue" data-owner="Vikram Singh" data-email="contact@happypaws.org" data-phone="+1 555-8831" data-location="San Jose, CA" data-address="128 Haven Road, San Jose, CA" data-fee="$120 (₹2,800)" data-vaccination="Fully Vaccinated ✅" data-passport="Neutered & Spayed ✂️" data-doc="VACCINATION-CERT-LUNA.pdf" data-age="1 Year" data-gender="Female" data-weight="4 kg" data-img="{% static 'pets/images/luna_landscape.jpg' %}">
+                                <td class="px-4 py-4 font-bold whitespace-nowrap">
+                                    <button onclick="openPetProfileModal(2)" class="text-left group flex items-center gap-3 cursor-pointer">
+                                        <img src="{% static 'pets/images/luna_landscape.jpg' %}" onerror="this.src='https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?auto=format&fit=crop&w=1200&q=80'" alt="Luna" class="w-12 h-9 rounded-xl object-cover border-2 border-[#5B8C76] shadow-sm">
+                                        <div>
+                                            <div class="text-sm font-extrabold user-name-text group-hover:text-[#5B8C76] flex items-center gap-1">
+                                                <span id="row-name-2">Luna</span> 🐱
+                                            </div>
+                                            <div class="text-[10px] theme-accent-text">ID: #PET-002 • <span id="row-breed-2">Persian Cat</span></div>
+                                        </div>
+                                    </button>
+                                </td>
+                                <td class="px-4 py-4 font-bold user-name-text whitespace-nowrap">Cat 🐱</td>
+                                <td class="px-4 py-4 text-muted whitespace-nowrap"><span id="row-shelter-2">Happy Paws Rescue</span><br><span class="text-[11px] font-semibold" id="row-email-2">contact@happypaws.org</span></td>
+                                <td class="px-4 py-4 whitespace-nowrap"><span class="px-3 py-1 badge-pending text-[10px] rounded-full" id="row-status-2">Pending ⏳</span></td>
+                                <td class="px-4 py-4 text-right whitespace-nowrap">
+                                    <button onclick="openPetProfileModal(2)" class="px-4 py-2 btn-design-primary text-xs font-black cursor-pointer shadow-md">View Profile</button>
+                                </td>
+                            </tr>
+
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+
+
+    <!-- 🏠 ANOMALY-FREE PURE LANDSCAPE PET PROFILE CARD VIEW MODAL -->
+    <div id="pet-profile-modal" class="fixed inset-0 bg-black/75 backdrop-blur-lg z-50 flex items-center justify-center p-4 hidden">
+        <div class="apple-glass rounded-[32px] p-6 sm:p-8 max-w-2xl w-full shadow-2xl space-y-4 max-h-[92vh] overflow-y-auto">
+            
+            <!-- 1. TOP SUBTITLE & STATUS TAG & RELOCATED UPDATE PHOTO BUTTON & CLOSE BUTTON -->
+            <div class="flex items-center justify-between gap-4">
+                <span class="text-xs font-black uppercase tracking-wider text-emerald-600 dark:text-emerald-400" id="prof-card-id">PET #PET-001</span>
+                
+                <div class="flex items-center gap-3">
+                    <span class="px-3.5 py-1 bg-[#D1FAE5] dark:bg-emerald-500/20 text-[#065F46] dark:text-[#A8D8B9] font-extrabold text-xs rounded-full shadow-xs" id="prof-card-status">Active Verified ✅</span>
+                    <button type="button" onclick="openEditPetModal()" class="px-3.5 py-1 bg-[#5B8C76] hover:bg-[#2D4C3E] text-white text-xs font-extrabold rounded-full shadow-xs cursor-pointer flex items-center gap-1">
+                        <span>📸 Update Photo</span>
+                    </button>
+                    <button onclick="closePetProfileModal()" class="w-8 h-8 rounded-full bg-gray-200 dark:bg-[#5B8C76]/20 hover:bg-gray-300 text-muted hover:text-[#5B8C76] font-black text-sm flex items-center justify-center cursor-pointer transition-all" title="Close Profile">✕</button>
+                </div>
+            </div>
+
+            <!-- 2. ANOMALY-FREE PURE LANDSCAPE PET PHOTO HERO CARD -->
+            <div class="relative group">
+                <div class="p-1.5 bg-gradient-to-r from-[#5B8C76]/40 via-[#A8D8B9]/30 to-[#5B8C76]/40 border border-[#5B8C76]/40 rounded-[40px] shadow-2xl overflow-hidden">
+                    <div class="relative rounded-[34px] overflow-hidden bg-black/60 h-48 sm:h-56 flex items-center justify-center">
+                        <img id="prof-card-hero-img" src="{% static 'pets/images/bruno_landscape.jpg' %}" onerror="this.src='https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&w=1200&q=80'" alt="Pet Landscape Photo" class="w-full h-full object-cover rounded-[34px] transition-transform duration-500 group-hover:scale-102">
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. MAIN TITLE -->
+            <h2 class="text-2xl font-black user-name-text tracking-tight pt-1" id="prof-card-title">
+                Pet: Bruno 🐶 (San Francisco, CA)
+            </h2>
+
+            <!-- 4. TWO-COLUMN GRID WITH LOCATION, ADDRESS & ADOPTION FEE -->
+            <div class="border-t border-b border-[#5B8C76]/20 py-4 space-y-3">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                    <div>
+                        <div class="font-extrabold user-name-text flex items-center gap-1">
+                            <span>📍 City Location & Full Address:</span>
+                        </div>
+                        <div class="text-muted font-semibold mt-0.5" id="prof-card-address">
+                            45 Rescue Lane, San Francisco, CA
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="font-extrabold user-name-text flex items-center gap-1">
+                            <span>💰 Adoption Fee ($/₹):</span>
+                        </div>
+                        <div class="text-emerald-500 font-extrabold mt-0.5 text-sm" id="prof-card-fee">
+                            $150 (₹3,500)
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs pt-2 border-t border-[#5B8C76]/15">
+                    <div>
+                        <div class="font-extrabold user-name-text flex items-center gap-1">
+                            <span>🏠 Shelter & Owner Contact:</span>
+                        </div>
+                        <div class="text-muted font-semibold mt-0.5" id="prof-card-owner">
+                            ABC Animal Shelter • Dr. Ananya Roy • contact@abcshelter.org • +1 555-0192
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="font-extrabold user-name-text flex items-center gap-1">
+                            <span>📊 Age, Gender & Weight:</span>
+                        </div>
+                        <div class="theme-accent-text font-bold mt-0.5" id="prof-card-stats">
+                            2 Years • Male • 28 kg
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 🩺 SEPARATE VACCINATION STATUS & HEALTH PASSPORT INSPECTOR BOX -->
+                <div class="p-3.5 card-inner-box rounded-2xl space-y-2 mt-2">
+                    <div class="flex items-center justify-between border-b border-[#5B8C76]/20 pb-2">
+                        <div class="text-xs font-extrabold user-name-text uppercase tracking-wider flex items-center gap-1.5">
+                            <span>🩺 Health & Vaccination Passport Audit</span>
+                        </div>
+                        <button type="button" onclick="openEditPetModal()" class="px-3 py-1 bg-[#5B8C76] hover:bg-[#2D4C3E] text-white rounded-xl text-xs font-extrabold cursor-pointer flex items-center gap-1 shadow-sm">
+                            <span>✏️ Edit Medical Status</span>
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs font-semibold pt-1">
+                        <div>
+                            <span class="text-muted text-[10px] uppercase block">Vaccination Status:</span>
+                            <span id="prof-card-vaccination-text" class="text-emerald-400 font-bold">Fully Vaccinated ✅</span>
+                        </div>
+                        <div>
+                            <span class="text-muted text-[10px] uppercase block">Health Passport Status:</span>
+                            <span id="prof-card-passport-text" class="theme-accent-text font-bold">Healthy & Active ✅</span>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-between items-center pt-2 border-t border-[#5B8C76]/15">
+                        <span class="text-[11px] text-muted">Document: <strong id="prof-card-license" class="theme-accent-text">VACCINATION-CERT-BRUNO.pdf 📄</strong></span>
+                        <button type="button" onclick="triggerDirectDocDownload()" class="px-3 py-1 btn-design-secondary rounded-xl text-xs font-extrabold cursor-pointer flex items-center gap-1">
+                            <span>📄 Certificate Doc 📥</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 5. IN-PROFILE CRUD OPERATIONS & ACTION BUTTONS -->
+            <div class="space-y-3 pt-1">
+                <div class="text-xs font-extrabold user-name-text uppercase tracking-wider">Pet Administrative CRUD Actions:</div>
+                
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs font-extrabold">
+                    <!-- READ / MANAGE REQUESTS -->
+                    <button type="button" onclick="navigateToRequests()" class="btn-design-primary py-3 px-3 text-center cursor-pointer shadow-md flex items-center justify-center gap-1">
+                        ❤️ Adoption Requests
+                    </button>
+
+                    <!-- DIRECT DOWNLOAD CERTIFICATE DOC -->
+                    <a id="btn-card-download-doc" href="javascript:void(0)" onclick="triggerDirectDocDownload()" class="btn-design-secondary py-3 px-3 text-center cursor-pointer flex items-center justify-center gap-1">
+                        📄 Certificate Doc 📥
+                    </a>
+
+                    <!-- UPDATE / EDIT PET DETAILS -->
+                    <button type="button" onclick="openEditPetModal()" class="py-3 px-3 btn-secondary-action rounded-2xl text-center cursor-pointer flex items-center justify-center gap-1">
+                        ✏️ Edit Profile
+                    </button>
+
+                    <!-- APPROVE BUTTON -->
+                    <button type="button" onclick="triggerApproveCardAction()" id="btn-card-approve" class="py-3 px-3 badge-verified rounded-2xl text-center cursor-pointer flex items-center justify-center gap-1">
+                        ✅ Approve
+                    </button>
+                </div>
+
+                <div class="flex justify-between items-center pt-2 border-t border-[#5B8C76]/15">
+                    <!-- SUSPEND BUTTON -->
+                    <button type="button" onclick="triggerSuspendCardAction()" id="btn-card-suspend" class="px-4 py-2 btn-danger-action rounded-2xl font-extrabold text-xs cursor-pointer flex items-center gap-1">
+                        ⏸ Suspend Listing
+                    </button>
+
+                    <!-- DELETE RECORD BUTTON -->
+                    <button type="button" onclick="triggerDeleteCardAction()" class="px-4 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-400 font-extrabold text-xs rounded-2xl cursor-pointer flex items-center gap-1">
+                        🗑 Delete Record
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ✏️ EDIT PET MODAL -->
+    <div id="pet-edit-modal" class="fixed inset-0 bg-black/75 backdrop-blur-lg z-50 flex items-center justify-center p-4 hidden">
+        <div class="modal-bg rounded-[32px] p-6 sm:p-8 max-w-lg w-full shadow-2xl relative space-y-5">
+            <button onclick="closeEditPetModal()" class="absolute top-6 right-6 text-muted hover:text-[#5B8C76] font-extrabold text-lg cursor-pointer">✕</button>
+            <h2 class="text-xl font-extrabold user-name-text flex items-center gap-2"><span>✏️</span> Edit Pet & Landscape Photo Specifications</h2>
+            
+            <form id="edit-pet-form" onsubmit="savePetEdit(event)" class="space-y-4 text-xs font-bold">
+                <div>
+                    <label class="block text-muted mb-1">Pet Name:</label>
+                    <input type="text" id="edit-pet-name" required class="w-full py-2.5 px-3.5 input-box rounded-2xl text-xs font-semibold">
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-muted mb-1">Breed:</label>
+                        <input type="text" id="edit-pet-breed" required class="w-full py-2.5 px-3.5 input-box rounded-2xl text-xs font-semibold">
+                    </div>
+                    <div>
+                        <label class="block text-muted mb-1">Shelter Name:</label>
+                        <input type="text" id="edit-shelter-name" required class="w-full py-2.5 px-3.5 input-box rounded-2xl text-xs font-semibold">
+                    </div>
+                </div>
+
+                <!-- 💉 TWO SEPARATE DROPDOWNS FOR VACCINATION & HEALTH PASSPORT -->
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-muted mb-1">Vaccination Status Dropdown:</label>
+                        <select id="edit-vaccination-status" required class="w-full py-2.5 px-3.5 input-box rounded-2xl text-xs font-semibold">
+                            <option value="Fully Vaccinated ✅">Fully Vaccinated ✅</option>
+                            <option value="Partially Vaccinated 💉">Partially Vaccinated 💉</option>
+                            <option value="Vaccination Due Soon ⏳">Vaccination Due Soon ⏳</option>
+                            <option value="Not Vaccinated ❌">Not Vaccinated ❌</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-muted mb-1">Health Passport Status Dropdown:</label>
+                        <select id="edit-health-passport-status" required class="w-full py-2.5 px-3.5 input-box rounded-2xl text-xs font-semibold">
+                            <option value="Healthy & Active ✅">Healthy & Active ✅</option>
+                            <option value="Neutered & Spayed ✂️">Neutered & Spayed ✂️</option>
+                            <option value="Under Treatment / Special Care 💊">Under Treatment / Special Care 💊</option>
+                            <option value="Quarantined / Observation 🏥">Quarantined / Observation 🏥</option>
+                            <option value="Pending Health Clearance ⏳">Pending Health Clearance ⏳</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-muted mb-1">Adoption Fee ($/₹):</label>
+                        <input type="text" id="edit-fee" required class="w-full py-2.5 px-3.5 input-box rounded-2xl text-xs font-semibold">
+                    </div>
+                    <div>
+                        <label class="block text-muted mb-1">Contact Email:</label>
+                        <input type="email" id="edit-email" required class="w-full py-2.5 px-3.5 input-box rounded-2xl text-xs font-semibold">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-muted mb-1">City Location & Address:</label>
+                    <input type="text" id="edit-location" required class="w-full py-2.5 px-3.5 input-box rounded-2xl text-xs font-semibold">
+                </div>
+
+                <div>
+                    <label class="block text-muted mb-1">Update Landscape Photo (16:9 JPG/PNG):</label>
+                    <input type="file" id="edit-photo-file" accept="image/*" class="w-full py-2 px-3 input-box rounded-2xl text-xs font-semibold file:mr-3 file:py-1 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-extrabold file:bg-[#5B8C76] file:text-white cursor-pointer">
+                </div>
+
+                <div>
+                    <label class="block text-muted mb-1">Update Vaccination Certificate (PDF/Image):</label>
+                    <input type="file" id="edit-doc-file" accept=".pdf,.doc,.docx,.png,.jpg" class="w-full py-2 px-3 input-box rounded-2xl text-xs font-semibold file:mr-3 file:py-1 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-extrabold file:bg-[#5B8C76] file:text-white cursor-pointer">
+                </div>
+
+                <div class="flex justify-end gap-3 pt-3 border-t border-[#5B8C76]/20">
+                    <button type="button" onclick="closeEditPetModal()" class="px-4 py-2.5 btn-secondary-action rounded-2xl cursor-pointer">Cancel</button>
+                    <button type="submit" class="px-5 py-2.5 bg-[#5B8C76] hover:bg-[#2D4C3E] text-white font-extrabold rounded-2xl shadow-md cursor-pointer">Save Profile & Photo 💾</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ⚡ CONTROLLERS -->
+    <script>
+        let currentPetId = 1;
+
+        const defaultFallbacks = {
+            1: "https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&w=1200&q=80",
+            2: "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?auto=format&fit=crop&w=1200&q=80"
+        };
+
+        const registeredSheltersData = {
+            "ABC Animal Shelter": {
+                email: "contact@abcshelter.org",
+                location: "45 Rescue Lane, San Francisco, CA",
+                fee: "$150 (₹3,500)"
+            },
+            "Happy Paws Rescue": {
+                email: "contact@happypaws.org",
+                location: "128 Haven Road, San Jose, CA",
+                fee: "$120 (₹2,800)"
+            },
+            "Save-a-Pet Foundation": {
+                email: "info@saveapet.org",
+                location: "88 Shelter Way, Oakland, CA",
+                fee: "$100 (₹2,500)"
+            },
+            "Paws & Claws Refuge": {
+                email: "admin@pawsandclaws.org",
+                location: "12 Pine Street, Berkeley, CA",
+                fee: "$135 (₹3,100)"
+            },
+            "Haven Pet Rescue": {
+                email: "contact@havenpet.org",
+                location: "304 Mission Ave, Sacramento, CA",
+                fee: "$110 (₹2,600)"
+            }
+        };
+
+        function autoPopulateAddShelterDetails() {
+            const selectedShelter = document.getElementById('add-shelter-name').value;
+            const data = registeredSheltersData[selectedShelter];
+            if (data) {
+                document.getElementById('add-email').value = data.email;
+                document.getElementById('add-location').value = data.location;
+                document.getElementById('add-fee').value = data.fee;
+            }
+        }
+
+        function navigateToRequests() {
+            window.location.href = "{% url 'admin_requests' %}";
+        }
+
+        function openAddPetModal() {
+            document.getElementById('add-pet-modal').classList.remove('hidden');
+            autoPopulateAddShelterDetails();
+        }
+
+        function closeAddPetModal() {
+            document.getElementById('add-pet-modal').classList.add('hidden');
+        }
+
+        function submitAddPetForm(event) {
+            event.preventDefault();
+            const name = document.getElementById('add-pet-name').value;
+            const type = document.getElementById('add-pet-type').value;
+            const breed = document.getElementById('add-pet-breed').value;
+            const shelter = document.getElementById('add-shelter-name').value;
+            const email = document.getElementById('add-email').value;
+            const vaccination = document.getElementById('add-vaccination-status').value;
+            const passport = document.getElementById('add-health-passport-status').value;
+            const fee = document.getElementById('add-fee').value;
+            const location = document.getElementById('add-location').value;
+            
+            const photoInput = document.getElementById('add-pet-photo-file');
+            let petImg = "https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&w=1200&q=80";
+            if (photoInput && photoInput.files && photoInput.files[0]) {
+                petImg = URL.createObjectURL(photoInput.files[0]);
+            }
+
+            const fileInput = document.getElementById('add-doc-file');
+            let docName = `VACCINATION-CERT-${name.toUpperCase()}.pdf`;
+            if (fileInput && fileInput.files && fileInput.files[0]) {
+                docName = fileInput.files[0].name;
+            }
+
+            const newId = document.querySelectorAll('.pet-row').length + 1;
+
+            const tbody = document.querySelector('#main-pets-table tbody');
+            const tr = document.createElement('tr');
+            tr.className = 'pet-row';
+            tr.setAttribute('data-id', newId);
+            tr.setAttribute('data-status', 'VERIFIED');
+            tr.setAttribute('data-name', name);
+            tr.setAttribute('data-type', type);
+            tr.setAttribute('data-breed', breed);
+            tr.setAttribute('data-shelter', shelter);
+            tr.setAttribute('data-owner', shelter);
+            tr.setAttribute('data-email', email);
+            tr.setAttribute('data-phone', '+1 555-0192');
+            tr.setAttribute('data-location', location);
+            tr.setAttribute('data-address', `${location}`);
+            tr.setAttribute('data-fee', fee);
+            tr.setAttribute('data-vaccination', vaccination);
+            tr.setAttribute('data-passport', passport);
+            tr.setAttribute('data-doc', docName);
+            tr.setAttribute('data-img', petImg);
+            tr.setAttribute('data-age', '1 Year');
+            tr.setAttribute('data-gender', 'Male');
+            tr.setAttribute('data-weight', '12 kg');
+
+            tr.innerHTML = `
+                <td class="px-4 py-4 font-bold whitespace-nowrap">
+                    <button onclick="openPetProfileModal(${newId})" class="text-left group flex items-center gap-3 cursor-pointer">
+                        <img src="${petImg}" alt="${name}" class="w-12 h-9 rounded-xl object-cover border-2 border-[#5B8C76] shadow-sm">
+                        <div>
+                            <div class="text-sm font-extrabold user-name-text group-hover:text-[#5B8C76] flex items-center gap-1">
+                                <span id="row-name-${newId}">${name}</span> 🐶
+                            </div>
+                            <div class="text-[10px] theme-accent-text">ID: #PET-00${newId} • <span id="row-breed-${newId}">${breed}</span></div>
+                        </div>
+                    </button>
+                </td>
+                <td class="px-4 py-4 font-bold user-name-text whitespace-nowrap">${type} 🐶</td>
+                <td class="px-4 py-4 text-muted whitespace-nowrap"><span id="row-shelter-${newId}">${shelter}</span><br><span class="text-[11px] font-semibold" id="row-email-${newId}">${email}</span></td>
+                <td class="px-4 py-4 whitespace-nowrap"><span class="px-3 py-1 badge-verified text-[10px] rounded-full" id="row-status-${newId}">Active Verified ✅</span></td>
+                <td class="px-4 py-4 text-right whitespace-nowrap">
+                    <button onclick="openPetProfileModal(${newId})" class="px-4 py-2 btn-design-primary text-xs font-black cursor-pointer shadow-md">View Profile</button>
+                </td>
+            `;
+
+            tbody.appendChild(tr);
+
+            const totalStat = document.getElementById('stat-total-pets');
+            const activeStat = document.getElementById('stat-available-pets');
+            if (totalStat) totalStat.textContent = parseInt(totalStat.textContent || 18) + 1;
+            if (activeStat) activeStat.textContent = parseInt(activeStat.textContent || 14) + 1;
+
+            closeAddPetModal();
+            document.getElementById('add-pet-form').reset();
+            openPetProfileModal(newId);
+        }
+
+        function openPetProfileModal(id) {
+            currentPetId = id;
+            const row = document.querySelector(`.pet-row[data-id="${id}"]`);
+            if (row) {
+                const name = row.getAttribute('data-name');
+                const location = row.getAttribute('data-location');
+                const address = row.getAttribute('data-address') || `45 Rescue Lane, ${location}`;
+                const shelter = row.getAttribute('data-shelter');
+                const email = row.getAttribute('data-email');
+                const phone = row.getAttribute('data-phone') || '+1 555-0192';
+                const fee = row.getAttribute('data-fee') || '$150 (₹3,500)';
+                const doc = row.getAttribute('data-doc');
+                const vaccination = row.getAttribute('data-vaccination') || 'Fully Vaccinated ✅';
+                const passport = row.getAttribute('data-passport') || 'Healthy & Active ✅';
+                
+                let petImg = row.getAttribute('data-img');
+                if (!petImg || petImg === 'undefined') {
+                    petImg = defaultFallbacks[id] || "https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&w=1200&q=80";
+                }
+
+                const age = row.getAttribute('data-age') || '2 Years';
+                const gender = row.getAttribute('data-gender') || 'Male';
+                const weight = row.getAttribute('data-weight') || '28 kg';
+                const status = row.getAttribute('data-status');
+
+                document.getElementById('prof-card-id').textContent = `PET #PET-00${id}`;
+                document.getElementById('prof-card-title').textContent = `Pet: ${name} 🐶 (${location})`;
+                
+                const heroImg = document.getElementById('prof-card-hero-img');
+                if (heroImg) heroImg.src = petImg;
+
+                document.getElementById('prof-card-address').textContent = address;
+                document.getElementById('prof-card-fee').textContent = fee;
+                document.getElementById('prof-card-owner').textContent = `${shelter} • ${email} • ${phone}`;
+                document.getElementById('prof-card-license').textContent = `${doc} 📄`;
+                document.getElementById('prof-card-stats').textContent = `${age} • ${gender} • ${weight}`;
+                document.getElementById('prof-card-vaccination-text').textContent = vaccination;
+                document.getElementById('prof-card-passport-text').textContent = passport;
+
+                const statusBadge = document.getElementById('prof-card-status');
+                if (status === 'PENDING') {
+                    statusBadge.textContent = "Pending Registration ⏳";
+                    statusBadge.className = "px-3.5 py-1 bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300 font-extrabold text-xs rounded-full shadow-xs";
+                } else if (status === 'SUSPENDED') {
+                    statusBadge.textContent = "Suspended ⚠️";
+                    statusBadge.className = "px-3.5 py-1 bg-red-100 dark:bg-red-500/20 text-red-800 dark:text-red-300 font-extrabold text-xs rounded-full shadow-xs";
+                } else {
+                    statusBadge.textContent = "Active Verified ✅";
+                    statusBadge.className = "px-3.5 py-1 bg-[#D1FAE5] dark:bg-emerald-500/20 text-[#065F46] dark:text-[#A8D8B9] font-extrabold text-xs rounded-full shadow-xs";
+                }
+            }
+            document.getElementById('pet-profile-modal').classList.remove('hidden');
+        }
+
+        function closePetProfileModal() {
+            document.getElementById('pet-profile-modal').classList.add('hidden');
+        }
+
+        function triggerApproveCardAction() {
+            openApproveModal(currentPetId, 'Pet');
+            openPetProfileModal(currentPetId);
+        }
+
+        function triggerSuspendCardAction() {
+            openSuspendModal(currentPetId, 'Pet');
+            openPetProfileModal(currentPetId);
+        }
+
+        function triggerDeleteCardAction() {
+            const row = document.querySelector(`.pet-row[data-id="${currentPetId}"]`);
+            if (row) row.remove();
+            closePetProfileModal();
+        }
+
+        function openEditPetModal() {
+            const row = document.querySelector(`.pet-row[data-id="${currentPetId}"]`);
+            if (row) {
+                document.getElementById('edit-pet-name').value = row.getAttribute('data-name');
+                document.getElementById('edit-pet-breed').value = row.getAttribute('data-breed');
+                document.getElementById('edit-shelter-name').value = row.getAttribute('data-shelter');
+                
+                const vSelect = document.getElementById('edit-vaccination-status');
+                if (vSelect) vSelect.value = row.getAttribute('data-vaccination') || 'Fully Vaccinated ✅';
+                
+                const pSelect = document.getElementById('edit-health-passport-status');
+                if (pSelect) pSelect.value = row.getAttribute('data-passport') || 'Healthy & Active ✅';
+
+                document.getElementById('edit-fee').value = row.getAttribute('data-fee') || '$150 (₹3,500)';
+                document.getElementById('edit-email').value = row.getAttribute('data-email');
+                document.getElementById('edit-location').value = row.getAttribute('data-location');
+            }
+            document.getElementById('pet-edit-modal').classList.remove('hidden');
+        }
+
+        function closeEditPetModal() {
+            document.getElementById('pet-edit-modal').classList.add('hidden');
+        }
+
+        function savePetEdit(event) {
+            event.preventDefault();
+            const name = document.getElementById('edit-pet-name').value;
+            const breed = document.getElementById('edit-pet-breed').value;
+            const shelter = document.getElementById('edit-shelter-name').value;
+            const vaccination = document.getElementById('edit-vaccination-status').value;
+            const passport = document.getElementById('edit-health-passport-status').value;
+            const fee = document.getElementById('edit-fee').value;
+            const email = document.getElementById('edit-email').value;
+            const location = document.getElementById('edit-location').value;
+            
+            const photoInput = document.getElementById('edit-photo-file');
+            const docInput = document.getElementById('edit-doc-file');
+
+            const row = document.querySelector(`.pet-row[data-id="${currentPetId}"]`);
+            if (row) {
+                row.setAttribute('data-name', name);
+                row.setAttribute('data-breed', breed);
+                row.setAttribute('data-shelter', shelter);
+                row.setAttribute('data-vaccination', vaccination);
+                row.setAttribute('data-passport', passport);
+                row.setAttribute('data-fee', fee);
+                row.setAttribute('data-email', email);
+                row.setAttribute('data-location', location);
+
+                if (photoInput && photoInput.files && photoInput.files[0]) {
+                    const newPhotoUrl = URL.createObjectURL(photoInput.files[0]);
+                    row.setAttribute('data-img', newPhotoUrl);
+                }
+
+                if (docInput && docInput.files && docInput.files[0]) {
+                    row.setAttribute('data-doc', docInput.files[0].name);
+                }
+
+                const nameEl = document.getElementById(`row-name-${currentPetId}`);
+                if (nameEl) nameEl.textContent = name;
+                const breedEl = document.getElementById(`row-breed-${currentPetId}`);
+                if (breedEl) breedEl.textContent = breed;
+                const shelterEl = document.getElementById(`row-shelter-${currentPetId}`);
+                if (shelterEl) shelterEl.textContent = shelter;
+                const emailEl = document.getElementById(`row-email-${currentPetId}`);
+                if (emailEl) emailEl.textContent = email;
+            }
+
+            closeEditPetModal();
+            openPetProfileModal(currentPetId);
+        }
+
+        function triggerDirectDocDownload() {
+            const row = document.querySelector(`.pet-row[data-id="${currentPetId}"]`);
+            const docName = row ? row.getAttribute('data-doc') : 'VACCINATION-CERT-BRUNO.pdf';
+            const blob = new Blob([`Official Vaccination Certificate for ${docName}`], { type: 'application/pdf' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = docName;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function openApproveModal(id, name) {
+            const badge = document.getElementById(`row-status-${id}`);
+            if (badge) {
+                badge.className = "px-3 py-1 badge-verified text-[10px] rounded-full";
+                badge.textContent = "Active Verified ✅";
+            }
+            const row = document.querySelector(`.pet-row[data-id="${id}"]`);
+            if (row) row.setAttribute('data-status', 'VERIFIED');
+        }
+
+        function openSuspendModal(id, name) {
+            const badge = document.getElementById(`row-status-${id}`);
+            if (badge) {
+                badge.className = "px-3 py-1 btn-danger-action text-[10px] rounded-full";
+                badge.textContent = "Suspended ⚠️";
+            }
+            const row = document.querySelector(`.pet-row[data-id="${id}"]`);
+            if (row) row.setAttribute('data-status', 'SUSPENDED');
+        }
+
+        function filterPetsTable() {
+            const query = document.getElementById('pet-search-input').value.toLowerCase();
+            document.querySelectorAll('.pet-row').forEach(row => {
+                const name = row.getAttribute('data-name').toLowerCase();
+                const breed = row.getAttribute('data-breed').toLowerCase();
+                const shelter = row.getAttribute('data-shelter').toLowerCase();
+                row.style.display = (name.includes(query) || breed.includes(query) || shelter.includes(query)) ? '' : 'none';
+            });
+        }
+
+        function toggleTheme() {
+            const isDark = document.documentElement.classList.contains('dark');
+            const themeIcon = document.getElementById('theme-icon');
+            if (isDark) { 
+                document.documentElement.classList.remove('dark'); 
+                localStorage.setItem('theme', 'light'); 
+                if (themeIcon) themeIcon.textContent = '☀️';
+            } else { 
+                document.documentElement.classList.add('dark'); 
+                localStorage.setItem('theme', 'dark'); 
+                if (themeIcon) themeIcon.textContent = '🌙';
+            }
+        }
+
+        /* 🎛️ AUTOMATIC GLASS UI DROPDOWN INITIALIZER */
+        function autoConvertGlassDropdowns() {
+            document.querySelectorAll('select.input-box, select').forEach(select => {
+                if (select.dataset.glassConverted === 'true' || select.classList.contains('hidden')) return;
+                select.dataset.glassConverted = 'true';
+                select.classList.add('hidden');
+
+                const wrapper = document.createElement('div');
+                wrapper.className = 'relative custom-dropdown-group inline-block w-full';
+                
+                select.parentNode.insertBefore(wrapper, select);
+                wrapper.appendChild(select);
+
+                const currentOpt = select.options[select.selectedIndex] || select.options[0];
+                const initialLabel = currentOpt ? currentOpt.textContent : 'Select...';
+
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'w-full py-2 px-3 input-box rounded-xl text-xs font-bold flex items-center justify-between cursor-pointer custom-dropdown-btn';
+                btn.innerHTML = `
+                    <span class="custom-dropdown-label">${initialLabel}</span>
+                    <svg class="w-3.5 h-3.5 text-[#5B8C76] dark:text-[#A8D8B9] transition-transform duration-200 custom-dropdown-arrow ml-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
+                `;
+
+                const menu = document.createElement('div');
+                menu.className = 'absolute top-full left-0 right-0 mt-1.5 z-50 rounded-2xl apple-glass shadow-2xl p-1.5 space-y-1 hidden custom-dropdown-menu border border-[#5B8C76]/30 dark:border-[#A8D8B9]/30 max-h-60 overflow-y-auto';
+
+                Array.from(select.options).forEach((opt, idx) => {
+                    const item = document.createElement('div');
+                    const isActive = idx === select.selectedIndex;
+                    item.className = `px-3 py-2 rounded-xl text-xs font-bold cursor-pointer hover:bg-[#5B8C76]/20 dark:hover:bg-[#A8D8B9]/20 transition-all flex items-center justify-between custom-opt-item ${isActive ? 'bg-[#5B8C76]/20 text-[#5B8C76] dark:text-[#A8D8B9]' : ''}`;
+                    item.innerHTML = `<span>${opt.textContent}</span>`;
+                    
+                    item.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        select.value = opt.value;
+                        btn.querySelector('.custom-dropdown-label').textContent = opt.textContent;
+                        
+                        menu.querySelectorAll('.custom-opt-item').forEach(i => i.classList.remove('bg-[#5B8C76]/20', 'text-[#5B8C76]', 'dark:text-[#A8D8B9]'));
+                        item.classList.add('bg-[#5B8C76]/20', 'text-[#5B8C76]', 'dark:text-[#A8D8B9]');
+                        
+                        menu.classList.add('hidden');
+                        btn.querySelector('.custom-dropdown-arrow').classList.remove('rotate-180');
+
+                        select.dispatchEvent(new Event('change', { bubbles: true }));
+                    });
+
+                    menu.appendChild(item);
+                });
+
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const isHidden = menu.classList.contains('hidden');
+                    document.querySelectorAll('.custom-dropdown-menu').forEach(m => m.classList.add('hidden'));
+                    document.querySelectorAll('.custom-dropdown-arrow').forEach(a => a.classList.remove('rotate-180'));
+
+                    if (isHidden) {
+                        menu.classList.remove('hidden');
+                        btn.querySelector('.custom-dropdown-arrow').classList.add('rotate-180');
+                    }
+                });
+
+                wrapper.appendChild(btn);
+                wrapper.appendChild(menu);
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', autoConvertGlassDropdowns);
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.custom-dropdown-group')) {
+                document.querySelectorAll('.custom-dropdown-menu').forEach(m => m.classList.add('hidden'));
+                document.querySelectorAll('.custom-dropdown-arrow').forEach(a => a.classList.remove('rotate-180'));
+            }
+        });
+
+        if (localStorage.getItem('theme') === 'light') {
+            document.documentElement.classList.remove('dark');
+            const themeIcon = document.getElementById('theme-icon');
+            if (themeIcon) themeIcon.textContent = '☀️';
+        } else {
+            const themeIcon = document.getElementById('theme-icon');
+            if (themeIcon) themeIcon.textContent = '🌙';
+        }
+    </script>
+</body>
+</html>

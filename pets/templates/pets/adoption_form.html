@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en" class="dark scroll-smooth">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pet Adoption Application — Paw Haven</title>
+    <meta name="description" content="Submit a digital adoption application to adopt a verified rescue pet." />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    <!-- Google Fonts: Plus Jakarta Sans & Jost -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet" />
+    <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+
+    <style type="text/css">
+        @import "tailwindcss";
+
+        :root {
+            --ink: #ffffff;
+            --ink-soft: rgba(255, 255, 255, 0.85);
+            --ink-faint: rgba(255, 255, 255, 0.65);
+            --glass: rgba(27, 41, 33, 0.78);
+            --glass-lift: rgba(36, 52, 42, 0.88);
+            --hairline: rgba(168, 216, 185, 0.22);
+            --accent-jade: #5B8C76;
+            --accent-light: #A8D8B9;
+            --ground: #111A15;
+            --ground-deep: #0B120E;
+            --shell: 1280px;
+            --nav-h: 74px;
+            --radius: 20px;
+            --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+            color-scheme: dark;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; }
+        * { margin: 0; scrollbar-width: none !important; }
+        *::-webkit-scrollbar { display: none !important; }
+
+        html { scroll-behavior: smooth; }
+        body {
+            min-height: 100dvh; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 16px; line-height: 1.5;
+            color: var(--ink); background-color: var(--ground);
+            -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
+        }
+
+        a, button { text-decoration: none !important; }
+        a:hover, button:hover { text-decoration: none !important; }
+
+        .shell { width: 100%; max-width: 780px; margin-inline: auto; padding-inline: clamp(16px, 3.4vw, 40px); }
+
+        /* SCROLL REVEAL ANIMATIONS */
+        .scroll-reveal {
+            opacity: 0;
+            transform: translateY(28px);
+            transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .scroll-reveal.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* TACTILE BUTTON SYSTEM */
+        .btn-ui-primary {
+            background: linear-gradient(135deg, #5B8C76 0%, #3D6B56 100%) !important;
+            color: #FFFFFF !important;
+            font-weight: 800 !important;
+            font-size: 0.825rem !important;
+            padding: 0.75rem 1.6rem !important;
+            border-radius: 999px !important;
+            border: 1px solid rgba(168, 216, 185, 0.35) !important;
+            box-shadow: 0 8px 20px rgba(91, 140, 118, 0.35) !important;
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+            cursor: pointer !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            gap: 0.5rem !important;
+            white-space: nowrap !important;
+            width: 100% !important;
+        }
+        .btn-ui-primary:hover {
+            transform: translateY(-2px) scale(1.01) !important;
+            box-shadow: 0 12px 28px rgba(91, 140, 118, 0.55) !important;
+            background: linear-gradient(135deg, #689D85 0%, #44745E 100%) !important;
+            border-color: rgba(168, 216, 185, 0.6) !important;
+        }
+        .btn-ui-primary:active { transform: translateY(0) scale(0.98) !important; }
+
+        .btn-ui-secondary {
+            background: rgba(91, 140, 118, 0.18) !important;
+            color: #A8D8B9 !important;
+            border: 1px solid rgba(168, 216, 185, 0.3) !important;
+            font-weight: 800 !important;
+            font-size: 0.825rem !important;
+            padding: 0.65rem 1.4rem !important;
+            border-radius: 999px !important;
+            backdrop-filter: blur(12px);
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+            cursor: pointer !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            gap: 0.5rem !important;
+            white-space: nowrap !important;
+        }
+
+        /* FLOATING PILL NAVBAR */
+        .nav-pill-container {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 60;
+        }
+
+        /* APPLE GLASS CARD SYSTEM */
+        .apple-glass-card {
+            background: var(--glass) !important;
+            backdrop-filter: blur(25px) saturate(120%);
+            -webkit-backdrop-filter: blur(25px) saturate(120%);
+            border: 1px solid var(--hairline) !important;
+            border-radius: var(--radius) !important;
+            box-shadow: 0 20px 45px rgba(0, 0, 0, 0.45) !important;
+        }
+    </style>
+</head>
+<body class="min-h-screen text-[#F4EDE2] bg-[#111A15] pt-24 pb-16">
+
+    <!-- 🛸 FLOATING PILL NAVBAR -->
+    <header class="nav-pill-container">
+        <div class="shell flex items-center justify-between min-h-[74px]">
+            <!-- BRAND LOGO -->
+            <a href="{% url 'home' %}" class="flex items-center gap-2.5 font-extrabold text-lg tracking-tight text-white">
+                <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#5B8C76] to-[#A8D8B9] flex items-center justify-center text-xl text-[#111A15] shadow-lg">
+                    🐾
+                </div>
+                <span>PAW <span class="text-[#A8D8B9]">HAVEN</span></span>
+            </a>
+
+            <!-- ACTION CONTROLS -->
+            <div class="flex items-center gap-3">
+                <a href="{% url 'pet_list' %}" class="btn-ui-secondary text-xs">← Back to Pets</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- FORM CONTAINER -->
+    <section class="shell py-6 space-y-6 scroll-reveal">
+        <div class="text-center space-y-2">
+            <span class="text-xs font-extrabold text-[#5B8C76] uppercase tracking-widest block">Digital Adoption Screening</span>
+            <h1 class="text-3xl font-extrabold text-white">Adoption Application 🐾</h1>
+            <p class="text-xs text-[#BAC8B1] font-medium max-w-md mx-auto">Complete this screening form to apply for adopting your selected rescue pet.</p>
+        </div>
+
+        <form action="#" method="POST" class="apple-glass-card p-8 space-y-6 scroll-reveal">
+            {% csrf_token %}
+
+            <div class="space-y-4">
+                <h3 class="font-extrabold text-base text-white border-b border-[#5B8C76]/20 pb-2">1. Adopter Personal Info</h3>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-[#BAC8B1] mb-1">Full Name</label>
+                        <input type="text" required placeholder="John Doe" class="w-full py-3 px-4 rounded-xl bg-[#0B120E]/80 border border-[#5B8C76]/30 text-white text-sm focus:outline-none focus:border-[#5B8C76]">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-[#BAC8B1] mb-1">Phone Number</label>
+                        <input type="tel" required placeholder="+91 98765 43210" class="w-full py-3 px-4 rounded-xl bg-[#0B120E]/80 border border-[#5B8C76]/30 text-white text-sm focus:outline-none focus:border-[#5B8C76]">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-[#BAC8B1] mb-1">Delivery Address</label>
+                    <input type="text" required placeholder="123 Haven Street, Green Park, Kochi" class="w-full py-3 px-4 rounded-xl bg-[#0B120E]/80 border border-[#5B8C76]/30 text-white text-sm focus:outline-none focus:border-[#5B8C76]">
+                </div>
+            </div>
+
+            <div class="space-y-4">
+                <h3 class="font-extrabold text-base text-white border-b border-[#5B8C76]/20 pb-2">2. Housing & Experience</h3>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-[#BAC8B1] mb-1">Housing Type</label>
+                        <select class="w-full py-3 px-4 rounded-xl bg-[#0B120E]/80 border border-[#5B8C76]/30 text-white text-sm focus:outline-none">
+                            <option value="HOUSE">Independent House</option>
+                            <option value="APARTMENT">Apartment / Flat</option>
+                            <option value="FARM">Farm / Villa</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-[#BAC8B1] mb-1">Pet Experience</label>
+                        <select class="w-full py-3 px-4 rounded-xl bg-[#0B120E]/80 border border-[#5B8C76]/30 text-white text-sm focus:outline-none">
+                            <option value="FIRST">First-Time Pet Owner</option>
+                            <option value="EXPERIENCED">Experienced Pet Owner</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-[#BAC8B1] mb-1">Why do you want to adopt this pet?</label>
+                    <textarea rows="3" required placeholder="Tell the shelter manager about your home environment..." class="w-full py-3 px-4 rounded-xl bg-[#0B120E]/80 border border-[#5B8C76]/30 text-white text-sm focus:outline-none focus:border-[#5B8C76]"></textarea>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-ui-primary text-sm py-3.5 mt-4">
+                Submit Adoption Application 🐾
+            </button>
+        </form>
+    </section>
+
+    <!-- SCROLL REVEAL OBSERVER JS -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const revealElements = document.querySelectorAll('.scroll-reveal');
+            const revealObserver = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('is-visible');
+                    }
+                });
+            }, { threshold: 0.12 });
+
+            revealElements.forEach(el => revealObserver.observe(el));
+        });
+    </script>
+</body>
+</html>

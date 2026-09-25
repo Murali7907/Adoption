@@ -1,0 +1,1145 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adoption Requests Management - Pet Adoption Suite</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS v4 Browser Build -->
+    <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+    <style type="text/css">
+        :root {
+            --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        * {
+            transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease;
+        }
+
+        /* 🚫 GLOBALLY HIDE ALL SCROLLBARS SYSTEM-WIDE (FIREFOX, CHROME, EDGE, SAFARI) */
+        *, html, body, main, div, aside, section {
+            -ms-overflow-style: none !important;
+            scrollbar-width: none !important;
+        }
+
+        *::-webkit-scrollbar,
+        html::-webkit-scrollbar,
+        body::-webkit-scrollbar,
+        main::-webkit-scrollbar,
+        div::-webkit-scrollbar,
+        aside::-webkit-scrollbar {
+            display: none !important;
+            width: 0px !important;
+            height: 0px !important;
+            background: transparent !important;
+        }
+
+        /* ☀️ LIGHT MODE: HORIZON UI ALABASTER CREAM (#F4EDE2) */
+        html:not(.dark) body { background-color: #F4EDE2 !important; color: #111A15 !important; }
+        
+        html:not(.dark) .apple-glass { 
+            background: #FFFFFF !important; 
+            border: 1px solid rgba(91, 140, 118, 0.30) !important; 
+            box-shadow: 0 16px 36px rgba(91, 140, 118, 0.10) !important; 
+        }
+        
+        html:not(.dark) .sidebar-bg { 
+            background: #EFE8DC !important; 
+            border-right: 1px solid rgba(91, 140, 118, 0.25) !important; 
+        }
+
+        html:not(.dark) .modal-bg { 
+            background: #FFFFFF !important; 
+            border: 1px solid rgba(91, 140, 118, 0.35) !important; 
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.20) !important; 
+        }
+
+        html:not(.dark) .user-name-text { color: #111A15 !important; font-weight: 800 !important; }
+        html:not(.dark) .text-muted { color: #4B5563 !important; font-weight: 600 !important; }
+        html:not(.dark) .theme-accent-text { color: #1E3A2B !important; font-weight: 800 !important; }
+        html:not(.dark) .table-header-text { color: #111A15 !important; font-weight: 800 !important; }
+        
+        html:not(.dark) .card-inner-box {
+            background: #F4EDE2 !important;
+            border: 1px solid #A3C4B5 !important;
+            color: #111A15 !important;
+        }
+
+        html:not(.dark) .input-box {
+            background: #FFFFFF !important;
+            border: 1px solid #789D8C !important;
+            color: #111A15 !important;
+            font-weight: 600 !important;
+        }
+
+        /* UNIFORM BUTTON STYLES */
+        .btn-ui-primary {
+            background-color: #5B8C76 !important;
+            color: #FFFFFF !important;
+            font-weight: 800 !important;
+            font-size: 0.75rem !important;
+            padding: 0.4rem 0.85rem !important;
+            border-radius: 0.85rem !important;
+            box-shadow: 0 4px 14px rgba(91, 140, 118, 0.35) !important;
+            transition: all 0.2s ease !important;
+            cursor: pointer !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            gap: 0.375rem !important;
+            white-space: nowrap !important;
+        }
+        .btn-ui-primary:hover {
+            background-color: #2D4C3E !important;
+            transform: translateY(-1px) !important;
+        }
+
+        .btn-ui-secondary {
+            background-color: rgba(91, 140, 118, 0.2) !important;
+            color: #F4EDE2 !important;
+            border: 1px solid rgba(168, 216, 185, 0.3) !important;
+            font-weight: 800 !important;
+            font-size: 0.75rem !important;
+            padding: 0.4rem 0.85rem !important;
+            border-radius: 0.85rem !important;
+            transition: all 0.2s ease !important;
+            cursor: pointer !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            gap: 0.375rem !important;
+            white-space: nowrap !important;
+        }
+        .btn-ui-secondary:hover {
+            background-color: rgba(91, 140, 118, 0.35) !important;
+            transform: translateY(-1px) !important;
+        }
+
+        html:not(.dark) .btn-ui-secondary {
+            background-color: #E5E7EB !important;
+            color: #111827 !important;
+            border: 1px solid #9CA3AF !important;
+        }
+
+        .btn-ui-danger {
+            background-color: rgba(239, 68, 68, 0.2) !important;
+            color: #F87171 !important;
+            border: 1px solid rgba(239, 68, 68, 0.3) !important;
+            font-weight: 800 !important;
+            font-size: 0.75rem !important;
+            padding: 0.4rem 0.85rem !important;
+            border-radius: 0.85rem !important;
+            transition: all 0.2s ease !important;
+            cursor: pointer !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            gap: 0.375rem !important;
+            white-space: nowrap !important;
+        }
+        .btn-ui-danger:hover {
+            background-color: rgba(239, 68, 68, 0.35) !important;
+            transform: translateY(-1px) !important;
+        }
+
+        html:not(.dark) .btn-ui-danger {
+            background-color: #FEE2E2 !important;
+            color: #7F1D1D !important;
+            border: 1px solid #FCA5A5 !important;
+        }
+
+        /* 🌙 DARK MODE: ELEGANT DEEP EMERALD GLASS */
+        .dark body { background-color: #111A15 !important; color: #F4EDE2 !important; }
+        
+        .dark .apple-glass { 
+            background: rgba(27, 41, 33, 0.85) !important; 
+            backdrop-filter: blur(25px); 
+            border: 1px solid rgba(168, 216, 185, 0.22) !important; 
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.45) !important;
+        }
+        
+        .dark .sidebar-bg { 
+            background: rgba(14, 22, 18, 0.90) !important; 
+            border-right: 1px solid rgba(168, 216, 185, 0.15) !important; 
+        }
+
+        .dark .modal-bg { 
+            background: rgba(22, 33, 27, 0.96) !important; 
+            border: 1px solid rgba(168, 216, 185, 0.3) !important; 
+        }
+
+        .dark .user-name-text { color: #FFFFFF !important; font-weight: 800 !important; }
+        .dark .text-muted { color: #9CA3AF !important; font-weight: 500 !important; }
+        .dark .theme-accent-text { color: #A8D8B9 !important; font-weight: 800 !important; }
+        .dark .table-header-text { color: #A8D8B9 !important; font-weight: 800 !important; }
+
+        /* MATCHING UI HOVER TEXT COLOR FOR ALL NAMES (NO UNDERLINE) */
+        .name-hover-link {
+            transition: color 0.2s ease, transform 0.2s ease !important;
+            cursor: pointer !important;
+            text-decoration: none !important;
+        }
+        html:not(.dark) .name-hover-link:hover,
+        html:not(.dark) a:hover .name-hover-link,
+        html:not(.dark) .group:hover .name-hover-link {
+            color: #5B8C76 !important;
+            text-decoration: none !important;
+        }
+        .dark .name-hover-link:hover,
+        .dark a:hover .name-hover-link,
+        .dark .group:hover .name-hover-link {
+            color: #A8D8B9 !important;
+            text-decoration: none !important;
+        }
+
+        /* 🎛️ UI MATCHING DROPDOWN SELECT & OPTION STYLING (BULLETPROOF & CROSS-BROWSER) */
+        select.input-box, select {
+            background-color: rgba(248, 249, 250, 0.95) !important;
+            border: 1px solid rgba(91, 140, 118, 0.35) !important;
+            color: #111A15 !important;
+            border-radius: 0.85rem !important;
+            font-weight: 700 !important;
+            padding: 0.5rem 0.75rem !important;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
+            cursor: pointer !important;
+        }
+
+        html:not(.dark) select.input-box:focus, html:not(.dark) select:focus {
+            border-color: #5B8C76 !important;
+            box-shadow: 0 0 0 3px rgba(91, 140, 118, 0.2) !important;
+            outline: none !important;
+        }
+
+        html:not(.dark) select option {
+            background-color: #FFFFFF !important;
+            color: #111A15 !important;
+            font-weight: 700 !important;
+        }
+
+        .dark select.input-box, .dark select {
+            background-color: rgba(17, 26, 21, 0.95) !important;
+            border: 1px solid rgba(168, 216, 185, 0.3) !important;
+            color: #F4EDE2 !important;
+        }
+
+        .dark select.input-box:focus, .dark select:focus {
+            border-color: #A8D8B9 !important;
+            box-shadow: 0 0 0 3px rgba(168, 216, 185, 0.25) !important;
+            outline: none !important;
+        }
+
+        .dark select option {
+            background-color: #16211B !important;
+            color: #F4EDE2 !important;
+            font-weight: 700 !important;
+        }
+
+
+        .dark .card-inner-box {
+            background: rgba(17, 26, 21, 0.6) !important;
+            border: 1px solid rgba(168, 216, 185, 0.2) !important;
+            color: #F4EDE2 !important;
+        }
+
+        .dark .input-box {
+            background: rgba(17, 26, 21, 0.8) !important;
+            border: 1px solid rgba(168, 216, 185, 0.25) !important;
+            color: #F4EDE2 !important;
+        }
+
+        .dark .badge-verified {
+            background-color: rgba(91, 140, 118, 0.3) !important;
+            color: #A8D8B9 !important;
+            border: 1px solid rgba(168, 216, 185, 0.3) !important;
+        }
+
+        .nav-item-active {
+            background: linear-gradient(135deg, #5B8C76 0%, #2D4C3E 100%) !important;
+            color: #FFFFFF !important;
+            box-shadow: 0 8px 20px rgba(91, 140, 118, 0.45) !important;
+        }
+
+        .nav-item-hover-transform {
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .nav-item-hover-transform:hover {
+            background: rgba(91, 140, 118, 0.25);
+            transform: translateX(4px);
+        }
+
+        /* FLOATING TOAST ANIMATIONS */
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        .toast-animate {
+            animation: slideInRight 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+    </style>
+</head>
+<body class="min-h-screen font-sans">
+
+    <!-- FLOATING TOAST NOTIFICATION CONTAINER -->
+    <div id="toast-container" class="fixed top-6 right-6 z-50 space-y-3 pointer-events-none"></div>
+
+    <div class="flex min-h-screen">
+        
+        <!-- SIDEBAR -->
+        <aside class="w-64 sidebar-bg flex flex-col justify-between p-6 sticky top-0 h-screen z-30 overflow-y-auto">
+            <div>
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#5B8C76] to-[#A8D8B9] flex items-center justify-center text-[#111A15] font-extrabold text-xl shadow-lg shadow-[#5B8C76]/30">
+                        👨‍💼
+                    </div>
+                    <div>
+                        <span class="font-extrabold text-lg tracking-tight block">HORIZON <span class="text-[#5B8C76] dark:text-[#A8D8B9]">UI</span></span>
+                        <span class="text-[10px] theme-accent-text font-extrabold uppercase tracking-widest">Pet Adoption Suite</span>
+                    </div>
+                </div>
+
+                <nav class="space-y-1 text-xs font-bold">
+                    <a href="{% url 'admin_dashboard' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>📊</span> Dashboard Overview</a>
+                    <a href="{% url 'admin_users' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>👥</span> User Management</a>
+                    
+                    <div class="space-y-1 my-2 py-2 border-y border-[#5B8C76]/25">
+                        <a href="{% url 'admin_shelters' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>🏠</span> Shelter Management</a>
+                        <a href="{% url 'admin_pets' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>🐶</span> Pet Management</a>
+                        <a href="{% url 'admin_requests' %}" class="nav-item-active flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>🐾</span> Adoption Requests</a>
+                        <a href="{% url 'admin_payments' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>💳</span> Payments</a>
+                        <a href="{% url 'admin_deliveries' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>🚚</span> Delivery Control</a>
+                        <a href="{% url 'admin_audit_logs' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>🔍</span> Audit Logs</a>
+                        <a href="{% url 'admin_revenue' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>💰</span> Revenue & Profit</a>
+                    </div>
+
+                    <a href="{% url 'admin_reports' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>📈</span> Reports & Analytics</a>
+                    <a href="{% url 'admin_notifications' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>🔔</span> Notifications</a>
+                    <a href="{% url 'admin_announcements' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>📢</span> Announcements</a>
+                    <a href="{% url 'admin_health' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>🩺</span> Pet Health</a>
+                    <a href="{% url 'admin_settings' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>⚙️</span> System Settings</a>
+                    <a href="{% url 'admin_roles' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>🔐</span> Roles & Permissions</a>
+                </nav>
+            </div>
+            
+            <div class="pt-4 border-t border-[#5B8C76]/25 space-y-1">
+                <a href="{% url 'home' %}" class="flex items-center gap-3 px-4 py-2 hover:bg-[#5B8C76]/20 rounded-2xl text-xs font-bold"><span>🌐</span> Main Website</a>
+                <a href="{% url 'login' %}" class="flex items-center gap-3 px-4 py-2 hover:bg-red-500/20 text-red-500 rounded-2xl text-xs font-bold"><span>🚪</span> Logout</a>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT CONTAINER -->
+        <main class="flex-1 p-8 overflow-y-auto space-y-8">
+            
+            <!-- 🚀 HORIZON CLEAN TOP HEADER NAVBAR -->
+            <header class="flex items-center justify-between mb-8 pb-2">
+                <!-- BREADCRUMB & PAGE TITLE -->
+                <div>
+                    <div class="text-xs text-muted font-bold mb-0.5">
+                        <span>Pages</span> / <span class="theme-accent-text font-extrabold">Adoption Requests</span>
+                    </div>
+                    <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight">Adoption Requests Control Center 🐾</h1>
+                </div>
+
+                <!-- CLEAN ACTION PILL CONTAINER -->
+                <div class="apple-glass rounded-full px-4 py-2 flex items-center gap-3 shadow-lg">
+                    <!-- THEME TOGGLER -->
+                    <button type="button" onclick="toggleTheme()" class="w-8 h-8 bg-[#5B8C76]/20 hover:bg-[#5B8C76]/30 border border-[#5B8C76]/40 rounded-full text-sm font-extrabold flex items-center justify-center cursor-pointer shadow-sm" title="Toggle Light/Dark Theme">
+                        <span id="theme-icon">🌙</span>
+                    </button>
+
+                    <!-- NOTIFICATION BELL -->
+                    <a href="{% url 'admin_notifications' %}" class="w-8 h-8 bg-[#5B8C76]/20 hover:bg-[#5B8C76]/30 border border-[#5B8C76]/40 rounded-full text-xs font-extrabold flex items-center justify-center relative shadow-sm" title="Notifications">
+                        🔔 <span class="w-2 h-2 rounded-full bg-red-500 absolute top-1 right-1 animate-ping"></span>
+                    </a>
+
+                    <!-- USER AVATAR PILL -->
+                    <div class="w-8 h-8 rounded-full bg-gradient-to-br from-[#5B8C76] to-[#A8D8B9] flex items-center justify-center font-extrabold text-xs text-[#111A15] shadow-sm" title="Admin User">
+                        A
+                    </div>
+                </div>
+            </header>
+
+            <!-- 📊 7 DASHBOARD KPI CARDS -->
+            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
+                <div class="apple-glass rounded-[24px] p-4 flex flex-col justify-between shadow-sm">
+                    <span class="text-[11px] text-muted font-extrabold uppercase tracking-wider block">Total Requests</span>
+                    <div class="flex items-center justify-between mt-2">
+                        <span class="user-name-text text-2xl font-black" id="kpi-total-requests">6</span>
+                        <span class="text-base">📦</span>
+                    </div>
+                </div>
+
+                <div class="apple-glass rounded-[24px] p-4 flex flex-col justify-between shadow-sm">
+                    <span class="text-[11px] text-muted font-extrabold uppercase tracking-wider block">Pending</span>
+                    <div class="flex items-center justify-between mt-2">
+                        <span class="text-blue-400 text-2xl font-black" id="kpi-pending">1</span>
+                        <span class="text-base">⏳</span>
+                    </div>
+                </div>
+
+                <div class="apple-glass rounded-[24px] p-4 flex flex-col justify-between shadow-sm">
+                    <span class="text-[11px] text-muted font-extrabold uppercase tracking-wider block">Under Review</span>
+                    <div class="flex items-center justify-between mt-2">
+                        <span class="text-amber-400 text-2xl font-black" id="kpi-under-review">2</span>
+                        <span class="text-base">🔍</span>
+                    </div>
+                </div>
+
+                <div class="apple-glass rounded-[24px] p-4 flex flex-col justify-between shadow-sm">
+                    <span class="text-[11px] text-muted font-extrabold uppercase tracking-wider block">Approved</span>
+                    <div class="flex items-center justify-between mt-2">
+                        <span class="text-emerald-400 text-2xl font-black" id="kpi-approved">1</span>
+                        <span class="text-base">✅</span>
+                    </div>
+                </div>
+
+                <div class="apple-glass rounded-[24px] p-4 flex flex-col justify-between shadow-sm">
+                    <span class="text-[11px] text-muted font-extrabold uppercase tracking-wider block">Rejected</span>
+                    <div class="flex items-center justify-between mt-2">
+                        <span class="text-rose-400 text-2xl font-black" id="kpi-rejected">1</span>
+                        <span class="text-base">❌</span>
+                    </div>
+                </div>
+
+                <div class="apple-glass rounded-[24px] p-4 flex flex-col justify-between shadow-sm">
+                    <span class="text-[11px] text-muted font-extrabold uppercase tracking-wider block">Cancelled</span>
+                    <div class="flex items-center justify-between mt-2">
+                        <span class="text-gray-400 text-2xl font-black" id="kpi-cancelled">0</span>
+                        <span class="text-base">🛑</span>
+                    </div>
+                </div>
+
+                <div class="apple-glass rounded-[24px] p-4 flex flex-col justify-between shadow-sm">
+                    <span class="text-[11px] text-muted font-extrabold uppercase tracking-wider block">Completed</span>
+                    <div class="flex items-center justify-between mt-2">
+                        <span class="text-purple-400 text-2xl font-black" id="kpi-completed">1</span>
+                        <span class="text-base">🎉</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 📋 PROPORTIONED DIRECTORY TABLE & ADVANCED MULTI-FILTER TOOLBAR -->
+            <div class="apple-glass rounded-[28px] p-5 shadow-xl space-y-5">
+                
+                <!-- ADVANCED FILTER BAR -->
+                <div class="space-y-4 border-b border-[#5B8C76]/15 pb-4">
+                    <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
+                        <h3 class="text-lg font-extrabold user-name-text">Adoption Applications Directory</h3>
+
+                        <div class="relative w-full sm:w-80">
+                            <input type="text" id="request-search-input" onkeyup="filterRequestsTable()" placeholder="Search ID, customer, pet, shelter..." class="w-full py-2.5 px-3.5 pr-8 input-box rounded-2xl text-xs font-semibold">
+                            <span class="absolute right-3 top-3 text-xs text-muted">🔍</span>
+                        </div>
+                    </div>
+
+                    <!-- 6 ADVANCED CUSTOM GLASS UI FILTERS -->
+                    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+                        
+                        <!-- 1. REQUEST STATUS -->
+                        <div class="relative custom-dropdown-group" id="dd-req-status-wrap">
+                            <label class="block text-[10px] text-muted font-bold mb-1 uppercase">Request Status:</label>
+                            <select id="filter-request-status" onchange="filterRequestsTable()" class="hidden">
+                                <option value="ALL">All Statuses</option>
+                                <option value="PENDING">Pending ⏳</option>
+                                <option value="UNDER_REVIEW">Under Review 🔍</option>
+                                <option value="APPROVED">Approved ✅</option>
+                                <option value="REJECTED">Rejected ❌</option>
+                                <option value="CANCELLED">Cancelled 🛑</option>
+                                <option value="COMPLETED">Completed 🎉</option>
+                            </select>
+                            <button type="button" onclick="toggleCustomDropdown('dd-req-status-wrap', event)" class="w-full py-2 px-3 input-box rounded-xl text-xs font-bold flex items-center justify-between cursor-pointer custom-dropdown-btn">
+                                <span class="custom-dropdown-label">All Statuses</span>
+                                <svg class="w-3.5 h-3.5 text-[#5B8C76] dark:text-[#A8D8B9] transition-transform duration-200 custom-dropdown-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
+                            </button>
+                            <div class="absolute top-full left-0 right-0 mt-1.5 z-50 rounded-2xl apple-glass shadow-2xl p-1.5 space-y-1 hidden custom-dropdown-menu border border-[#5B8C76]/30 dark:border-[#A8D8B9]/30">
+                                <div onclick="selectCustomDropdownOption('dd-req-status-wrap', 'ALL', 'All Statuses')" class="px-3 py-2 rounded-xl text-xs font-bold cursor-pointer hover:bg-[#5B8C76]/20 dark:hover:bg-[#A8D8B9]/20 transition-all flex items-center justify-between custom-opt-item bg-[#5B8C76]/20 text-[#5B8C76] dark:text-[#A8D8B9]"><span>All Statuses</span></div>
+                                <div onclick="selectCustomDropdownOption('dd-req-status-wrap', 'PENDING', 'Pending ⏳')" class="px-3 py-2 rounded-xl text-xs font-bold cursor-pointer hover:bg-[#5B8C76]/20 dark:hover:bg-[#A8D8B9]/20 transition-all flex items-center justify-between custom-opt-item"><span>Pending ⏳</span></div>
+                                <div onclick="selectCustomDropdownOption('dd-req-status-wrap', 'UNDER_REVIEW', 'Under Review 🔍')" class="px-3 py-2 rounded-xl text-xs font-bold cursor-pointer hover:bg-[#5B8C76]/20 dark:hover:bg-[#A8D8B9]/20 transition-all flex items-center justify-between custom-opt-item"><span>Under Review 🔍</span></div>
+                                <div onclick="selectCustomDropdownOption('dd-req-status-wrap', 'APPROVED', 'Approved ✅')" class="px-3 py-2 rounded-xl text-xs font-bold cursor-pointer hover:bg-[#5B8C76]/20 dark:hover:bg-[#A8D8B9]/20 transition-all flex items-center justify-between custom-opt-item"><span>Approved ✅</span></div>
+                                <div onclick="selectCustomDropdownOption('dd-req-status-wrap', 'REJECTED', 'Rejected ❌')" class="px-3 py-2 rounded-xl text-xs font-bold cursor-pointer hover:bg-[#5B8C76]/20 dark:hover:bg-[#A8D8B9]/20 transition-all flex items-center justify-between custom-opt-item"><span>Rejected ❌</span></div>
+                                <div onclick="selectCustomDropdownOption('dd-req-status-wrap', 'CANCELLED', 'Cancelled 🛑')" class="px-3 py-2 rounded-xl text-xs font-bold cursor-pointer hover:bg-[#5B8C76]/20 dark:hover:bg-[#A8D8B9]/20 transition-all flex items-center justify-between custom-opt-item"><span>Cancelled 🛑</span></div>
+                                <div onclick="selectCustomDropdownOption('dd-req-status-wrap', 'COMPLETED', 'Completed 🎉')" class="px-3 py-2 rounded-xl text-xs font-bold cursor-pointer hover:bg-[#5B8C76]/20 dark:hover:bg-[#A8D8B9]/20 transition-all flex items-center justify-between custom-opt-item"><span>Completed 🎉</span></div>
+                            </div>
+                        </div>
+
+                        <!-- 2. PAYMENT STATUS -->
+                        <div class="relative custom-dropdown-group" id="dd-payment-wrap">
+                            <label class="block text-[10px] text-muted font-bold mb-1 uppercase">Payment Status:</label>
+                            <select id="filter-payment-status" onchange="filterRequestsTable()" class="hidden">
+                                <option value="ALL">All Payments</option>
+                                <option value="PAID">Paid / Successful 💳</option>
+                                <option value="PENDING">Pending Payment ⏳</option>
+                                <option value="REFUNDED">Refunded 💸</option>
+                            </select>
+                            <button type="button" onclick="toggleCustomDropdown('dd-payment-wrap', event)" class="w-full py-2 px-3 input-box rounded-xl text-xs font-bold flex items-center justify-between cursor-pointer custom-dropdown-btn">
+                                <span class="custom-dropdown-label">All Payments</span>
+                                <svg class="w-3.5 h-3.5 text-[#5B8C76] dark:text-[#A8D8B9] transition-transform duration-200 custom-dropdown-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
+                            </button>
+                            <div class="absolute top-full left-0 right-0 mt-1.5 z-50 rounded-2xl apple-glass shadow-2xl p-1.5 space-y-1 hidden custom-dropdown-menu border border-[#5B8C76]/30 dark:border-[#A8D8B9]/30">
+                                <div onclick="selectCustomDropdownOption('dd-payment-wrap', 'ALL', 'All Payments')" class="px-3 py-2 rounded-xl text-xs font-bold cursor-pointer hover:bg-[#5B8C76]/20 dark:hover:bg-[#A8D8B9]/20 transition-all flex items-center justify-between custom-opt-item bg-[#5B8C76]/20 text-[#5B8C76] dark:text-[#A8D8B9]"><span>All Payments</span></div>
+                                <div onclick="selectCustomDropdownOption('dd-payment-wrap', 'PAID', 'Paid 💳')" class="px-3 py-2 rounded-xl text-xs font-bold cursor-pointer hover:bg-[#5B8C76]/20 dark:hover:bg-[#A8D8B9]/20 transition-all flex items-center justify-between custom-opt-item"><span>Paid 💳</span></div>
+                                <div onclick="selectCustomDropdownOption('dd-payment-wrap', 'PENDING', 'Pending Payment ⏳')" class="px-3 py-2 rounded-xl text-xs font-bold cursor-pointer hover:bg-[#5B8C76]/20 dark:hover:bg-[#A8D8B9]/20 transition-all flex items-center justify-between custom-opt-item"><span>Pending Payment ⏳</span></div>
+                                <div onclick="selectCustomDropdownOption('dd-payment-wrap', 'REFUNDED', 'Refunded 💸')" class="px-3 py-2 rounded-xl text-xs font-bold cursor-pointer hover:bg-[#5B8C76]/20 dark:hover:bg-[#A8D8B9]/20 transition-all flex items-center justify-between custom-opt-item"><span>Refunded 💸</span></div>
+                            </div>
+                        </div>
+
+                        <!-- 3. DELIVERY STATUS -->
+                        <div class="relative custom-dropdown-group" id="dd-delivery-wrap">
+                            <label class="block text-[10px] text-muted font-bold mb-1 uppercase">Delivery Status:</label>
+                            <select id="filter-delivery-status" onchange="filterRequestsTable()" class="hidden">
+                                <option value="ALL">All Deliveries</option>
+                                <option value="IN_TRANSIT">In Transit 🚚</option>
+                                <option value="HANDOVER_PENDING">Handover Pending ✍️</option>
+                                <option value="SCHEDULED">Scheduled 📅</option>
+                                <option value="COMPLETED">Delivered 🎉</option>
+                                <option value="UNSCHEDULED">Unscheduled ⏳</option>
+                            </select>
+                            <button type="button" onclick="toggleCustomDropdown('dd-delivery-wrap', event)" class="w-full py-2 px-3 input-box rounded-xl text-xs font-bold flex items-center justify-between cursor-pointer custom-dropdown-btn">
+                                <span class="custom-dropdown-label">All Deliveries</span>
+                                <svg class="w-3.5 h-3.5 text-[#5B8C76] dark:text-[#A8D8B9] transition-transform duration-200 custom-dropdown-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
+                            </button>
+                            <div class="absolute top-full left-0 right-0 mt-1.5 z-50 rounded-2xl apple-glass shadow-2xl p-1.5 space-y-1 hidden custom-dropdown-menu border border-[#5B8C76]/30 dark:border-[#A8D8B9]/30">
+                                <div onclick="selectCustomDropdownOption('dd-delivery-wrap', 'ALL', 'All Deliveries')" class="px-3 py-2 rounded-xl text-xs font-bold cursor-pointer hover:bg-[#5B8C76]/20 dark:hover:bg-[#A8D8B9]/20 transition-all flex items-center justify-between custom-opt-item bg-[#5B8C76]/20 text-[#5B8C76] dark:text-[#A8D8B9]"><span>All Deliveries</span></div>
+                                <div onclick="selectCustomDropdownOption('dd-delivery-wrap', 'IN_TRANSIT', 'In Transit 🚚')" class="px-3 py-2 rounded-xl text-xs font-bold cursor-pointer hover:bg-[#5B8C76]/20 dark:hover:bg-[#A8D8B9]/20 transition-all flex items-center justify-between custom-opt-item"><span>In Transit 🚚</span></div>
+                                <div onclick="selectCustomDropdownOption('dd-delivery-wrap', 'HANDOVER_PENDING', 'Handover Pending ✍️')" class="px-3 py-2 rounded-xl text-xs font-bold cursor-pointer hover:bg-[#5B8C76]/20 dark:hover:bg-[#A8D8B9]/20 transition-all flex items-center justify-between custom-opt-item"><span>Handover Pending ✍️</span></div>
+                                <div onclick="selectCustomDropdownOption('dd-delivery-wrap', 'SCHEDULED', 'Scheduled 📅')" class="px-3 py-2 rounded-xl text-xs font-bold cursor-pointer hover:bg-[#5B8C76]/20 dark:hover:bg-[#A8D8B9]/20 transition-all flex items-center justify-between custom-opt-item"><span>Scheduled 📅</span></div>
+                                <div onclick="selectCustomDropdownOption('dd-delivery-wrap', 'COMPLETED', 'Delivered 🎉')" class="px-3 py-2 rounded-xl text-xs font-bold cursor-pointer hover:bg-[#5B8C76]/20 dark:hover:bg-[#A8D8B9]/20 transition-all flex items-center justify-between custom-opt-item"><span>Delivered 🎉</span></div>
+                                <div onclick="selectCustomDropdownOption('dd-delivery-wrap', 'UNSCHEDULED', 'Unscheduled ⏳')" class="px-3 py-2 rounded-xl text-xs font-bold cursor-pointer hover:bg-[#5B8C76]/20 dark:hover:bg-[#A8D8B9]/20 transition-all flex items-center justify-between custom-opt-item"><span>Unscheduled ⏳</span></div>
+                            </div>
+                        </div>
+
+                        <!-- 4. SHELTER -->
+                        <div class="relative custom-dropdown-group" id="dd-shelter-wrap">
+                            <label class="block text-[10px] text-muted font-bold mb-1 uppercase">Shelter:</label>
+                            <select id="filter-shelter" onchange="filterRequestsTable()" class="hidden">
+                                <option value="ALL">All Shelters</option>
+                                <option value="Kochi Animal Shelter">Kochi Shelter</option>
+                                <option value="Happy Paws Rescue">Happy Paws</option>
+                                <option value="ABC Animal Shelter">ABC Shelter</option>
+                                <option value="Save-a-Pet Foundation">Save-a-Pet</option>
+                            </select>
+                            <button type="button" onclick="toggleCustomDropdown('dd-shelter-wrap', event)" class="w-full py-2 px-3 input-box rounded-xl text-xs font-bold flex items-center justify-between cursor-pointer custom-dropdown-btn">
+                                <span class="custom-dropdown-label">All Shelters</span>
+                                <svg class="w-3.5 h-3.5 text-[#5B8C76] dark:text-[#A8D8B9] transition-transform duration-200 custom-dropdown-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
+                            </button>
+                            <div class="absolute top-full left-0 right-0 mt-1.5 z-50 rounded-2xl apple-glass shadow-2xl p-1.5 space-y-1 hidden custom-dropdown-menu border border-[#5B8C76]/30 dark:border-[#A8D8B9]/30">
+                                <div onclick="selectCustomDropdownOption('dd-shelter-wrap', 'ALL', 'All Shelters')" class="px-3 py-2 rounded-xl text-xs font-bold cursor-pointer hover:bg-[#5B8C76]/20 dark:hover:bg-[#A8D8B9]/20 transition-all flex items-center justify-between custom-opt-item bg-[#5B8C76]/20 text-[#5B8C76] dark:text-[#A8D8B9]"><span>All Shelters</span></div>
+                                <div onclick="selectCustomDropdownOption('dd-shelter-wrap', 'Kochi Animal Shelter', 'Kochi Shelter')" class="px-3 py-2 rounded-xl text-xs font-bold cursor-pointer hover:bg-[#5B8C76]/20 dark:hover:bg-[#A8D8B9]/20 transition-all flex items-center justify-between custom-opt-item"><span>Kochi Shelter</span></div>
+                                <div onclick="selectCustomDropdownOption('dd-shelter-wrap', 'Happy Paws Rescue', 'Happy Paws')" class="px-3 py-2 rounded-xl text-xs font-bold cursor-pointer hover:bg-[#5B8C76]/20 dark:hover:bg-[#A8D8B9]/20 transition-all flex items-center justify-between custom-opt-item"><span>Happy Paws</span></div>
+                                <div onclick="selectCustomDropdownOption('dd-shelter-wrap', 'ABC Animal Shelter', 'ABC Shelter')" class="px-3 py-2 rounded-xl text-xs font-bold cursor-pointer hover:bg-[#5B8C76]/20 dark:hover:bg-[#A8D8B9]/20 transition-all flex items-center justify-between custom-opt-item"><span>ABC Shelter</span></div>
+                                <div onclick="selectCustomDropdownOption('dd-shelter-wrap', 'Save-a-Pet Foundation', 'Save-a-Pet')" class="px-3 py-2 rounded-xl text-xs font-bold cursor-pointer hover:bg-[#5B8C76]/20 dark:hover:bg-[#A8D8B9]/20 transition-all flex items-center justify-between custom-opt-item"><span>Save-a-Pet</span></div>
+                            </div>
+                        </div>
+
+                        <!-- 5. PET TYPE -->
+                        <div class="relative custom-dropdown-group" id="dd-pettype-wrap">
+                            <label class="block text-[10px] text-muted font-bold mb-1 uppercase">Pet Type:</label>
+                            <select id="filter-pet-type" onchange="filterRequestsTable()" class="hidden">
+                                <option value="ALL">All Types</option>
+                                <option value="Dog">Dogs 🐶</option>
+                                <option value="Cat">Cats 🐱</option>
+                            </select>
+                            <button type="button" onclick="toggleCustomDropdown('dd-pettype-wrap', event)" class="w-full py-2 px-3 input-box rounded-xl text-xs font-bold flex items-center justify-between cursor-pointer custom-dropdown-btn">
+                                <span class="custom-dropdown-label">All Types</span>
+                                <svg class="w-3.5 h-3.5 text-[#5B8C76] dark:text-[#A8D8B9] transition-transform duration-200 custom-dropdown-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
+                            </button>
+                            <div class="absolute top-full left-0 right-0 mt-1.5 z-50 rounded-2xl apple-glass shadow-2xl p-1.5 space-y-1 hidden custom-dropdown-menu border border-[#5B8C76]/30 dark:border-[#A8D8B9]/30">
+                                <div onclick="selectCustomDropdownOption('dd-pettype-wrap', 'ALL', 'All Types')" class="px-3 py-2 rounded-xl text-xs font-bold cursor-pointer hover:bg-[#5B8C76]/20 dark:hover:bg-[#A8D8B9]/20 transition-all flex items-center justify-between custom-opt-item bg-[#5B8C76]/20 text-[#5B8C76] dark:text-[#A8D8B9]"><span>All Types</span></div>
+                                <div onclick="selectCustomDropdownOption('dd-pettype-wrap', 'Dog', 'Dogs 🐶')" class="px-3 py-2 rounded-xl text-xs font-bold cursor-pointer hover:bg-[#5B8C76]/20 dark:hover:bg-[#A8D8B9]/20 transition-all flex items-center justify-between custom-opt-item"><span>Dogs 🐶</span></div>
+                                <div onclick="selectCustomDropdownOption('dd-pettype-wrap', 'Cat', 'Cats 🐱')" class="px-3 py-2 rounded-xl text-xs font-bold cursor-pointer hover:bg-[#5B8C76]/20 dark:hover:bg-[#A8D8B9]/20 transition-all flex items-center justify-between custom-opt-item"><span>Cats 🐱</span></div>
+                            </div>
+                        </div>
+
+                        <!-- 6. DATE RANGE -->
+                        <div class="relative custom-dropdown-group" id="dd-daterange-wrap">
+                            <label class="block text-[10px] text-muted font-bold mb-1 uppercase">Date Range:</label>
+                            <select id="filter-date-range" onchange="filterRequestsTable()" class="hidden">
+                                <option value="ALL">All Time</option>
+                                <option value="TODAY">Today</option>
+                                <option value="THIS_WEEK">This Week</option>
+                                <option value="THIS_MONTH">This Month</option>
+                            </select>
+                            <button type="button" onclick="toggleCustomDropdown('dd-daterange-wrap', event)" class="w-full py-2 px-3 input-box rounded-xl text-xs font-bold flex items-center justify-between cursor-pointer custom-dropdown-btn">
+                                <span class="custom-dropdown-label">All Time</span>
+                                <svg class="w-3.5 h-3.5 text-[#5B8C76] dark:text-[#A8D8B9] transition-transform duration-200 custom-dropdown-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
+                            </button>
+                            <div class="absolute top-full left-0 right-0 mt-1.5 z-50 rounded-2xl apple-glass shadow-2xl p-1.5 space-y-1 hidden custom-dropdown-menu border border-[#5B8C76]/30 dark:border-[#A8D8B9]/30">
+                                <div onclick="selectCustomDropdownOption('dd-daterange-wrap', 'ALL', 'All Time')" class="px-3 py-2 rounded-xl text-xs font-bold cursor-pointer hover:bg-[#5B8C76]/20 dark:hover:bg-[#A8D8B9]/20 transition-all flex items-center justify-between custom-opt-item bg-[#5B8C76]/20 text-[#5B8C76] dark:text-[#A8D8B9]"><span>All Time</span></div>
+                                <div onclick="selectCustomDropdownOption('dd-daterange-wrap', 'TODAY', 'Today')" class="px-3 py-2 rounded-xl text-xs font-bold cursor-pointer hover:bg-[#5B8C76]/20 dark:hover:bg-[#A8D8B9]/20 transition-all flex items-center justify-between custom-opt-item"><span>Today</span></div>
+                                <div onclick="selectCustomDropdownOption('dd-daterange-wrap', 'THIS_WEEK', 'This Week')" class="px-3 py-2 rounded-xl text-xs font-bold cursor-pointer hover:bg-[#5B8C76]/20 dark:hover:bg-[#A8D8B9]/20 transition-all flex items-center justify-between custom-opt-item"><span>This Week</span></div>
+                                <div onclick="selectCustomDropdownOption('dd-daterange-wrap', 'THIS_MONTH', 'This Month')" class="px-3 py-2 rounded-xl text-xs font-bold cursor-pointer hover:bg-[#5B8C76]/20 dark:hover:bg-[#A8D8B9]/20 transition-all flex items-center justify-between custom-opt-item"><span>This Month</span></div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- DATA TABLE WITH CLICKABLE CUSTOMER & PET PROFILE LINKS -->
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs" id="main-requests-table">
+                        <thead>
+                            <tr class="border-b border-[#5B8C76]/20 table-header-text uppercase tracking-wider">
+                                <th class="pl-4 pr-2 py-3 text-left font-black whitespace-nowrap">REQUEST ID</th>
+                                <th class="px-3 py-3 text-left font-black whitespace-nowrap">CUSTOMER & PROFILE</th>
+                                <th class="px-3 py-3 text-left font-black whitespace-nowrap">PET PROFILE</th>
+                                <th class="px-2 py-3 text-left font-black whitespace-nowrap">SHELTER</th>
+                                <th class="px-2 py-3 text-center font-black whitespace-nowrap">APPLICATION DATE</th>
+                                <th class="px-2 py-3 text-center font-black whitespace-nowrap">REQUEST STATUS</th>
+                                <th class="px-2 py-3 text-center font-black whitespace-nowrap">DELIVERY STATUS</th>
+                                <th class="pl-2 pr-4 py-3 text-right font-black whitespace-nowrap">ACTIONS</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-[#5B8C76]/10 font-medium" id="requests-tbody">
+                            
+                            <!-- ROW 1: BRUNO (UNDER REVIEW / IN TRANSIT) -->
+                            <tr class="request-row" data-id="REQ-1001" data-status="UNDER_REVIEW" data-payment="PAID" data-delivery="IN_TRANSIT" data-shelter="Kochi Animal Shelter" data-pettype="Dog" data-pet="Bruno" data-breed="Golden Retriever" data-customer="Rahul Sharma" data-phone="+91 98765 43210" data-date="2026-08-20" data-fee="₹3,500 ($150)" data-petimg="{% static 'pets/images/bruno_landscape.jpg' %}" data-delid="DEL-2026-00125" data-txnid="TXN-2026-1001">
+                                <td class="pl-4 pr-2 py-3.5 font-black whitespace-nowrap text-left">
+                                    <button type="button" onclick="openRequestDetailModal('REQ-1001')" class="theme-accent-text name-hover-link font-black cursor-pointer text-xs no-underline" title="View Full Adoption Lifecycle Profile">#REQ-1001</button>
+                                </td>
+                                <td class="px-3 py-3.5 text-left whitespace-nowrap">
+                                    <a href="{% url 'admin_users' %}" class="font-extrabold user-name-text name-hover-link flex items-center gap-1 group text-xs no-underline" title="Visit Rahul Sharma's Customer Profile">
+                                        <span class="name-hover-link">Rahul Sharma</span>
+                                        <span class="text-[10px] text-muted name-hover-link">↗</span>
+                                    </a>
+                                    <span class="text-muted text-[10px] block">+91 98765 43210</span>
+                                </td>
+                                <td class="px-3 py-3.5 font-bold whitespace-nowrap text-left">
+                                    <a href="{% url 'admin_pets' %}" class="flex items-center gap-2.5 group cursor-pointer no-underline" title="Visit Bruno's Pet Profile">
+                                        <img src="{% static 'pets/images/bruno_landscape.jpg' %}" alt="Bruno" class="w-10 h-8 rounded-lg object-cover border border-[#5B8C76]/50 shadow-xs group-hover:scale-105 transition-transform">
+                                        <div>
+                                            <span class="user-name-text name-hover-link font-extrabold text-xs block no-underline">Bruno 🐶 ↗</span>
+                                            <span class="text-muted text-[10px] block font-medium">Click to view pet</span>
+                                        </div>
+                                    </a>
+                                </td>
+                                <td class="px-2 py-3.5 text-left whitespace-nowrap">
+                                    <a href="{% url 'admin_shelters' %}" class="text-muted name-hover-link whitespace-nowrap font-semibold text-left block no-underline">Kochi Shelter</a>
+                                </td>
+                                <td class="px-2 py-3.5 text-muted whitespace-nowrap text-center">Aug 20, 2026</td>
+                                <td class="px-2 py-3.5 whitespace-nowrap text-center"><span class="px-2.5 py-0.5 bg-amber-500/20 text-amber-400 font-extrabold text-[10px] rounded-full">Under Review 🔍</span></td>
+                                <td class="px-2 py-3.5 whitespace-nowrap text-center"><span class="px-2.5 py-0.5 bg-sky-500/20 text-sky-400 font-extrabold text-[10px] rounded-full">In Transit 🚚</span></td>
+                                <td class="pl-2 pr-4 py-3.5 text-right whitespace-nowrap space-x-1">
+                                    <button type="button" onclick="openRequestDetailModal('REQ-1001')" class="btn-ui-primary">View Details</button>
+                                </td>
+                            </tr>
+
+                            <!-- ROW 2: LUNA (APPROVED / HANDOVER PENDING) -->
+                            <tr class="request-row" data-id="REQ-1002" data-status="APPROVED" data-payment="PAID" data-delivery="HANDOVER_PENDING" data-shelter="Happy Paws Rescue" data-pettype="Cat" data-pet="Luna" data-breed="Persian Cat" data-customer="Priya Patel" data-phone="+1 555-8831" data-date="2026-08-19" data-fee="₹2,800 ($120)" data-petimg="{% static 'pets/images/luna_landscape.jpg' %}" data-delid="DEL-2026-00126" data-txnid="TXN-2026-1002">
+                                <td class="pl-4 pr-2 py-3.5 font-black whitespace-nowrap text-left">
+                                    <button type="button" onclick="openRequestDetailModal('REQ-1002')" class="theme-accent-text name-hover-link font-black cursor-pointer text-xs no-underline" title="View Full Adoption Lifecycle Profile">#REQ-1002</button>
+                                </td>
+                                <td class="px-3 py-3.5 text-left whitespace-nowrap">
+                                    <a href="{% url 'admin_users' %}" class="font-extrabold user-name-text name-hover-link flex items-center gap-1 group text-xs no-underline" title="Visit Priya Patel's Customer Profile">
+                                        <span class="name-hover-link">Priya Patel</span>
+                                        <span class="text-[10px] text-muted name-hover-link">↗</span>
+                                    </a>
+                                    <span class="text-muted text-[10px] block">+1 555-8831</span>
+                                </td>
+                                <td class="px-3 py-3.5 font-bold whitespace-nowrap text-left">
+                                    <a href="{% url 'admin_pets' %}" class="flex items-center gap-2.5 group cursor-pointer no-underline" title="Visit Luna's Pet Profile">
+                                        <img src="{% static 'pets/images/luna_landscape.jpg' %}" alt="Luna" class="w-10 h-8 rounded-lg object-cover border border-[#5B8C76]/50 shadow-xs group-hover:scale-105 transition-transform">
+                                        <div>
+                                            <span class="user-name-text name-hover-link font-extrabold text-xs block no-underline">Luna 🐱 ↗</span>
+                                            <span class="text-muted text-[10px] block font-medium">Click to view pet</span>
+                                        </div>
+                                    </a>
+                                </td>
+                                <td class="px-2 py-3.5 text-left whitespace-nowrap">
+                                    <a href="{% url 'admin_shelters' %}" class="text-muted name-hover-link whitespace-nowrap font-semibold text-left block no-underline">Happy Paws</a>
+                                </td>
+                                <td class="px-2 py-3.5 text-muted whitespace-nowrap text-center">Aug 19, 2026</td>
+                                <td class="px-2 py-3.5 whitespace-nowrap text-center"><span class="px-2.5 py-0.5 bg-emerald-500/20 text-emerald-400 font-extrabold text-[10px] rounded-full">Approved ✅</span></td>
+                                <td class="px-2 py-3.5 whitespace-nowrap text-center"><span class="px-2.5 py-0.5 bg-indigo-500/20 text-indigo-300 font-extrabold text-[10px] rounded-full">Handover Pending ✍️</span></td>
+                                <td class="pl-2 pr-4 py-3.5 text-right whitespace-nowrap space-x-1">
+                                    <button type="button" onclick="openRequestDetailModal('REQ-1002')" class="btn-ui-primary">View Details</button>
+                                </td>
+                            </tr>
+
+                            <!-- ROW 3: MAX (PENDING / UNSCHEDULED) -->
+                            <tr class="request-row" data-id="REQ-1003" data-status="PENDING" data-payment="PENDING" data-delivery="UNSCHEDULED" data-shelter="ABC Animal Shelter" data-pettype="Dog" data-pet="Max" data-breed="German Shepherd" data-customer="Amit Kumar" data-phone="+1 555-4421" data-date="2026-08-21" data-fee="₹4,200 ($180)" data-petimg="https://images.unsplash.com/photo-1589941013453-ec89f33b5e95?auto=format&fit=crop&w=300&q=80" data-delid="DEL-2026-00127" data-txnid="TXN-2026-1003">
+                                <td class="pl-4 pr-2 py-3.5 font-black whitespace-nowrap text-left">
+                                    <button type="button" onclick="openRequestDetailModal('REQ-1003')" class="theme-accent-text name-hover-link font-black cursor-pointer text-xs no-underline" title="View Full Adoption Lifecycle Profile">#REQ-1003</button>
+                                </td>
+                                <td class="px-3 py-3.5 text-left whitespace-nowrap">
+                                    <a href="{% url 'admin_users' %}" class="font-extrabold user-name-text name-hover-link flex items-center gap-1 group text-xs no-underline" title="Visit Amit Kumar's Customer Profile">
+                                        <span class="name-hover-link">Amit Kumar</span>
+                                        <span class="text-[10px] text-muted name-hover-link">↗</span>
+                                    </a>
+                                    <span class="text-muted text-[10px] block">+1 555-4421</span>
+                                </td>
+                                <td class="px-3 py-3.5 font-bold whitespace-nowrap text-left">
+                                    <a href="{% url 'admin_pets' %}" class="flex items-center gap-2.5 group cursor-pointer no-underline" title="Visit Max's Pet Profile">
+                                        <img src="https://images.unsplash.com/photo-1589941013453-ec89f33b5e95?auto=format&fit=crop&w=300&q=80" alt="Max" class="w-10 h-8 rounded-lg object-cover border border-[#5B8C76]/50 shadow-xs group-hover:scale-105 transition-transform">
+                                        <div>
+                                            <span class="user-name-text name-hover-link font-extrabold text-xs block no-underline">Max 🐶 ↗</span>
+                                            <span class="text-muted text-[10px] block font-medium">Click to view pet</span>
+                                        </div>
+                                    </a>
+                                </td>
+                                <td class="px-2 py-3.5 text-left whitespace-nowrap">
+                                    <a href="{% url 'admin_shelters' %}" class="text-muted name-hover-link whitespace-nowrap font-semibold text-left block no-underline">ABC Shelter</a>
+                                </td>
+                                <td class="px-2 py-3.5 text-muted whitespace-nowrap text-center">Aug 21, 2026</td>
+                                <td class="px-2 py-3.5 whitespace-nowrap text-center"><span class="px-2.5 py-0.5 bg-blue-500/20 text-blue-300 font-extrabold text-[10px] rounded-full">Pending ⏳</span></td>
+                                <td class="px-2 py-3.5 whitespace-nowrap text-center"><span class="px-2.5 py-0.5 bg-gray-500/20 text-gray-400 font-extrabold text-[10px] rounded-full">Unscheduled ⏳</span></td>
+                                <td class="pl-2 pr-4 py-3.5 text-right whitespace-nowrap space-x-1">
+                                    <button type="button" onclick="openRequestDetailModal('REQ-1003')" class="btn-ui-primary">View Details</button>
+                                </td>
+                            </tr>
+
+                            <!-- ROW 4: BELLA (COMPLETED) -->
+                            <tr class="request-row" data-id="REQ-1004" data-status="COMPLETED" data-payment="PAID" data-delivery="COMPLETED" data-shelter="Save-a-Pet Foundation" data-pettype="Dog" data-pet="Bella" data-breed="Beagle" data-customer="Sneha Roy" data-phone="+1 555-9012" data-date="2026-08-15" data-fee="₹2,600 ($110)" data-petimg="https://images.unsplash.com/photo-1505628346881-b72b27e84530?auto=format&fit=crop&w=300&q=80" data-delid="DEL-2026-00128" data-txnid="TXN-2026-1004">
+                                <td class="pl-4 pr-2 py-3.5 font-black whitespace-nowrap text-left">
+                                    <button type="button" onclick="openRequestDetailModal('REQ-1004')" class="theme-accent-text name-hover-link font-black cursor-pointer text-xs no-underline" title="View Full Adoption Lifecycle Profile">#REQ-1004</button>
+                                </td>
+                                <td class="px-3 py-3.5 text-left whitespace-nowrap">
+                                    <a href="{% url 'admin_users' %}" class="font-extrabold user-name-text name-hover-link flex items-center gap-1 group text-xs no-underline" title="Visit Sneha Roy's Customer Profile">
+                                        <span class="name-hover-link">Sneha Roy</span>
+                                        <span class="text-[10px] text-muted name-hover-link">↗</span>
+                                    </a>
+                                    <span class="text-muted text-[10px] block">+1 555-9012</span>
+                                </td>
+                                <td class="px-3 py-3.5 font-bold whitespace-nowrap text-left">
+                                    <a href="{% url 'admin_pets' %}" class="flex items-center gap-2.5 group cursor-pointer no-underline" title="Visit Bella's Pet Profile">
+                                        <img src="https://images.unsplash.com/photo-1505628346881-b72b27e84530?auto=format&fit=crop&w=300&q=80" alt="Bella" class="w-10 h-8 rounded-lg object-cover border border-[#5B8C76]/50 shadow-xs group-hover:scale-105 transition-transform">
+                                        <div>
+                                            <span class="user-name-text name-hover-link font-extrabold text-xs block no-underline">Bella 🐶 ↗</span>
+                                            <span class="text-muted text-[10px] block font-medium">Click to view pet</span>
+                                        </div>
+                                    </a>
+                                </td>
+                                <td class="px-2 py-3.5 text-left whitespace-nowrap">
+                                    <a href="{% url 'admin_shelters' %}" class="text-muted name-hover-link whitespace-nowrap font-semibold text-left block no-underline">Save-a-Pet</a>
+                                </td>
+                                <td class="px-2 py-3.5 text-muted whitespace-nowrap text-center">Aug 15, 2026</td>
+                                <td class="px-2 py-3.5 whitespace-nowrap text-center"><span class="px-2.5 py-0.5 badge-verified text-[10px] rounded-full">Completed 🎉</span></td>
+                                <td class="px-2 py-3.5 whitespace-nowrap text-center"><span class="px-2.5 py-0.5 badge-verified text-[10px] rounded-full">Delivered 🎉</span></td>
+                                <td class="pl-2 pr-4 py-3.5 text-right whitespace-nowrap space-x-1">
+                                    <button type="button" onclick="openRequestDetailModal('REQ-1004')" class="btn-ui-primary">View Details</button>
+                                </td>
+                            </tr>
+
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- 📄 SINGLE CONNECTED LIFECYCLE REQUEST DETAILS DRAWER / MODAL (WITH 5 TAB SECTIONS & WORKFLOW CONTROLS) -->
+    <div id="request-detail-modal" class="fixed inset-0 bg-black/80 backdrop-blur-lg z-50 flex items-center justify-center p-4 hidden">
+        <div class="apple-glass rounded-[32px] p-6 sm:p-8 max-w-5xl w-full shadow-2xl space-y-6 max-h-[92vh] overflow-y-auto">
+            
+            <!-- HEADER -->
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-[#5B8C76]/20 pb-4">
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs font-black theme-accent-text uppercase tracking-widest" id="modal-req-id">#REQ-1001</span>
+                        <span class="text-xs text-muted font-bold" id="modal-req-date">• Submitted Aug 20, 2026</span>
+                    </div>
+                    <h2 class="text-xl font-black user-name-text tracking-tight mt-0.5" id="modal-req-title">
+                        Adoption Lifecycle Profile: Rahul Sharma ➔ Bruno 🐶
+                    </h2>
+                </div>
+
+                <div class="flex items-center gap-3">
+                    <span class="px-3.5 py-1 bg-amber-500/20 text-amber-400 font-extrabold text-xs rounded-full shadow-xs" id="modal-status-badge">Under Review 🔍</span>
+                    <button onclick="closeRequestDetailModal()" class="w-8 h-8 rounded-full bg-gray-200 dark:bg-[#5B8C76]/20 hover:bg-gray-300 text-muted hover:text-[#5B8C76] font-black text-sm flex items-center justify-center cursor-pointer" title="Close">✕</button>
+                </div>
+            </div>
+
+            <!-- SINGLE CONNECTED LIFECYCLE CROSS-MODULE NAVIGATION BAR -->
+            <div class="flex flex-wrap items-center justify-between gap-2 p-3 card-inner-box rounded-2xl text-xs font-bold">
+                <div class="flex items-center gap-2">
+                    <a href="{% url 'admin_payments' %}" class="btn-ui-secondary">💳 Payment TXN (#TXN-2026-1001)</a>
+                    <a href="{% url 'admin_deliveries' %}" class="btn-ui-secondary">🚚 Delivery Route (#DEL-2026-00125)</a>
+                    <a href="{% url 'admin_audit_logs' %}" class="btn-ui-secondary">🔍 View Audit Trail</a>
+                </div>
+
+                <!-- WORKFLOW CONTROL ACTION BUTTONS -->
+                <div class="flex items-center gap-2">
+                    <button type="button" onclick="approveRequest()" class="btn-ui-primary">Approve ✅</button>
+                    <button type="button" onclick="openRejectReasonModal()" class="btn-ui-danger">Reject ❌</button>
+                    <button type="button" onclick="requestMoreInfo()" class="btn-ui-secondary">Request Info ℹ️</button>
+                    <button type="button" onclick="completeAdoptionWorkflow()" class="btn-ui-primary">Mark Completed 🎉</button>
+                </div>
+            </div>
+
+            <!-- VISUAL 7-STAGE FLIPKART/AMAZON ADOPTION PIPELINE -->
+            <div class="p-4 card-inner-box rounded-2xl space-y-2">
+                <div class="text-xs font-extrabold user-name-text uppercase tracking-wider flex items-center justify-between">
+                    <span>🛣️ 7-Stage Connected Adoption Order Lifecycle</span>
+                    <span class="text-[11px] text-amber-400 font-extrabold" id="timeline-stage-text">Stage 2: Under Review</span>
+                </div>
+                <div class="grid grid-cols-2 sm:grid-cols-7 gap-2 pt-1 text-[10px] font-extrabold text-center">
+                    <div class="p-2 rounded-xl border border-[#5B8C76] bg-[#5B8C76] text-white">1. Submitted ✓</div>
+                    <div class="p-2 rounded-xl border border-amber-500 bg-amber-500 text-white">2. In Review 🔍</div>
+                    <div class="p-2 rounded-xl border border-gray-600 bg-gray-800/50 text-gray-400">3. Approved ○</div>
+                    <div class="p-2 rounded-xl border border-gray-600 bg-gray-800/50 text-gray-400">4. Payment 💳</div>
+                    <div class="p-2 rounded-xl border border-gray-600 bg-gray-800/50 text-gray-400">5. Agreement 📄</div>
+                    <div class="p-2 rounded-xl border border-gray-600 bg-gray-800/50 text-gray-400">6. Delivery 🚚</div>
+                    <div class="p-2 rounded-xl border border-gray-600 bg-gray-800/50 text-gray-400">7. Completed 🎉</div>
+                </div>
+            </div>
+
+            <!-- UNIFORM 4-CARD DETAILED PROFILE GRID (ALL CARDS EXACT SAME min-h-[215px] SIZE) -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs items-stretch">
+                
+                <!-- COLUMN 1: PET & APPLICANT SPECIFICATIONS -->
+                <div class="space-y-4 flex flex-col justify-between">
+                    <!-- CARD 1: PET SPECIFICATIONS -->
+                    <div class="p-4.5 card-inner-box rounded-2xl flex-1 flex flex-col justify-between space-y-2 min-h-[215px]">
+                        <div class="text-xs font-extrabold theme-accent-text uppercase tracking-wider flex items-center justify-between">
+                            <span>🐶 Pet Requested Profile</span>
+                            <span class="text-emerald-400 font-extrabold" id="modal-pet-fee">Fee: ₹3,500 ($150)</span>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <img id="modal-pet-img" src="{% static 'pets/images/bruno_landscape.jpg' %}" alt="Pet Photo" class="w-20 h-16 rounded-2xl object-cover border-2 border-[#5B8C76]">
+                            <div class="space-y-1">
+                                <h3 class="text-base font-black user-name-text" id="modal-pet-name">Bruno 🐶</h3>
+                                <p class="text-muted font-bold text-[11px]" id="modal-pet-type-breed">Dog • Golden Retriever</p>
+                                <p class="text-muted text-[11px]">2 Years • Male • 28 kg</p>
+                                <p class="theme-accent-text text-[11px] font-extrabold" id="modal-pet-shelter">Shelter: Kochi Animal Shelter</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- CARD 2: APPLICANT PROFILE -->
+                    <div class="p-4.5 card-inner-box rounded-2xl flex-1 flex flex-col justify-between space-y-2 min-h-[215px]">
+                        <div class="text-xs font-extrabold theme-accent-text uppercase tracking-wider">
+                            <span>🧑 Applicant Profile & Contact</span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2 text-muted font-semibold">
+                            <div>Full Name: <strong class="user-name-text block" id="modal-app-name">Rahul Sharma</strong></div>
+                            <div>Occupation: <strong class="user-name-text block" id="modal-app-job">Software Engineer</strong></div>
+                            <div>Email: <strong class="user-name-text block text-[11px]" id="modal-app-email">rahul.sharma@example.com</strong></div>
+                            <div>Phone: <strong class="user-name-text block" id="modal-app-phone">+91 98765 43210</strong></div>
+                        </div>
+                        <div class="pt-2 border-t border-[#5B8C76]/15">
+                            <span class="text-muted">Residence Address:</span>
+                            <p class="user-name-text font-bold mt-0.5" id="modal-app-address">Flat 402, Oakwood Apartments, 45 Rescue Lane, Thrissur, Kerala</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- COLUMN 2: HOUSEHOLD, EXPERIENCE & DOCS -->
+                <div class="space-y-4 flex flex-col justify-between">
+                    <!-- CARD 3: HOUSING ENVIRONMENT -->
+                    <div class="p-4.5 card-inner-box rounded-2xl flex-1 flex flex-col justify-between space-y-2 min-h-[215px]">
+                        <div class="text-xs font-extrabold theme-accent-text uppercase tracking-wider">
+                            <span>🏡 Housing Environment & Experience</span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2 text-muted font-semibold">
+                            <div>Home Type: <strong class="user-name-text block">Apartment (Owned) 🏢</strong></div>
+                            <div>Family Members: <strong class="user-name-text block">3 Adults 👨‍👩‍👦</strong></div>
+                            <div>Other Pets: <strong class="user-name-text block">None Currently 🐶</strong></div>
+                            <div>Care Experience: <strong class="user-name-text block">5+ Years (Previous Owner)</strong></div>
+                        </div>
+                        <div class="pt-2 border-t border-[#5B8C76]/15">
+                            <span class="text-muted">Reason for Adoption:</span>
+                            <p class="user-name-text font-bold mt-0.5">"Looking to adopt a companion dog for our family."</p>
+                        </div>
+                    </div>
+
+                    <!-- CARD 4: VERIFICATION DOCUMENTS -->
+                    <div class="p-4.5 card-inner-box rounded-2xl flex-1 flex flex-col justify-between space-y-2 min-h-[215px]">
+                        <div class="text-xs font-extrabold theme-accent-text uppercase tracking-wider flex items-center justify-between">
+                            <span>📎 Verification Documents</span>
+                            <span class="text-emerald-400 font-bold">2 Verified ✅</span>
+                        </div>
+                        <div class="space-y-2 pt-1">
+                            <div class="flex items-center justify-between p-2.5 bg-black/40 rounded-xl border border-[#5B8C76]/30">
+                                <span class="user-name-text font-bold">ID-Gov-Passport-Rahul.pdf</span>
+                                <button type="button" onclick="triggerDocDownload('ID-Gov-Passport-Rahul.pdf')" class="btn-ui-secondary">Preview 📄</button>
+                            </div>
+                            <div class="flex items-center justify-between p-2.5 bg-black/40 rounded-xl border border-[#5B8C76]/30">
+                                <span class="user-name-text font-bold">Residence-Proof.pdf</span>
+                                <button type="button" onclick="triggerDocDownload('Residence-Proof.pdf')" class="btn-ui-secondary">Preview 📄</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- ACTION BUTTONS -->
+            <div class="pt-3 border-t border-[#5B8C76]/20 flex justify-end gap-3">
+                <button type="button" onclick="closeRequestDetailModal()" class="btn-ui-secondary">
+                    Close Profile
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- 🛑 REJECT REASON MODAL -->
+    <div id="reject-reason-modal" class="fixed inset-0 bg-black/80 backdrop-blur-lg z-50 flex items-center justify-center p-4 hidden">
+        <div class="modal-bg rounded-[32px] p-6 max-w-md w-full shadow-2xl relative space-y-4">
+            <button onclick="closeRejectReasonModal()" class="absolute top-6 right-6 text-muted hover:text-[#5B8C76] font-extrabold text-lg cursor-pointer">✕</button>
+            <h3 class="text-lg font-extrabold text-rose-400 flex items-center gap-2"><span>❌</span> Reject Adoption Application</h3>
+            <p class="text-xs text-muted font-semibold">Specify the reason for rejecting this application. An automated email notification will be sent to the customer.</p>
+
+            <form onsubmit="submitRejectionReason(event)" class="space-y-4 text-xs font-bold">
+                <div>
+                    <label class="block text-muted mb-1">Rejection Reason Category:</label>
+                    <select id="reject-category-select" required class="w-full py-2.5 px-3.5 input-box rounded-2xl text-xs font-semibold">
+                        <option value="Ineligible Housing">Ineligible Housing (Landlord Restrictions)</option>
+                        <option value="Lack of Experience">Lack of Care Experience for Breed</option>
+                        <option value="Document Verification Failed">Document Verification Failed</option>
+                        <option value="Pet Already Adopted">Pet Already Adopted</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-muted mb-1">Detailed Explanation:</label>
+                    <textarea id="reject-explanation-input" rows="3" required placeholder="Enter notes for applicant..." class="w-full p-3 input-box rounded-2xl text-xs font-semibold">Application rejected due to housing restrictions.</textarea>
+                </div>
+
+                <div class="flex justify-end gap-3 pt-2">
+                    <button type="button" onclick="closeRejectReasonModal()" class="btn-ui-secondary">Cancel</button>
+                    <button type="submit" class="btn-ui-danger">Confirm Rejection ❌</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ⚡ CONTROLLERS -->
+    <script>
+        let currentReqId = 'REQ-1001';
+
+        /* 🎛️ CUSTOM GLASS UI DROPDOWN CONTROLLERS */
+        function toggleCustomDropdown(wrapperId, event) {
+            if (event) event.stopPropagation();
+            const wrapper = document.getElementById(wrapperId);
+            if (!wrapper) return;
+            const menu = wrapper.querySelector('.custom-dropdown-menu');
+            const arrow = wrapper.querySelector('.custom-dropdown-arrow');
+            const isHidden = menu.classList.contains('hidden');
+
+            // Close all other open dropdowns
+            document.querySelectorAll('.custom-dropdown-menu').forEach(m => m.classList.add('hidden'));
+            document.querySelectorAll('.custom-dropdown-arrow').forEach(a => a.classList.remove('rotate-180'));
+
+            if (isHidden) {
+                menu.classList.remove('hidden');
+                arrow.classList.add('rotate-180');
+            }
+        }
+
+        function selectCustomDropdownOption(wrapperId, val, label) {
+            const wrapper = document.getElementById(wrapperId);
+            if (!wrapper) return;
+            const select = wrapper.querySelector('select');
+            const labelSpan = wrapper.querySelector('.custom-dropdown-label');
+            const menu = wrapper.querySelector('.custom-dropdown-menu');
+            const arrow = wrapper.querySelector('.custom-dropdown-arrow');
+
+            if (select) {
+                select.value = val;
+                select.dispatchEvent(new Event('change'));
+            }
+            if (labelSpan) {
+                labelSpan.textContent = label;
+            }
+            if (menu) {
+                menu.classList.add('hidden');
+            }
+            if (arrow) {
+                arrow.classList.remove('rotate-180');
+            }
+
+            // Highlight selected item
+            wrapper.querySelectorAll('.custom-opt-item').forEach(item => {
+                if (item.textContent.trim() === label.trim()) {
+                    item.classList.add('bg-[#5B8C76]/20', 'text-[#5B8C76]', 'dark:text-[#A8D8B9]');
+                } else {
+                    item.classList.remove('bg-[#5B8C76]/20', 'text-[#5B8C76]', 'dark:text-[#A8D8B9]');
+                }
+            });
+
+            filterRequestsTable();
+        }
+
+        // Close all dropdowns when clicking anywhere outside
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.custom-dropdown-group')) {
+                document.querySelectorAll('.custom-dropdown-menu').forEach(m => m.classList.add('hidden'));
+                document.querySelectorAll('.custom-dropdown-arrow').forEach(a => a.classList.remove('rotate-180'));
+            }
+        });
+
+        const requestDatabase = {
+            'REQ-1001': { id: 'REQ-1001', pet: 'Bruno 🐶', breed: 'Golden Retriever', customer: 'Rahul Sharma', job: 'Software Engineer', email: 'rahul.sharma@example.com', phone: '+91 98765 43210', address: 'Flat 402, Oakwood Apartments, 45 Rescue Lane, Thrissur, Kerala', shelter: 'Kochi Animal Shelter', date: 'Aug 20, 2026', fee: '₹3,500 ($150)', status: 'UNDER_REVIEW', petimg: "{% static 'pets/images/bruno_landscape.jpg' %}" },
+            'REQ-1002': { id: 'REQ-1002', pet: 'Luna 🐱', breed: 'Persian Cat', customer: 'Priya Patel', job: 'Graphic Designer', email: 'priya.patel@example.com', phone: '+1 555-8831', address: '128 Haven Road, San Jose, CA', shelter: 'Happy Paws Rescue', date: 'Aug 19, 2026', fee: '₹2,800 ($120)', status: 'APPROVED', petimg: "{% static 'pets/images/luna_landscape.jpg' %}" },
+            'REQ-1003': { id: 'REQ-1003', pet: 'Max 🐶', breed: 'German Shepherd', customer: 'Amit Kumar', job: 'Architect', email: 'amit.kumar@example.com', phone: '+1 555-4421', address: '77 Silicon Valley Blvd, Santa Clara, CA', shelter: 'ABC Animal Shelter', date: 'Aug 21, 2026', fee: '₹4,200 ($180)', status: 'PENDING', petimg: "https://images.unsplash.com/photo-1589941013453-ec89f33b5e95?auto=format&fit=crop&w=300&q=80" },
+            'REQ-1004': { id: 'REQ-1004', pet: 'Bella 🐶', breed: 'Beagle', customer: 'Sneha Roy', job: 'Doctor', email: 'sneha.roy@example.com', phone: '+1 555-9012', address: '88 Shelter Way, Oakland, CA', shelter: 'Save-a-Pet Foundation', date: 'Aug 15, 2026', fee: '₹2,600 ($110)', status: 'COMPLETED', petimg: "https://images.unsplash.com/photo-1505628346881-b72b27e84530?auto=format&fit=crop&w=300&q=80" }
+        };
+
+        /* 📢 FLOATING TOAST NOTIFICATION SYSTEM */
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            if (!container) return;
+
+            const toast = document.createElement('div');
+            
+            let bgStyle = 'bg-[#5B8C76] text-white border border-[#A8D8B9]/30';
+            let icon = '✅';
+            if (type === 'danger' || type === 'error') {
+                bgStyle = 'bg-red-600 text-white border border-red-400/30';
+                icon = '❌';
+            } else if (type === 'warning') {
+                bgStyle = 'bg-amber-600 text-white border border-amber-400/30';
+                icon = '⏳';
+            }
+
+            toast.className = `flex items-center gap-3 px-5 py-3.5 rounded-2xl shadow-2xl text-xs font-bold pointer-events-auto toast-animate ${bgStyle}`;
+            toast.innerHTML = `
+                <span class="text-base">${icon}</span>
+                <span>${message}</span>
+            `;
+
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(100%)';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        function filterRequestsTable() {
+            const query = document.getElementById('request-search-input').value.toLowerCase();
+            const statusFilter = document.getElementById('filter-request-status').value;
+            const paymentFilter = document.getElementById('filter-payment-status').value;
+            const deliveryFilter = document.getElementById('filter-delivery-status').value;
+            const shelterFilter = document.getElementById('filter-shelter').value;
+            const petTypeFilter = document.getElementById('filter-pet-type').value;
+
+            document.querySelectorAll('.request-row').forEach(row => {
+                const id = row.getAttribute('data-id').toLowerCase();
+                const pet = row.getAttribute('data-pet').toLowerCase();
+                const customer = row.getAttribute('data-customer').toLowerCase();
+                const shelter = row.getAttribute('data-shelter').toLowerCase();
+                
+                const status = row.getAttribute('data-status');
+                const payment = row.getAttribute('data-payment');
+                const delivery = row.getAttribute('data-delivery');
+                const rowShelter = row.getAttribute('data-shelter');
+                const petType = row.getAttribute('data-pettype');
+
+                const matchesStatus = (statusFilter === 'ALL') || (status === statusFilter);
+                const matchesPayment = (paymentFilter === 'ALL') || (payment === paymentFilter);
+                const matchesDelivery = (deliveryFilter === 'ALL') || (delivery === deliveryFilter);
+                const matchesShelter = (shelterFilter === 'ALL') || (rowShelter === shelterFilter);
+                const matchesPetType = (petTypeFilter === 'ALL') || (petType === petTypeFilter);
+                const matchesQuery = id.includes(query) || pet.includes(query) || customer.includes(query) || shelter.includes(query);
+
+                row.style.display = (matchesStatus && matchesPayment && matchesDelivery && matchesShelter && matchesPetType && matchesQuery) ? '' : 'none';
+            });
+        }
+
+        function openRequestDetailModal(reqId) {
+            currentReqId = reqId;
+            const data = requestDatabase[reqId];
+            if (data) {
+                document.getElementById('modal-req-id').textContent = `#${data.id}`;
+                document.getElementById('modal-req-title').textContent = `Adoption Lifecycle Profile: ${data.customer} ➔ ${data.pet}`;
+                document.getElementById('modal-pet-name').textContent = data.pet;
+                document.getElementById('modal-pet-type-breed').textContent = data.breed;
+                document.getElementById('modal-pet-fee').textContent = `Fee: ${data.fee}`;
+                document.getElementById('modal-pet-shelter').textContent = `Shelter: ${data.shelter}`;
+                document.getElementById('modal-pet-img').src = data.petimg;
+
+                document.getElementById('modal-app-name').textContent = data.customer;
+                document.getElementById('modal-app-job').textContent = data.job;
+                document.getElementById('modal-app-email').textContent = data.email;
+                document.getElementById('modal-app-phone').textContent = data.phone;
+                document.getElementById('modal-app-address').textContent = data.address;
+            }
+            document.getElementById('request-detail-modal').classList.remove('hidden');
+        }
+
+        function closeRequestDetailModal() {
+            document.getElementById('request-detail-modal').classList.add('hidden');
+        }
+
+        function approveRequest() {
+            const row = document.querySelector(`.request-row[data-id="${currentReqId}"]`);
+            if (row) {
+                row.setAttribute('data-status', 'APPROVED');
+                showToast(`✅ Adoption Request #${currentReqId} Approved! Audit record created.`, 'success');
+            }
+            closeRequestDetailModal();
+            filterRequestsTable();
+        }
+
+        function openRejectReasonModal() {
+            document.getElementById('reject-reason-modal').classList.remove('hidden');
+        }
+
+        function closeRejectReasonModal() {
+            document.getElementById('reject-reason-modal').classList.add('hidden');
+        }
+
+        function submitRejectionReason(event) {
+            event.preventDefault();
+            const reason = document.getElementById('reject-category-select').value;
+            const row = document.querySelector(`.request-row[data-id="${currentReqId}"]`);
+            if (row) {
+                row.setAttribute('data-status', 'REJECTED');
+                showToast(`❌ Request #${currentReqId} Rejected due to: ${reason}`, 'danger');
+            }
+            closeRejectReasonModal();
+            closeRequestDetailModal();
+            filterRequestsTable();
+        }
+
+        function requestMoreInfo() {
+            showToast(`ℹ️ Information Request sent to applicant for #${currentReqId}.`, 'warning');
+        }
+
+        function completeAdoptionWorkflow() {
+            const row = document.querySelector(`.request-row[data-id="${currentReqId}"]`);
+            if (row) {
+                row.setAttribute('data-status', 'COMPLETED');
+                row.setAttribute('data-delivery', 'COMPLETED');
+                showToast(`🎉 Adoption #${currentReqId} marked as COMPLETED! Pet status updated to Adopted.`, 'success');
+            }
+            closeRequestDetailModal();
+            filterRequestsTable();
+        }
+
+        function triggerDocDownload(fileName) {
+            showToast(`Opening preview: ${fileName}`, 'success');
+        }
+
+        function toggleTheme() {
+            const isDark = document.documentElement.classList.contains('dark');
+            const themeIcon = document.getElementById('theme-icon');
+            if (isDark) { 
+                document.documentElement.classList.remove('dark'); 
+                localStorage.setItem('theme', 'light'); 
+                if (themeIcon) themeIcon.textContent = '☀️';
+            } else { 
+                document.documentElement.classList.add('dark'); 
+                localStorage.setItem('theme', 'dark'); 
+                if (themeIcon) themeIcon.textContent = '🌙';
+            }
+        }
+
+        if (localStorage.getItem('theme') === 'light') {
+            document.documentElement.classList.remove('dark');
+            const themeIcon = document.getElementById('theme-icon');
+            if (themeIcon) themeIcon.textContent = '☀️';
+        } else {
+            const themeIcon = document.getElementById('theme-icon');
+            if (themeIcon) themeIcon.textContent = '🌙';
+        }
+    </script>
+</body>
+</html>

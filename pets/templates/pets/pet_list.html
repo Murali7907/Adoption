@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en" class="dark scroll-smooth">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Browse Rescue Pets — Paw Haven</title>
+    <meta name="description" content="Browse verified rescue pets available for adoption across partner shelters." />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    <!-- Google Fonts: Plus Jakarta Sans & Jost -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet" />
+    <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+
+    <style type="text/css">
+        @import "tailwindcss";
+
+        :root {
+            --ink: #ffffff;
+            --ink-soft: rgba(255, 255, 255, 0.85);
+            --ink-faint: rgba(255, 255, 255, 0.65);
+            --glass: rgba(27, 41, 33, 0.78);
+            --glass-lift: rgba(36, 52, 42, 0.88);
+            --hairline: rgba(168, 216, 185, 0.22);
+            --accent-jade: #5B8C76;
+            --accent-light: #A8D8B9;
+            --ground: #111A15;
+            --ground-deep: #0B120E;
+            --shell: 1280px;
+            --nav-h: 74px;
+            --radius: 20px;
+            --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+            color-scheme: dark;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; }
+        * { margin: 0; scrollbar-width: none !important; }
+        *::-webkit-scrollbar { display: none !important; }
+
+        html { scroll-behavior: smooth; }
+        body {
+            min-height: 100dvh; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 16px; line-height: 1.5;
+            color: var(--ink); background-color: var(--ground);
+            -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
+        }
+
+        a, button { text-decoration: none !important; }
+        a:hover, button:hover { text-decoration: none !important; }
+
+        .shell { width: 100%; max-width: var(--shell); margin-inline: auto; padding-inline: clamp(16px, 3.4vw, 40px); }
+
+        /* SCROLL REVEAL ANIMATIONS */
+        .scroll-reveal {
+            opacity: 0;
+            transform: translateY(28px);
+            transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .scroll-reveal.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* TACTILE BUTTON SYSTEM */
+        .btn-ui-primary {
+            background: linear-gradient(135deg, #5B8C76 0%, #3D6B56 100%) !important;
+            color: #FFFFFF !important;
+            font-weight: 800 !important;
+            font-size: 0.825rem !important;
+            padding: 0.65rem 1.4rem !important;
+            border-radius: 999px !important;
+            border: 1px solid rgba(168, 216, 185, 0.35) !important;
+            box-shadow: 0 8px 20px rgba(91, 140, 118, 0.35) !important;
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+            cursor: pointer !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            gap: 0.5rem !important;
+            white-space: nowrap !important;
+        }
+        .btn-ui-primary:hover {
+            transform: translateY(-2px) scale(1.02) !important;
+            box-shadow: 0 12px 28px rgba(91, 140, 118, 0.55) !important;
+            background: linear-gradient(135deg, #689D85 0%, #44745E 100%) !important;
+            border-color: rgba(168, 216, 185, 0.6) !important;
+        }
+        .btn-ui-primary:active { transform: translateY(0) scale(0.97) !important; }
+
+        .btn-ui-pearl {
+            background: linear-gradient(180deg, #FFFFFF 0%, #F4EDE2 100%) !important;
+            color: #111A15 !important;
+            font-weight: 800 !important;
+            font-size: 0.825rem !important;
+            padding: 0.65rem 1.4rem !important;
+            border-radius: 999px !important;
+            box-shadow: 0 8px 26px rgba(0,0,0,0.4) !important;
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+            cursor: pointer !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            gap: 0.5rem !important;
+            white-space: nowrap !important;
+        }
+        .btn-ui-pearl:hover {
+            transform: translateY(-2px) scale(1.02) !important;
+            box-shadow: 0 14px 34px rgba(0,0,0,0.5) !important;
+        }
+
+        .btn-ui-secondary {
+            background: rgba(91, 140, 118, 0.18) !important;
+            color: #A8D8B9 !important;
+            border: 1px solid rgba(168, 216, 185, 0.3) !important;
+            font-weight: 800 !important;
+            font-size: 0.825rem !important;
+            padding: 0.65rem 1.4rem !important;
+            border-radius: 999px !important;
+            backdrop-filter: blur(12px);
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+            cursor: pointer !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            gap: 0.5rem !important;
+            white-space: nowrap !important;
+        }
+        .btn-ui-secondary:hover {
+            background: rgba(91, 140, 118, 0.35) !important;
+            transform: translateY(-2px) scale(1.02) !important;
+            border-color: rgba(168, 216, 185, 0.5) !important;
+        }
+
+        /* FLOATING PILL NAVBAR */
+        .nav-pill-container {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 60;
+        }
+        .nav-rail-pill {
+            margin-inline: auto; display: flex; align-items: center; gap: 4px; padding: 6px; border-radius: 999px;
+            background: rgba(14, 22, 18, 0.75); border: 1px solid var(--hairline);
+            backdrop-filter: blur(20px) saturate(120%);
+        }
+        .nav-rail-pill a {
+            padding: 8px 18px; border-radius: 999px; font-size: 13px; font-weight: 700; color: var(--ink-soft);
+            transition: all 0.25s var(--ease-out);
+        }
+        .nav-rail-pill a:hover { color: #FFFFFF; background: rgba(91, 140, 118, 0.2); }
+        .nav-rail-pill a.is-active { background: #5B8C76; color: #FFFFFF; box-shadow: 0 4px 14px rgba(91, 140, 118, 0.4); }
+
+        /* APPLE GLASS CARD SYSTEM */
+        .apple-glass-card {
+            background: var(--glass) !important;
+            backdrop-filter: blur(25px) saturate(120%);
+            -webkit-backdrop-filter: blur(25px) saturate(120%);
+            border: 1px solid var(--hairline) !important;
+            border-radius: var(--radius) !important;
+            box-shadow: 0 20px 45px rgba(0, 0, 0, 0.45) !important;
+        }
+
+        .name-hover-link {
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+            cursor: pointer !important;
+            display: inline-block !important;
+        }
+        .name-hover-link:hover {
+            transform: translateY(-1px) scale(1.01) !important;
+            color: #A8D8B9 !important;
+            text-shadow: 0 0 10px rgba(168, 216, 185, 0.4) !important;
+        }
+    </style>
+</head>
+<body class="min-h-screen text-[#F4EDE2] bg-[#111A15] pt-24 pb-16">
+
+    <!-- 🛸 FLOATING PILL NAVBAR -->
+    <header class="nav-pill-container">
+        <div class="shell flex items-center justify-between min-h-[74px]">
+            <!-- BRAND LOGO -->
+            <a href="{% url 'home' %}" class="flex items-center gap-2.5 font-extrabold text-lg tracking-tight text-white">
+                <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#5B8C76] to-[#A8D8B9] flex items-center justify-center text-xl text-[#111A15] shadow-lg">
+                    🐾
+                </div>
+                <span>PAW <span class="text-[#A8D8B9]">HAVEN</span></span>
+            </a>
+
+            <!-- CENTERED FLOATING PILL NAV RAIL -->
+            <nav class="hidden lg:flex nav-rail-pill" aria-label="Primary">
+                <a href="{% url 'home' %}">Home</a>
+                <a href="{% url 'pet_list' %}" class="is-active">Browse Pets</a>
+                <a href="{% url 'admin_shelters' %}">Shelter Network</a>
+                <a href="{% url 'admin_deliveries' %}">Track Delivery</a>
+                <a href="{% url 'admin_dashboard' %}">Admin Suite</a>
+            </nav>
+
+            <!-- ACTION CONTROLS -->
+            <div class="flex items-center gap-3">
+                <a href="{% url 'login' %}" class="btn-ui-secondary text-xs">Sign In</a>
+                <a href="{% url 'pet_list' %}" class="btn-ui-pearl text-xs">Adopt a Pet 🐾</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- PAGE HEADER -->
+    <section class="shell py-8 space-y-6 scroll-reveal">
+        <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-[#5B8C76]/20 pb-6">
+            <div>
+                <span class="text-xs font-extrabold text-[#5B8C76] uppercase tracking-widest block">Available Rescue Companions</span>
+                <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-white mt-1">Explore Rescue Pets 🐾</h1>
+                <p class="text-xs sm:text-sm text-[#BAC8B1] font-medium mt-1">Filter health-checked pets by species, breed, age, and verified shelter location.</p>
+            </div>
+            <a href="{% url 'add_pet' %}" class="btn-ui-primary text-xs">➕ List a Pet for Adoption</a>
+        </div>
+
+        <!-- INTERACTIVE FILTER GLASS BAR -->
+        <div class="apple-glass-card p-4 grid grid-cols-1 sm:grid-cols-4 gap-3 text-xs font-bold scroll-reveal">
+            <div>
+                <label class="block text-[11px] text-[#BAC8B1] mb-1">Species</label>
+                <select class="w-full py-2.5 px-3 rounded-xl bg-[#0B120E]/80 border border-[#5B8C76]/30 text-white font-semibold focus:outline-none">
+                    <option value="">All Species 🐾</option>
+                    <option value="DOG">Dogs 🐶</option>
+                    <option value="CAT">Cats 🐱</option>
+                    <option value="OTHER">Other Pets 🐰</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-[11px] text-[#BAC8B1] mb-1">Gender</label>
+                <select class="w-full py-2.5 px-3 rounded-xl bg-[#0B120E]/80 border border-[#5B8C76]/30 text-white font-semibold focus:outline-none">
+                    <option value="">All Genders</option>
+                    <option value="M">Male ♂</option>
+                    <option value="F">Female ♀</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-[11px] text-[#BAC8B1] mb-1">Shelter Location</label>
+                <select class="w-full py-2.5 px-3 rounded-xl bg-[#0B120E]/80 border border-[#5B8C76]/30 text-white font-semibold focus:outline-none">
+                    <option value="">All Shelters</option>
+                    <option value="Kochi">Kochi Rescue Shelter</option>
+                    <option value="Bangalore">Animal Haven Shelter</option>
+                </select>
+            </div>
+
+            <div class="flex items-end">
+                <button type="button" class="btn-ui-primary text-xs w-full py-2.5">
+                    Filter Pets 🔍
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- PET CARDS GRID -->
+    <section class="shell py-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            
+            <!-- PET CARD 1 -->
+            <div class="apple-glass-card overflow-hidden group hover:scale-[1.02] transition-all duration-300 scroll-reveal">
+                <div class="relative h-64 overflow-hidden">
+                    <img src="/featured_dog.jpg" alt="Buddy Golden Retriever" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                    <span class="absolute top-3 right-3 px-3 py-1 bg-emerald-500/90 backdrop-blur-md text-white text-[10px] font-extrabold rounded-full shadow-lg">✅ Health Cleared</span>
+                    <span class="absolute bottom-3 left-3 px-3 py-1 bg-black/60 backdrop-blur-md text-[#A8D8B9] text-xs font-bold rounded-full">Dog • 3 Months</span>
+                </div>
+                <div class="p-5 space-y-3">
+                    <div class="flex justify-between items-center">
+                        <h3 class="font-extrabold text-lg text-white">Buddy</h3>
+                        <span class="text-xs font-extrabold text-[#5B8C76]">Golden Retriever</span>
+                    </div>
+                    <p class="text-xs text-[#BAC8B1] font-medium line-clamp-2">Playful, affectionate puppy who loves children and outdoor play. Fully vaccinated and microchipped.</p>
+                    <div class="pt-2 border-t border-[#5B8C76]/20 flex items-center justify-between">
+                        <span class="text-[11px] text-[#BAC8B1] font-bold">🏠 Kochi Rescue Shelter</span>
+                        <a href="{% url 'pet_detail' 1 %}" class="btn-ui-primary text-xs py-1.5 px-3">Meet Buddy 🐾</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PET CARD 2 -->
+            <div class="apple-glass-card overflow-hidden group hover:scale-[1.02] transition-all duration-300 scroll-reveal">
+                <div class="relative h-64 overflow-hidden">
+                    <img src="/featured_cat.jpg" alt="Luna Persian Kitten" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                    <span class="absolute top-3 right-3 px-3 py-1 bg-emerald-500/90 backdrop-blur-md text-white text-[10px] font-extrabold rounded-full shadow-lg">✅ Health Cleared</span>
+                    <span class="absolute bottom-3 left-3 px-3 py-1 bg-black/60 backdrop-blur-md text-[#A8D8B9] text-xs font-bold rounded-full">Cat • 4 Months</span>
+                </div>
+                <div class="p-5 space-y-3">
+                    <div class="flex justify-between items-center">
+                        <h3 class="font-extrabold text-lg text-white">Luna</h3>
+                        <span class="text-xs font-extrabold text-[#5B8C76]">Persian Kitten</span>
+                    </div>
+                    <p class="text-xs text-[#BAC8B1] font-medium line-clamp-2">Gentle, quiet kitten who loves sunbathing and lap cuddles. Litter trained and health verified.</p>
+                    <div class="pt-2 border-t border-[#5B8C76]/20 flex items-center justify-between">
+                        <span class="text-[11px] text-[#BAC8B1] font-bold">🏠 Animal Haven Shelter</span>
+                        <a href="{% url 'pet_detail' 2 %}" class="btn-ui-primary text-xs py-1.5 px-3">Meet Luna 🐾</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PET CARD 3 -->
+            <div class="apple-glass-card overflow-hidden group hover:scale-[1.02] transition-all duration-300 scroll-reveal">
+                <div class="relative h-64 overflow-hidden">
+                    <img src="/pet_hero.jpg" alt="Max & Oliver" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                    <span class="absolute top-3 right-3 px-3 py-1 bg-purple-500/90 backdrop-blur-md text-white text-[10px] font-extrabold rounded-full shadow-lg">⭐ Bonded Pair</span>
+                    <span class="absolute bottom-3 left-3 px-3 py-1 bg-black/60 backdrop-blur-md text-[#A8D8B9] text-xs font-bold rounded-full">Dog & Cat Duo</span>
+                </div>
+                <div class="p-5 space-y-3">
+                    <div class="flex justify-between items-center">
+                        <h3 class="font-extrabold text-lg text-white">Max & Oliver</h3>
+                        <span class="text-xs font-extrabold text-[#5B8C76]">Bonded Duo</span>
+                    </div>
+                    <p class="text-xs text-[#BAC8B1] font-medium line-clamp-2">Inseparable rescue duo looking for a loving family together. Extremely friendly and trained.</p>
+                    <div class="pt-2 border-t border-[#5B8C76]/20 flex items-center justify-between">
+                        <span class="text-[11px] text-[#BAC8B1] font-bold">🏠 Bangalore Pet Rescue</span>
+                        <a href="{% url 'pet_detail' 3 %}" class="btn-ui-primary text-xs py-1.5 px-3">Meet Duo 🐾</a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="py-10 bg-[#0B120E] border-t border-[#5B8C76]/20 text-xs font-bold text-[#BAC8B1] mt-12">
+        <div class="shell flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-2">
+                <span class="text-base">🐾</span>
+                <span class="text-white font-extrabold">Paw Haven Pet Adoption Suite</span>
+                <span>• © 2026 All Rights Reserved</span>
+            </div>
+            <div class="flex gap-4">
+                <a href="{% url 'home' %}" class="name-hover-link">Home</a>
+                <a href="{% url 'admin_dashboard' %}" class="name-hover-link">Admin Suite</a>
+                <a href="{% url 'login' %}" class="name-hover-link">Sign In</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- SCROLL REVEAL OBSERVER JS -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const revealElements = document.querySelectorAll('.scroll-reveal');
+            const revealObserver = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('is-visible');
+                    }
+                });
+            }, { threshold: 0.12 });
+
+            revealElements.forEach(el => revealObserver.observe(el));
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>KindHeart — Rescued Pet & Shelter Adoption Platform</title>
+    <meta name="description"
+        content="KindHeart — Every Heart Deserves a Home. A state-of-the-art pet adoption platform featuring video backdrops, 3D photorealistic pet models, and AI matchmaker concierge." />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet" />
+
+    <!-- Tailwind CSS v4 Browser Build -->
+    <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+
+    <!-- GSAP Animation Engine -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+    <!-- Custom Stylesheet with Cachebuster -->
+    <link rel="stylesheet" href="/styles.css?v=29.0" />
+
+    <!-- 🚀 Critical Controls Style (Ambient Sound in header, Hamburger Strictly Hidden on Desktop >= 1024px) -->
+    <style>
+        /* Ambient Nature Sound: Displayed in header on all screen sizes */
+        #ambient-sound-btn,
+        button#ambient-sound-btn {
+            display: inline-flex !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+            pointer-events: auto !important;
+            position: static !important;
+            width: 28px !important;
+            height: 28px !important;
+            min-width: 28px !important;
+            min-height: 28px !important;
+            padding: 0 !important;
+            border-radius: 999px !important;
+            align-items: center !important;
+            justify-content: center !important;
+            font-size: 0.75rem !important;
+            cursor: pointer !important;
+        }
+
+        #ambient-sound-btn #sound-label {
+            display: none !important;
+        }
+
+        /* Mobile sizing for ambient sound */
+        @media (max-width: 767px) {
+            #ambient-sound-btn,
+            button#ambient-sound-btn {
+                width: 34px !important;
+                height: 34px !important;
+                min-width: 34px !important;
+                min-height: 34px !important;
+                font-size: 0.85rem !important;
+            }
+        }
+
+        /* 🍔 DESKTOP SCREENS (>= 1024px): Strictly Hide Hamburger Button */
+        @media (min-width: 1024px) {
+            #mobile-menu-toggle-btn,
+            button#mobile-menu-toggle-btn,
+            .btn-mobile-hamburger {
+                display: none !important;
+                visibility: hidden !important;
+                pointer-events: none !important;
+                opacity: 0 !important;
+                width: 0 !important;
+                height: 0 !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                position: absolute !important;
+                left: -9999px !important;
+            }
+        }
+
+        /* 🍔 MOBILE & TABLET SCREENS (< 1024px): Prominently Visible & Styled */
+        @media (max-width: 1023px) {
+            #mobile-menu-toggle-btn,
+            button#mobile-menu-toggle-btn,
+            .btn-mobile-hamburger {
+                display: inline-flex !important;
+                visibility: visible !important;
+                pointer-events: auto !important;
+                opacity: 1 !important;
+                position: static !important;
+                left: auto !important;
+                width: 36px !important;
+                height: 36px !important;
+                min-width: 36px !important;
+                min-height: 36px !important;
+                border-radius: 999px !important;
+                background: rgba(255, 255, 255, 0.12) !important;
+                backdrop-filter: blur(16px) !important;
+                -webkit-backdrop-filter: blur(16px) !important;
+                border: 1px solid rgba(255, 255, 255, 0.22) !important;
+                color: #FFFFFF !important;
+                flex-shrink: 0 !important;
+            }
+        }
+
+        @media (max-width: 767px) {
+            #mobile-menu-toggle-btn,
+            button#mobile-menu-toggle-btn,
+            .btn-mobile-hamburger {
+                width: 34px !important;
+                height: 34px !important;
+                min-width: 34px !important;
+                min-height: 34px !important;
+            }
+        }
+    </style>
+</head>
+
+<body class="min-h-screen text-slate-100 bg-[#0A0A0B] selection:bg-emerald-500/30 selection:text-white">
+
+    <!-- 🎬 FIXED FULLSCREEN CINEMATIC VIDEO BACKGROUND -->
+    <div id="bg-video-container">
+        <video id="bg-video-element" autoPlay muted loop playsInline preload="auto">
+            <source src="/hero.mp4" type="video/mp4" />
+            <img src="/kindheart_real_hero.jpg" alt="Background Wildlife Loop" class="w-full h-full object-cover" />
+        </video>
+    </div>
+    <div class="dark-video-scrim"></div>
+
+    <!-- 🌫️ ULTRA-CLEAN APPLE LIQUID GLASS STICKY HEADER NAVBAR -->
+    <header class="nav-kindheart-fixed fixed top-0 left-0 right-0 z-50 flex items-center justify-between w-full max-w-full overflow-hidden" style="position: fixed !important; top: 0 !important; left: 0 !important; right: 0 !important; z-index: 999 !important; box-sizing: border-box !important;">
+        <!-- FAR LEFT CORNER: Logo & Brand Name -->
+        <a href="#top" class="brand-logo-container flex items-center gap-2.5 font-extrabold tracking-tight text-white font-heading shrink-0"
+            onclick="event.preventDefault(); scrollToTop();">
+            <div class="brand-icon-wrap flex items-center justify-center shrink-0">
+                <img src="/kindheart_icon_dark.png" alt="KindHeart Logo" class="brand-logo-dark" />
+                <img src="/kindheart_icon_light.png" alt="KindHeart Logo" class="brand-logo-light" />
+            </div>
+            <span class="brand-text font-heading font-extrabold text-base sm:text-lg tracking-tight text-white">Kind<span
+                    class="text-[#FF8F1C]">Heart</span></span>
+        </a>
+
+        <!-- CENTER: Main Header Tabs (Desktop Only) -->
+        <nav class="iphone-camera-switcher hidden lg:flex items-center justify-center mx-auto"
+            aria-label="Primary Navigation">
+            <div class="iphone-mode-track flex items-center gap-1">
+                <a href="#top" class="iphone-mode-tab is-active"
+                    onclick="event.preventDefault(); scrollToTop(this);">Home</a>
+                <a href="#find-a-pet" class="iphone-mode-tab" onclick="setActiveTab(this)">Find a Pet</a>
+                <a href="#services" class="iphone-mode-tab" onclick="setActiveTab(this)">Services</a>
+                <a href="#shelter-banner" class="iphone-mode-tab" onclick="setActiveTab(this)">About Us</a>
+                <a href="#contact" class="iphone-mode-tab" onclick="setActiveTab(this)">Contact Us</a>
+            </div>
+        </nav>
+
+        <!-- FAR RIGHT CORNER: Darkmode Toggle, Ambient Sound, Login, Mobile Menu Button -->
+        <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
+            <!-- 1st: Darkmode Toggle -->
+            <button onclick="toggleTheme()" class="btn-apple-secondary btn-header-icon-sm cursor-pointer"
+                title="Toggle Light/Dark Theme">
+                <span id="theme-toggle-icon">🌙</span>
+            </button>
+
+            <!-- 2nd: Ambient Sound Toggle (Displayed in header on desktop and mobile) -->
+            <button id="ambient-sound-btn" onclick="toggleAmbientSound()"
+                class="btn-apple-secondary btn-header-icon-sm cursor-pointer flex items-center justify-center"
+                title="Toggle Ambient Sound">
+                <span id="sound-icon" class="text-xs">🔈</span>
+            </button>
+
+            <!-- 3rd: Login (Icon on mobile, text on desktop) -->
+            <a href="/users/login/"
+                class="auth-btn-login btn-apple-secondary btn-header-icon-sm md:btn-header-sm cursor-pointer text-xs sm:text-sm inline-flex items-center justify-center gap-1.5" title="Login / Account">
+                <span class="md:hidden text-xs">👤</span>
+                <span class="hidden md:inline">Login</span>
+            </a>
+
+            <!-- 4th: Mobile Menu Hamburger Button (Only appears in mobile view < 1024px) -->
+            <button id="mobile-menu-toggle-btn" onclick="toggleMobileMenu(undefined, event)"
+                class="btn-mobile-hamburger cursor-pointer text-white inline-flex lg:hidden"
+                aria-label="Toggle Mobile Menu" aria-expanded="false">
+                <svg id="mobile-menu-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" class="pointer-events-none stroke-white" stroke="white">
+                    <line x1="4" y1="6" x2="20" y2="6" stroke="white" stroke-width="2.2" stroke-linecap="round"></line>
+                    <line x1="4" y1="12" x2="20" y2="12" stroke="white" stroke-width="2.2" stroke-linecap="round"></line>
+                    <line x1="4" y1="18" x2="20" y2="18" stroke="white" stroke-width="2.2" stroke-linecap="round"></line>
+                </svg>
+            </button>
+        </div>
+    </header>
+
+    <!-- 📱 MOBILE FROSTED LIQUID-GLASS NAVIGATION DRAWER (< 1024px) -->
+    <div id="mobile-nav-drawer" class="mobile-nav-drawer lg:hidden">
+        <div class="mobile-nav-inner px-5 py-6 flex flex-col gap-4">
+            <nav class="flex flex-col gap-2" aria-label="Mobile Navigation">
+                <a href="#top" class="mobile-nav-link active" onclick="scrollToTop(); toggleMobileMenu(false);">
+                    <span>Home</span>
+                    <span class="text-xs font-mono opacity-50">01</span>
+                </a>
+                <a href="#find-a-pet" class="mobile-nav-link" onclick="toggleMobileMenu(false);">
+                    <span>Find a Pet</span>
+                    <span class="text-xs font-mono opacity-50">02</span>
+                </a>
+                <a href="#services" class="mobile-nav-link" onclick="toggleMobileMenu(false);">
+                    <span>Services</span>
+                    <span class="text-xs font-mono opacity-50">03</span>
+                </a>
+                <a href="#shelter-banner" class="mobile-nav-link" onclick="toggleMobileMenu(false);">
+                    <span>About Us</span>
+                    <span class="text-xs font-mono opacity-50">04</span>
+                </a>
+                <a href="#contact" class="mobile-nav-link" onclick="toggleMobileMenu(false);">
+                    <span>Contact Us</span>
+                    <span class="text-xs font-mono opacity-50">05</span>
+                </a>
+            </nav>
+        </div>
+    </div>
+
+    <!-- MAIN PAGE CONTAINER -->
+    <div class="relative z-10 w-full pt-28 sm:pt-32 lg:pt-20">
+
+        <!-- 🌟 HERO VIEWPORT -->
+        <section class="min-h-0 lg:min-h-[calc(100vh-80px)] flex flex-col justify-start lg:justify-center items-center relative pt-8 pb-12 sm:pt-14 sm:pb-16 lg:pt-4" id="top">
+            <div class="shell grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-10 items-center">
+
+                <!-- LEFT HERO CONTENT -->
+                <div class="lg:col-span-7 xl:col-span-6 space-y-5 sm:space-y-6">
+                    <h1
+                        class="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white font-heading leading-[1.12] sm:leading-[1.08]">
+                        A New Best Friend <br />
+                        <span class="text-gradient-cognac">Is Waiting.</span>
+                    </h1>
+
+                    <p class="hero-subtext text-sm sm:text-lg text-slate-300 font-normal sm:font-medium leading-relaxed max-w-lg">
+                        Discover verified rescue pets looking for a loving home. Track full medical clearance,
+                        vaccination records, and arrange doorstep transport.
+                    </p>
+
+                    <div class="flex flex-wrap items-center gap-3 sm:gap-4">
+                        <a href="#find-a-pet" class="btn-hero-glass">
+                            Find a Pet
+                        </a>
+                        <a href="#shelter-banner" class="btn-hero-glass">
+                            About Us
+                        </a>
+                    </div>
+                </div>
+
+                <!-- RIGHT HERO SHOWCASE CARD -->
+                <div class="lg:col-span-5 xl:col-span-6 mt-4 lg:mt-0">
+                    <div
+                        class="hero-image-glass-frame relative group overflow-hidden rounded-2xl sm:rounded-3xl p-2 sm:p-2.5 liquid-glass border border-white/15 shadow-2xl">
+                        <div class="relative h-[280px] sm:h-[380px] lg:h-[480px] w-full rounded-xl sm:rounded-2xl overflow-hidden bg-black/40">
+                            <img src="/kindheart_real_hero.jpg" alt="KindHeart Rescued Companion Hero"
+                                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/10">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- 🐾 FIND A PET DISCOVERY & FEATURED GALLERY -->
+        <section id="find-a-pet" class="pt-10 pb-12 sm:pt-18 sm:pb-16 relative scroll-mt-20">
+            <div class="shell space-y-12 sm:space-y-16">
+
+                <!-- SECTION HEADER (GENEROUS MARGIN GAP) -->
+                <div class="find-a-pet-header max-w-3xl space-y-3 mb-12 sm:mb-16">
+                    <span class="text-xs font-mono font-bold tracking-widest text-[#FF8F1C] uppercase block">FIND A
+                        PET</span>
+                    <h2
+                        class="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-white font-heading leading-tight">
+                        Find Your New Best Friend
+                    </h2>
+                    <p class="text-slate-300 text-sm sm:text-base font-normal max-w-2xl leading-relaxed">
+                        Every pet deserves a loving home. Find a companion that's waiting to meet you.
+                    </p>
+                </div>
+
+                <!-- PET CARDS GRID (4 PER ROW ON DESKTOP) -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 pt-4" id="pet-cards-grid">
+
+                    <!-- CARD 1: BRUNO -->
+                    <article class="pet-card-hover-wrapper group"
+                        onclick="showPetDetail('Bruno', 'Labrador Retriever', 'Kochi', 'CHIP-88234', '100% Cleared', '/featured_dog.jpg', 'Gentle and outgoing 2-year-old Labrador Retriever. Highly socialized, excellent with children, and loves daily park adventures.')">
+                        <img src="/featured_dog.jpg" alt="Bruno - Labrador Retriever" class="pet-card-hover-bg"
+                            loading="lazy" />
+
+                        <!-- Static Bottom Title -->
+                        <div class="pet-card-static-scrim">
+                            <h3 class="text-xl font-bold text-white font-heading">Bruno</h3>
+                            <p class="text-xs text-slate-300 font-medium font-mono">Labrador Retriever &bull; 2 years
+                            </p>
+                        </div>
+
+                        <!-- Hover Details Overlay (Appears on Hover) -->
+                        <div class="pet-card-details-overlay">
+                            <div>
+                                <span
+                                    class="text-[10px] font-bold font-mono tracking-widest text-[#FF8F1C] uppercase block mb-1">AVAILABLE
+                                    FOR ADOPTION</span>
+                                <h3 class="text-2xl font-bold text-white font-heading leading-tight mb-0.5">Bruno</h3>
+                                <p class="text-xs font-semibold text-[#FF8F1C] font-mono mb-2">Labrador Retriever &bull;
+                                    2 years</p>
+
+                                <p class="text-xs text-slate-200 leading-relaxed line-clamp-3 mb-2">
+                                    Gentle and outgoing 2-year-old Labrador Retriever. Highly socialized, excellent with
+                                    children, and loves daily park adventures.
+                                </p>
+                            </div>
+
+                            <button class="pet-adopt-btn" aria-label="Adopt Bruno"
+                                onclick="event.stopPropagation(); openAdoptionModal('Bruno');">
+                                <span>Adopt Me</span>
+                                <span>🐾 &rarr;</span>
+                            </button>
+                        </div>
+                    </article>
+
+                    <!-- CARD 2: LUNA -->
+                    <article class="pet-card-hover-wrapper group"
+                        onclick="showPetDetail('Luna', 'Siamese Mix', 'Kochi', 'CHIP-44102', '100% Cleared', '/luna_siamese.jpg', 'Sweet and tranquil Siamese mix with bright blue eyes. Enjoys cozy sunlit windowsills and calm indoor companionship.')">
+                        <img src="/luna_siamese.jpg" alt="Luna - Siamese Mix" class="pet-card-hover-bg"
+                            loading="lazy" />
+
+                        <!-- Static Bottom Title -->
+                        <div class="pet-card-static-scrim">
+                            <h3 class="text-xl font-bold text-white font-heading">Luna</h3>
+                            <p class="text-xs text-slate-300 font-medium font-mono">Siamese Mix &bull; 1 year</p>
+                        </div>
+
+                        <!-- Hover Details Overlay (Appears on Hover) -->
+                        <div class="pet-card-details-overlay">
+                            <div>
+                                <span
+                                    class="text-[10px] font-bold font-mono tracking-widest text-[#FF8F1C] uppercase block mb-1">AVAILABLE
+                                    FOR ADOPTION</span>
+                                <h3 class="text-2xl font-bold text-white font-heading leading-tight mb-0.5">Luna</h3>
+                                <p class="text-xs font-semibold text-[#FF8F1C] font-mono mb-2">Siamese Mix &bull; 1 year
+                                </p>
+
+                                <p class="text-xs text-slate-200 leading-relaxed line-clamp-3 mb-2">
+                                    Sweet and tranquil Siamese mix with bright blue eyes. Enjoys cozy sunlit windowsills
+                                    and calm indoor companionship.
+                                </p>
+                            </div>
+
+                            <button class="pet-adopt-btn" aria-label="Adopt Luna"
+                                onclick="event.stopPropagation(); openAdoptionModal('Luna');">
+                                <span>Adopt Me</span>
+                                <span>🐾 &rarr;</span>
+                            </button>
+                        </div>
+                    </article>
+
+                    <!-- CARD 3: PIP & SUNNY -->
+                    <article class="pet-card-hover-wrapper group"
+                        onclick="showPetDetail('Pip & Sunny', 'Turquoise Parakeet', 'Kochi', 'BAND-1904', 'Health Screened', '/rescued_bird.jpg', 'Bright and cheerful rescued parakeet pair. Loves whistling melodies, exploring perches, and eating fresh greens.')">
+                        <img src="/rescued_bird.jpg" alt="Pip & Sunny - Turquoise Parakeet" class="pet-card-hover-bg"
+                            loading="lazy" />
+
+                        <!-- Static Bottom Title -->
+                        <div class="pet-card-static-scrim">
+                            <h3 class="text-xl font-bold text-white font-heading">Pip & Sunny</h3>
+                            <p class="text-xs text-slate-300 font-medium font-mono">Turquoise Parakeet &bull; 8 months
+                            </p>
+                        </div>
+
+                        <!-- Hover Details Overlay (Appears on Hover) -->
+                        <div class="pet-card-details-overlay">
+                            <div>
+                                <span
+                                    class="text-[10px] font-bold font-mono tracking-widest text-[#FF8F1C] uppercase block mb-1">AVAILABLE
+                                    FOR ADOPTION</span>
+                                <h3 class="text-2xl font-bold text-white font-heading leading-tight mb-0.5">Pip & Sunny
+                                </h3>
+                                <p class="text-xs font-semibold text-[#FF8F1C] font-mono mb-2">Turquoise Parakeet &bull;
+                                    8 months</p>
+
+                                <p class="text-xs text-slate-200 leading-relaxed line-clamp-3 mb-2">
+                                    Bright and cheerful rescued parakeet pair. Loves whistling melodies, exploring
+                                    perches, and eating fresh greens.
+                                </p>
+                            </div>
+
+                            <button class="pet-adopt-btn" aria-label="Adopt Pip & Sunny"
+                                onclick="event.stopPropagation(); openAdoptionModal('Pip & Sunny');">
+                                <span>Adopt Me</span>
+                                <span>🐾 &rarr;</span>
+                            </button>
+                        </div>
+                    </article>
+
+                    <!-- CARD 4: CLOVER -->
+                    <article class="pet-card-hover-wrapper group"
+                        onclick="showPetDetail('Clover', 'Holland Lop', 'Kochi', 'CHIP-31902', '100% Cleared', '/rescued_rabbit.jpg', 'Incredibly docile Holland Lop bunny with soft floppy ears. Completely litter-trained and loves gentle head scratches.')">
+                        <img src="/rescued_rabbit.jpg" alt="Clover - Holland Lop" class="pet-card-hover-bg"
+                            loading="lazy" />
+
+                        <!-- Static Bottom Title -->
+                        <div class="pet-card-static-scrim">
+                            <h3 class="text-xl font-bold text-white font-heading">Clover</h3>
+                            <p class="text-xs text-slate-300 font-medium font-mono">Holland Lop &bull; 1.5 years</p>
+                        </div>
+
+                        <!-- Hover Details Overlay (Appears on Hover) -->
+                        <div class="pet-card-details-overlay">
+                            <div>
+                                <span
+                                    class="text-[10px] font-bold font-mono tracking-widest text-[#FF8F1C] uppercase block mb-1">AVAILABLE
+                                    FOR ADOPTION</span>
+                                <h3 class="text-2xl font-bold text-white font-heading leading-tight mb-0.5">Clover</h3>
+                                <p class="text-xs font-semibold text-[#FF8F1C] font-mono mb-2">Holland Lop &bull; 1.5
+                                    years</p>
+
+                                <p class="text-xs text-slate-200 leading-relaxed line-clamp-3 mb-2">
+                                    Incredibly docile Holland Lop bunny with soft floppy ears. Completely litter-trained
+                                    and loves gentle head scratches.
+                                </p>
+                            </div>
+
+                            <button class="pet-adopt-btn" aria-label="Adopt Clover"
+                                onclick="event.stopPropagation(); openAdoptionModal('Clover');">
+                                <span>Adopt Me</span>
+                                <span>🐾 &rarr;</span>
+                            </button>
+                        </div>
+                    </article>
+
+                </div>
+
+            </div>
+        </section>
+
+        <!-- 🛠️ PET CARE & SHELTER SERVICES SECTION -->
+        <section id="services" class="pt-10 pb-16 sm:pt-14 sm:pb-20 relative scroll-mt-24">
+            <div class="shell space-y-12 sm:space-y-16">
+
+                <!-- SECTION HEADER (MATCHES FIND A PET) -->
+                <div class="services-header max-w-4xl space-y-3 mt-2 sm:mt-3 mb-12 sm:mb-16">
+                    <span class="text-xs font-mono font-bold tracking-widest text-[#FF8F1C] uppercase block">SERVICES</span>
+                    <h2
+                        class="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-white font-heading leading-tight">
+                        Our KindHeart Services
+                    </h2>
+                    <p class="text-slate-300 font-normal leading-relaxed text-sm sm:text-base max-w-2xl">
+                        From professional pet grooming to lifelong post-adoption veterinary support, KindHeart provides complete compassionate care.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+                    <!-- Service 1: Health Checkups -->
+                    <div class="service-card-image-blur group">
+                        <img src="/real_veterinary_care.jpg" alt="Veterinary Care" class="service-card-bg-img" />
+                        <div class="service-card-default-scrim flex flex-col justify-end p-6">
+                            <div>
+                                <h3 class="text-2xl font-bold text-white font-heading drop-shadow-md">Veterinary Care</h3>
+                                <p class="text-xs text-slate-200 mt-1 font-medium leading-relaxed">Complete medical screenings, microchipping, and verified vaccination clearance.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Service 2: Shelter Network -->
+                    <div class="service-card-image-blur group">
+                        <img src="/kindheart_real_shelter.jpg" alt="Shelter Network" class="service-card-bg-img" />
+                        <div class="service-card-default-scrim flex flex-col justify-end p-6">
+                            <div>
+                                <h3 class="text-2xl font-bold text-white font-heading drop-shadow-md">Shelter Network</h3>
+                                <p class="text-xs text-slate-200 mt-1 font-medium leading-relaxed">Connecting 320+ certified non-profit animal rescue shelters with loving homes.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Service 3: Doorstep Transport -->
+                    <div class="service-card-image-blur group">
+                        <img src="/service_transport.jpg" alt="Safe Doorstep Transport" class="service-card-bg-img" />
+                        <div class="service-card-default-scrim flex flex-col justify-end p-6">
+                            <div>
+                                <h3 class="text-2xl font-bold text-white font-heading drop-shadow-md">Safe Transport</h3>
+                                <p class="text-xs text-slate-200 mt-1 font-medium leading-relaxed">GPS-monitored climate-controlled transport delivering pets safely to your doorstep.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Service 4: Adoption Counseling -->
+                    <div class="service-card-image-blur group">
+                        <img src="/service_adoption_counseling.jpg" alt="Adoption Counseling" class="service-card-bg-img" />
+                        <div class="service-card-default-scrim flex flex-col justify-end p-6">
+                            <div>
+                                <h3 class="text-2xl font-bold text-white font-heading drop-shadow-md">Adoption Counseling</h3>
+                                <p class="text-xs text-slate-200 mt-1 font-medium leading-relaxed">Dedicated family matching consultations to ensure lifelong harmonious bonds.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Service 5: Wellness & Therapy -->
+                    <div class="service-card-image-blur group">
+                        <img src="/service_wellness_therapy.jpg" alt="Rehabilitation & Wellness Therapy" class="service-card-bg-img" />
+                        <div class="service-card-default-scrim flex flex-col justify-end p-6">
+                            <div>
+                                <h3 class="text-2xl font-bold text-white font-heading drop-shadow-md">Wellness & Therapy</h3>
+                                <p class="text-xs text-slate-200 mt-1 font-medium leading-relaxed">Specialized physical rehabilitation, trauma recovery, and nutritional support.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Service 6: Pet Grooming & Spa -->
+                    <div class="service-card-image-blur group">
+                        <img src="/service_grooming.jpg" alt="Pet Grooming & Spa" class="service-card-bg-img" />
+                        <div class="service-card-default-scrim flex flex-col justify-end p-6">
+                            <div>
+                                <h3 class="text-2xl font-bold text-white font-heading drop-shadow-md">Pet Grooming & Spa</h3>
+                                <p class="text-xs text-slate-200 mt-1 font-medium leading-relaxed">Therapeutic warm baths, gentle coat conditioning, nail trimming, and hygienic care for adopted pets.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 🐾 CINEMATIC ANIMATED PET RESCUE BANNER (ABOUT US) -->
+        <section id="shelter-banner" class="shell pt-14 pb-0 sm:pt-20 sm:pb-0 scroll-mt-24 relative">
+            <!-- Animated Ambient Background Glow Orbs -->
+            <div class="about-ambient-glow -top-10 -right-10 z-0"></div>
+            <div class="about-ambient-glow -bottom-10 -left-10 z-0" style="animation-delay: -3s; background: radial-gradient(circle, rgba(255, 143, 28, 0.2) 0%, transparent 70%);"></div>
+
+            <!-- ABOUT US SECTION HEADER -->
+            <div class="about-header max-w-4xl space-y-3 mt-4 sm:mt-6 mb-10 sm:mb-14 md:mb-16 relative z-10">
+                <span class="text-xs font-mono font-bold tracking-widest text-[#FF8F1C] uppercase block">ABOUT US</span>
+                <h2 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-white font-heading leading-tight">
+                    About KindHeart
+                </h2>
+                <p class="text-slate-300 font-normal leading-relaxed text-sm sm:text-base max-w-2xl">
+                    Dedicated to rescuing, rehabilitating, and connecting companion pets with loving families.
+                </p>
+            </div>
+
+            <div
+                class="about-banner-container rounded-2xl sm:rounded-3xl p-6 sm:p-12 md:p-16 relative overflow-hidden min-h-[420px] sm:min-h-[500px] flex flex-col justify-center items-center text-center z-10">
+                <!-- 🎬 Looping Cinematic Shelter Video (about_us_bg.mp4) with Poster Fallback (Crisp & Natural) -->
+                <video autoplay loop muted playsinline preload="auto" poster="/about_us_bg.jpg"
+                    class="about-shelter-video absolute inset-0 w-full h-full object-cover pointer-events-none">
+                    <source src="/about_us_bg.mp4" type="video/mp4" />
+                </video>
+                <!-- Subtle Scrim Matching Hero & Find a Pet Background -->
+                <div class="absolute inset-0 bg-gradient-to-t from-black/65 via-black/25 to-black/20 pointer-events-none"></div>
+
+                <!-- Shimmer Sweep Light Ray -->
+                <div class="about-shimmer-sweep"></div>
+
+                <div class="relative z-20 max-w-3xl mx-auto text-center flex flex-col items-center space-y-6">
+                    <h2 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white font-heading leading-tight tracking-tight drop-shadow-lg text-center">
+                        Nurturing Rescued Pets, <br />
+                        <span class="text-gradient-cognac">Finding Forever Homes.</span>
+                    </h2>
+                    <p class="text-sm sm:text-base text-slate-300 leading-relaxed font-medium drop-shadow-md max-w-2xl mx-auto text-center">
+                        KindHeart provides compassionate rehabilitation, safe foster networks, and lifetime medical support for abandoned companion animals, connecting thousands of rescued pets with caring adopters across 320+ partner shelters.
+                    </p>
+
+                    <!-- Centered Impact Metric Cards with Pet Adoption Focus -->
+                    <div class="about-impact-grid grid grid-cols-1 sm:grid-cols-3 gap-3.5 sm:gap-4 mt-7 sm:mt-9 pt-1 sm:pt-2 w-full max-w-2xl mx-auto">
+                        <div class="about-impact-pill p-4 sm:p-5 rounded-2xl text-center flex flex-col items-center justify-center cursor-pointer shadow-lg group/pill">
+                            <span class="text-2xl sm:text-3xl font-extrabold text-gradient-cognac font-heading block group-hover/pill:scale-105 transition-transform mb-1">12,500+</span>
+                            <span class="text-xs sm:text-sm text-slate-200 font-medium block text-center">Happy Adoptions</span>
+                            <div class="w-full max-w-[120px] bg-white/20 h-1 rounded-full mt-3 overflow-hidden mx-auto">
+                                <div class="bg-gradient-to-r from-[#FF8F1C] to-[#E06000] h-full rounded-full w-[85%] animate-pulse"></div>
+                            </div>
+                        </div>
+
+                        <div class="about-impact-pill p-4 sm:p-5 rounded-2xl text-center flex flex-col items-center justify-center cursor-pointer shadow-lg group/pill">
+                            <span class="text-2xl sm:text-3xl font-extrabold text-gradient-cognac font-heading block group-hover/pill:scale-105 transition-transform mb-1">98%</span>
+                            <span class="text-xs sm:text-sm text-slate-200 font-medium block text-center">Placement Success</span>
+                            <div class="w-full max-w-[120px] bg-white/20 h-1 rounded-full mt-3 overflow-hidden mx-auto">
+                                <div class="bg-gradient-to-r from-[#FF8F1C] to-[#E06000] h-full rounded-full w-[94%] animate-pulse"></div>
+                            </div>
+                        </div>
+
+                        <div class="about-impact-pill p-4 sm:p-5 rounded-2xl text-center flex flex-col items-center justify-center cursor-pointer shadow-lg group/pill">
+                            <span class="text-2xl sm:text-3xl font-extrabold text-gradient-cognac font-heading block group-hover/pill:scale-105 transition-transform mb-1">320+</span>
+                            <span class="text-xs sm:text-sm text-slate-200 font-medium block text-center">Rescue Partners</span>
+                            <div class="w-full max-w-[120px] bg-white/20 h-1 rounded-full mt-3 overflow-hidden mx-auto">
+                                <div class="bg-gradient-to-r from-[#FF8F1C] to-[#E06000] h-full rounded-full w-[100%] animate-pulse"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Centered Buttons: Explore More & Contact Us -->
+                    <div class="about-actions-group pt-4 sm:pt-6 mt-6 sm:mt-8 flex flex-wrap items-center justify-center gap-4">
+                        <a href="#find-a-pet"
+                            class="btn-apple-primary text-xs sm:text-sm py-3.5 px-7 cursor-pointer shadow-xl hover:shadow-orange-500/25 active:scale-95 transition-all">
+                            <span>Explore More</span>
+                        </a>
+                        <a href="#contact"
+                            class="btn-hero-glass btn-apple-secondary text-xs sm:text-sm py-3.5 px-7 flex items-center justify-center shadow-lg active:scale-95 transition-all"
+                            style="border-radius: 999px !important;">
+                            <span>Contact Us</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 📬 CONTACT US SECTION -->
+        <section id="contact" class="shell pt-14 pb-16 sm:pt-20 sm:pb-24 scroll-mt-24 relative scroll-reveal">
+            <!-- Ambient Subtle Background Glow -->
+            <div class="about-ambient-glow -bottom-10 -right-10 z-0"></div>
+
+            <div class="space-y-10 sm:space-y-14 relative z-10">
+                <!-- SECTION HEADER (HUMANIZED & SHORTENED WITH SPACE BELOW) -->
+                <div class="contact-header max-w-3xl space-y-3">
+                    <span class="text-xs font-semibold tracking-wider text-[#FF8F1C] uppercase block font-mono">CONTACT US</span>
+                    <h2 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-white font-heading leading-tight">
+                        Get in Touch With Us
+                    </h2>
+                    <p class="text-slate-300 text-sm sm:text-base font-normal max-w-2xl leading-relaxed">
+                        We're here to help you adopt, foster, volunteer, or support rescued pets.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
+                    <!-- Left: Realistic Pet Care Support Photo Card (Centered content, no badges) -->
+                    <div class="lg:col-span-5 h-full">
+                        <div class="contact-photo-card h-full min-h-[300px] sm:min-h-[440px] lg:min-h-[500px] relative rounded-2xl sm:rounded-3xl overflow-hidden border border-white/15 shadow-2xl group flex flex-col items-center justify-center text-center">
+                            <img src="/contact_shelter_help.jpg" alt="KindHeart Pet Support Team"
+                                class="contact-photo-img absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+                            <div class="contact-photo-scrim absolute inset-0 bg-gradient-to-t from-black/95 via-black/55 to-black/35"></div>
+                            
+                            <!-- Centered Warm Note Overlay -->
+                            <div class="relative z-10 p-6 sm:p-10 flex flex-col items-center justify-center text-center h-full space-y-4">
+                                <h3 class="text-2xl sm:text-3xl font-bold text-white font-heading leading-tight drop-shadow-md">
+                                    Compassionate Support, <br /><span class="text-gradient-cognac">Every Step of the Way.</span>
+                                </h3>
+                                <p class="text-xs sm:text-sm text-slate-200 leading-relaxed font-normal max-w-sm drop-shadow">
+                                    Whether you're adopting, fostering, volunteering, or inquiring about pet care, our adoption caretakers are always here to assist you.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right: Borderless Form Card with Centered Heading & Spacious Field Gaps -->
+                    <div class="lg:col-span-7 h-full flex flex-col justify-center items-center">
+                        <form onsubmit="handleContactSubmit(event)"
+                            class="contact-form-card w-full max-w-xl mx-auto flex flex-col justify-center h-full border-0">
+                            
+                            <!-- Centered Heading & Subtitle with Generous Space Below -->
+                            <div class="contact-form-intro space-y-3 text-center max-w-lg mx-auto mb-10 sm:mb-14">
+                                <h3 class="text-2xl sm:text-3xl font-extrabold text-white font-heading tracking-tight text-center">
+                                    Send Us an Inquiry
+                                </h3>
+                                <p class="text-xs sm:text-sm text-slate-300 leading-relaxed font-normal text-center max-w-md mx-auto">
+                                    Fill out the details below and our team will get back to you promptly.
+                                </p>
+                            </div>
+
+                            <!-- Field Inputs with Dedicated Explicit Vertical Gaps -->
+                            <div class="w-full">
+                                <!-- Row 1: Full Name & Email Address -->
+                                <div class="contact-form-row contact-grid-two">
+                                    <div>
+                                        <input type="text" id="contact-name" required placeholder="Your Full Name" aria-label="Your Full Name"
+                                            class="contact-input-field" />
+                                    </div>
+                                    <div>
+                                        <input type="email" id="contact-email" required placeholder="Email Address" aria-label="Email Address"
+                                            class="contact-input-field" />
+                                    </div>
+                                </div>
+
+                                <!-- Row 2: Phone Number -->
+                                <div class="contact-form-row">
+                                    <input type="tel" id="contact-phone" placeholder="Phone Number" aria-label="Phone Number"
+                                        class="contact-input-field" />
+                                </div>
+
+                                <!-- Row 3: Message -->
+                                <div class="contact-form-row">
+                                    <textarea id="contact-message" rows="4" required
+                                        placeholder="How can our pet adoption and rescue team help you today?" aria-label="Your Message"
+                                        class="contact-input-field resize-none"></textarea>
+                                </div>
+                            </div>
+
+                            <!-- Submit Button with Clean Dedicated Spacing -->
+                            <div class="contact-form-btn-wrap w-full">
+                                <button type="submit"
+                                    class="w-full btn-apple-primary py-4 text-sm font-bold cursor-pointer justify-center shadow-xl hover:shadow-orange-500/25 active:scale-[0.98] transition-all">
+                                    <span>Send Enquiry Message</span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 🐾 MINIMALIST CENTERED FROSTED-BLURRED COMPACT FOOTER -->
+        <footer class="footer-kindheart-blurred w-full mt-8 sm:mt-12 py-6 sm:py-8 text-center">
+            <div class="footer-centered-content max-w-4xl mx-auto px-6 text-center flex flex-col items-center justify-center">
+                <!-- 1. Centered Brand Name with Space Above & Below -->
+                <a href="#top" class="footer-brand-wrap inline-flex items-center justify-center gap-2 text-xl sm:text-2xl font-extrabold tracking-tight text-white font-heading hover:opacity-90 transition-opacity mx-auto mb-3 sm:mb-4"
+                    onclick="event.preventDefault(); scrollToTop();">
+                    <span class="font-heading font-extrabold tracking-tight text-white">Kind<span class="text-[#FF8F1C]">Heart</span></span>
+                </a>
+
+                <!-- 2. Centered Navigation Menu -->
+                <nav class="footer-nav-wrap flex flex-wrap items-center justify-center gap-x-4 sm:gap-x-8 gap-y-2 text-[11px] sm:text-xs font-bold uppercase tracking-widest text-slate-300 mx-auto mb-3 sm:mb-4">
+                    <a href="#top" onclick="event.preventDefault(); scrollToTop();" class="hover:text-white transition-colors">Home</a>
+                    <a href="#find-a-pet" class="hover:text-white transition-colors">Find a Pet</a>
+                    <a href="#services" class="hover:text-white transition-colors">Services</a>
+                    <a href="#shelter-banner" class="hover:text-white transition-colors">About Us</a>
+                    <a href="#contact" class="hover:text-white transition-colors">Contact</a>
+                </nav>
+
+                <!-- 3. Centered Circular Social Media Icons -->
+                <div class="footer-social-wrap flex flex-row items-center justify-center gap-3 sm:gap-3.5 mx-auto mb-3 sm:mb-4">
+                    <!-- Twitter / X -->
+                    <a href="https://twitter.com" target="_blank" rel="noopener noreferrer"
+                        class="w-8 h-8 sm:w-9 sm:h-9 rounded-full border border-white/20 flex items-center justify-center text-slate-300 hover:text-[#FF8F1C] hover:border-[#FF8F1C] hover:scale-110 transition-all"
+                        aria-label="Twitter">
+                        <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
+                            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                        </svg>
+                    </a>
+                    <!-- Facebook -->
+                    <a href="https://facebook.com" target="_blank" rel="noopener noreferrer"
+                        class="w-8 h-8 sm:w-9 sm:h-9 rounded-full border border-white/20 flex items-center justify-center text-slate-300 hover:text-[#FF8F1C] hover:border-[#FF8F1C] hover:scale-110 transition-all"
+                        aria-label="Facebook">
+                        <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
+                            <path d="M9.101 23.691v-7.98H6.627v-3.667h2.474v-1.58c0-4.085 1.848-5.978 5.858-5.978.401 0 .955.042 1.468.103a8.68 8.68 0 0 1 1.141.195v3.325a8.623 8.623 0 0 0-.653-.036 26.805 26.805 0 0 0-.733-.009c-.82 0-1.611.211-1.956.54-.344.33-.424.966-.424 1.87v1.57h4.088l-.565 3.667h-3.523v7.98H9.101z"/>
+                        </svg>
+                    </a>
+                    <!-- Instagram -->
+                    <a href="https://instagram.com" target="_blank" rel="noopener noreferrer"
+                        class="w-8 h-8 sm:w-9 sm:h-9 rounded-full border border-white/20 flex items-center justify-center text-slate-300 hover:text-[#FF8F1C] hover:border-[#FF8F1C] hover:scale-110 transition-all"
+                        aria-label="Instagram">
+                        <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
+                            <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                        </svg>
+                    </a>
+                </div>
+
+                <!-- 4. Copyright Text Line -->
+                <p class="footer-copyright-wrap text-[11px] sm:text-xs text-slate-400 font-normal text-center mx-auto">
+                    Copyright &copy; 2026 All rights reserved | This website is made with <span class="text-[#FF8F1C]">❤️</span> by <strong class="text-white font-semibold">KindHeart</strong>
+                </p>
+            </div>
+        </footer>
+
+    </div>
+
+
+    <!-- 📋 ADOPTION APPLICATION MODAL -->
+    <div id="adoption-modal" class="modal-overlay">
+        <div class="modal-card p-6 sm:p-8 relative">
+            <button onclick="closeAdoptionModal()" class="service-close-btn absolute top-5 right-5 z-30"
+                title="Close">✕</button>
+            <div class="space-y-6">
+                <div>
+                    <h3 class="text-2xl font-extrabold text-white font-heading">Adoption Application 🐾</h3>
+                    <p class="text-xs text-slate-300 font-medium mt-1">Submit your application to adopt or sponsor a
+                        rescue companion.</p>
+                </div>
+                <form onsubmit="handleAdoptionSubmit(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-mono text-slate-300 font-bold mb-1.5">Selected Pet /
+                            Companion</label>
+                        <input type="text" id="adopt-pet-name" readonly
+                            class="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-2.5 text-xs text-emerald-400 font-mono font-bold" />
+                    </div>
+                    <div>
+                        <label class="block text-xs font-mono text-slate-300 font-bold mb-1.5">Your Full Name</label>
+                        <input type="text" required placeholder="Jane Doe"
+                            class="w-full bg-white/5 border border-white/15 rounded-xl px-4 py-2.5 text-xs text-white placeholder-slate-400 focus:outline-none focus:border-emerald-500" />
+                    </div>
+                    <div>
+                        <label class="block text-xs font-mono text-slate-300 font-bold mb-1.5">Phone Number</label>
+                        <input type="tel" required placeholder="+91 98765 43210"
+                            class="w-full bg-white/5 border border-white/15 rounded-xl px-4 py-2.5 text-xs text-white placeholder-slate-400 focus:outline-none focus:border-emerald-500" />
+                    </div>
+                    <button type="submit"
+                        class="w-full btn-apple-primary py-3 text-xs font-bold cursor-pointer justify-center">Submit
+                        Application</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- 📱 PET DETAIL PREVIEW MODAL -->
+    <div id="fullscreen-preview-modal" class="modal-overlay">
+        <div class="modal-card p-6 sm:p-8 relative">
+            <button onclick="closePetPreviewModal()" class="service-close-btn absolute top-4 right-4 z-30"
+                title="Close Preview">✕</button>
+            <div class="space-y-6">
+                <div class="h-64 rounded-2xl overflow-hidden relative border border-white/15">
+                    <img id="modal-pet-image" src="" alt="Pet Preview" class="w-full h-full object-cover" />
+                </div>
+                <div class="space-y-3">
+                    <span id="modal-pet-shelter"
+                        class="text-xs font-mono font-bold text-emerald-400 uppercase tracking-widest block">Kochi
+                        Shelter</span>
+                    <h3 id="modal-pet-name" class="text-3xl font-extrabold text-white font-heading">Bruno</h3>
+                    <p id="modal-pet-type" class="text-xs font-mono text-slate-300">Golden Retriever · 2 Years</p>
+                    <p id="modal-pet-desc" class="text-xs text-slate-300 leading-relaxed font-medium">Verified pet
+                        details...</p>
+
+                    <div class="grid grid-cols-2 gap-3 pt-2">
+                        <div class="p-3 rounded-xl bg-white/5 border border-white/10">
+                            <span class="text-[10px] font-mono text-slate-400 block">Microchip ID:</span>
+                            <span id="modal-pet-chip" class="text-xs font-bold text-white font-mono">CHIP-98402</span>
+                        </div>
+                        <div class="p-3 rounded-xl bg-white/5 border border-white/10">
+                            <span class="text-[10px] font-mono text-slate-400 block">Vaccinations:</span>
+                            <span id="modal-pet-vax" class="text-xs font-bold text-emerald-400 font-mono">Verified
+                                Complete</span>
+                        </div>
+                    </div>
+
+                    <!-- ACTION BUTTONS MATCHING OTHER SITE BUTTONS -->
+                    <div class="flex items-center gap-3 pt-4 border-t border-white/10">
+                        <button id="modal-adopt-btn" onclick="adoptCurrentProfilePet()"
+                            class="flex-1 btn-apple-primary py-3 px-5 text-xs sm:text-sm font-bold flex items-center justify-center gap-2 cursor-pointer shadow-lg transition-all">
+                            <span>Adopt Me</span>
+                            <span>🐾 &rarr;</span>
+                        </button>
+                        <button onclick="closePetPreviewModal()"
+                            class="btn-apple-secondary py-3 px-5 text-xs sm:text-sm font-bold flex items-center justify-center gap-2 cursor-pointer transition-all">
+                            <span>Close</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ⬆️ SCROLL TO TOP ARROW BUTTON (WITH GENERATED BRAND LOGO) -->
+    <button id="scroll-to-top-btn" onclick="scrollToTop()" class="fixed z-40 w-12 h-12 rounded-full border border-amber-500/40 shadow-2xl backdrop-blur-xl flex items-center justify-center transition-all duration-300 opacity-0 pointer-events-none scale-75 hover:scale-110 active:scale-95 cursor-pointer overflow-hidden p-0" style="right: 42px !important; bottom: 32px !important;" title="Scroll to Top" aria-label="Scroll to Top">
+        <img src="/scroll_up_logo.png" alt="Scroll to Top" class="w-full h-full object-cover rounded-full pointer-events-none drop-shadow-md" />
+    </button>
+
+    <!-- JavaScript Engine -->
+    <script src="/script.js"></script>
+    <script>
+        function switchPetView(imageSrc, petTitle, petSubtitle) {
+            const cardImg = document.getElementById('hero-photo-card');
+            const cardTitle = document.getElementById('hero-pet-title');
+            const cardSub = document.getElementById('hero-pet-subtitle');
+
+            if (cardImg) {
+                cardImg.style.opacity = '0';
+                setTimeout(() => {
+                    cardImg.src = imageSrc;
+                    cardImg.style.opacity = '1';
+                }, 180);
+            }
+            if (cardTitle) cardTitle.textContent = petTitle;
+            if (cardSub) cardSub.textContent = petSubtitle;
+
+            const btnRetriever = document.getElementById('btn-view-retriever');
+            const btnCat = document.getElementById('btn-view-cat');
+            const btnElephant = document.getElementById('btn-view-elephant');
+
+            [btnRetriever, btnCat, btnElephant].forEach(btn => {
+                if (btn) {
+                    btn.className = "px-3 py-1 rounded-xl text-xs font-bold bg-white/10 text-slate-300 hover:text-white hover:bg-white/20 transition-all";
+                }
+            });
+
+            if (imageSrc.includes('model_retriever') && btnRetriever) {
+                btnRetriever.className = "px-3 py-1 rounded-xl text-xs font-bold bg-emerald-600 text-white shadow-sm transition-all";
+            } else if (imageSrc.includes('model_cat') && btnCat) {
+                btnCat.className = "px-3 py-1 rounded-xl text-xs font-bold bg-emerald-600 text-white shadow-sm transition-all";
+            } else if (imageSrc.includes('elephant') && btnElephant) {
+                btnElephant.className = "px-3 py-1 rounded-xl text-xs font-bold bg-emerald-600 text-white shadow-sm transition-all";
+            }
+        }
+    </script>
+</body>
+
+</html>

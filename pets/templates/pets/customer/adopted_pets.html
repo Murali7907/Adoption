@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Adopted Pets - Customer Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+    <style type="text/css">
+        @import "tailwindcss";
+        .dark body { background-color: #111810; color: #E6E6E6; }
+        .dark .glass-card { background-color: rgba(28, 37, 27, 0.85); border-color: rgba(186, 200, 177, 0.2); }
+        .dark .sidebar-bg { background-color: rgba(17, 24, 16, 0.95); border-color: rgba(186, 200, 177, 0.15); }
+        html:not(.dark) body { background-color: #F4F7F2; color: #202D1F; }
+        html:not(.dark) .glass-card { background-color: #FFFFFF; border-color: #D2DED0; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
+        html:not(.dark) .sidebar-bg { background-color: #EBF1E8; border-color: #D2DED0; }
+        html:not(.dark) .text-muted { color: #526650; }
+    </style>
+</head>
+<body class="min-h-screen font-sans transition-colors duration-300">
+
+    <div class="flex min-h-screen">
+        <aside class="w-64 sidebar-bg border-r flex flex-col justify-between p-6 sticky top-0 h-screen z-30 transition-colors">
+            <div>
+                <div class="flex items-center gap-3 mb-10">
+                    <div class="w-10 h-10 rounded-2xl bg-[#7B9669] flex items-center justify-center text-white font-extrabold text-xl shadow-lg">🧑</div>
+                    <div>
+                        <span class="font-extrabold text-base tracking-wider block">CUSTOMER</span>
+                        <span class="text-[10px] text-[#7B9669] font-bold uppercase tracking-widest">Adopter Portal</span>
+                    </div>
+                </div>
+                <nav class="space-y-1.5 text-xs font-bold">
+                    <a href="{% url 'customer_dashboard' %}" class="flex items-center gap-3 px-4 py-3 hover:bg-[#7B9669]/20 rounded-xl"><span>🏠</span> Home</a>
+                    <a href="{% url 'customer_find_pet' %}" class="flex items-center gap-3 px-4 py-3 hover:bg-[#7B9669]/20 rounded-xl"><span>🔎</span> Find a Pet</a>
+                    <a href="{% url 'customer_requests' %}" class="flex items-center gap-3 px-4 py-3 hover:bg-[#7B9669]/20 rounded-xl"><span>📋</span> My Adoption Requests</a>
+                    <a href="{% url 'customer_adopted' %}" class="flex items-center gap-3 px-4 py-3 bg-[#7B9669] text-white rounded-xl shadow-md"><span>🐾</span> My Adopted Pets</a>
+                    <a href="{% url 'customer_favorites' %}" class="flex items-center gap-3 px-4 py-3 hover:bg-[#7B9669]/20 rounded-xl"><span>❤️</span> Favorites</a>
+                    <a href="{% url 'customer_delivery_tracking' %}" class="flex items-center gap-3 px-4 py-3 hover:bg-[#7B9669]/20 rounded-xl"><span>🚚</span> Delivery Tracking</a>
+                    <a href="{% url 'profile' %}" class="flex items-center gap-3 px-4 py-3 hover:bg-[#7B9669]/20 rounded-xl"><span>👤</span> My Profile</a>
+                </nav>
+            </div>
+            <div class="pt-6 border-t border-[#BAC8B1]/20 space-y-2">
+                <a href="{% url 'home' %}" class="flex items-center gap-3 px-4 py-2.5 hover:bg-[#7B9669]/20 rounded-xl text-xs font-bold"><span>🌐</span> Main Website</a>
+            </div>
+        </aside>
+
+        <main class="flex-1 p-8 overflow-y-auto">
+            <header class="flex items-center justify-between mb-8 pb-4 border-b border-[#BAC8B1]/20">
+                <div>
+                    <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight">My Adopted Companions 🐾</h1>
+                    <p class="text-xs text-muted font-medium mt-1">Animals you have successfully adopted into your home.</p>
+                </div>
+                <button type="button" onclick="toggleTheme()" class="px-4 py-2 bg-[#7B9669]/20 hover:bg-[#7B9669]/30 border border-[#7B9669]/40 rounded-xl text-xs font-extrabold flex items-center gap-2 cursor-pointer">
+                    <span id="theme-icon">🌙</span> <span id="theme-text">Dark Mode</span>
+                </button>
+            </header>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div class="glass-card border rounded-3xl p-6 shadow-xl flex items-center gap-4">
+                    <img class="w-24 h-24 rounded-2xl object-cover" src="https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&q=80&w=300" alt="Bruno">
+                    <div>
+                        <h3 class="text-lg font-extrabold">Bruno 🐶</h3>
+                        <p class="text-xs text-muted font-bold">Adopted: 17 Aug 2026</p>
+                        <p class="text-xs text-muted">Shelter: ABC Animal Shelter</p>
+                        <a href="{% url 'pet_detail_sample' %}" class="mt-3 inline-block px-3 py-1.5 bg-[#7B9669] text-white text-xs font-bold rounded-xl">View Details</a>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        function toggleTheme() {
+            const isDark = document.documentElement.classList.contains('dark');
+            if (isDark) { document.documentElement.classList.remove('dark'); localStorage.setItem('theme', 'light'); }
+            else { document.documentElement.classList.add('dark'); localStorage.setItem('theme', 'dark'); }
+        }
+        if (localStorage.getItem('theme') === 'light') document.documentElement.classList.remove('dark');
+    </script>
+</body>
+</html>

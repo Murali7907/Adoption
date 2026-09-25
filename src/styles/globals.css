@@ -1,0 +1,2465 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+
+:root {
+    --font-heading: 'Outfit', sans-serif;
+    --font-body: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+    --shell: 1280px;
+    --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+    color-scheme: dark;
+}
+
+/* Light Mode Overrides */
+html.light {
+    color-scheme: light;
+}
+
+html.light body {
+    background-color: #F8FAFC !important;
+    color: #0F172A;
+}
+
+html.light #bg-video-container {
+    opacity: 0.3 !important;
+}
+
+html.light .dark-video-scrim {
+    background: rgba(248, 250, 252, 0.62) !important;
+    backdrop-filter: blur(14px) saturate(135%) !important;
+    -webkit-backdrop-filter: blur(14px) saturate(135%) !important;
+}
+
+html.light .nav-fullwidth-tab,
+html.light .nav-kindheart-fixed {
+    background: rgba(255, 255, 255, 0.92) !important;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04) !important;
+}
+
+html.light .nav-link-pill {
+    color: #334155;
+}
+
+html.light .nav-link-pill:hover {
+    color: #0F172A;
+    background: rgba(0, 0, 0, 0.06);
+}
+
+html.light .liquid-glass {
+    background: rgba(255, 255, 255, 0.85) !important;
+    border: 1px solid rgba(0, 0, 0, 0.1) !important;
+    color: #0F172A !important;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.08) !important;
+}
+
+html.light .text-slate-300,
+html.light .text-slate-400 {
+    color: #475569 !important;
+}
+
+html.light .text-white {
+    color: #0F172A !important;
+}
+
+/* 🛡️ ESSENTIAL MEDIA OVERLAYS MUST RETAIN CRISP WHITE TEXT IN LIGHT MODE */
+.about-banner-container h2,
+.about-banner-container h2 span,
+.about-banner-container p,
+.about-banner-container .stat-label,
+html.light .about-banner-container h2,
+html.light .about-banner-container h2 span,
+html.light .about-banner-container p,
+html.light .about-banner-container .stat-label,
+html.light .about-banner-container a,
+html.light .about-banner-container button,
+html.light .pet-card-static-scrim h3,
+html.light .pet-card-static-scrim p,
+html.light .service-card-default-scrim h3,
+html.light .service-card-default-scrim p,
+html.light .service-card-default-scrim span,
+html.light .contact-photo-card h3,
+html.light .contact-photo-card p,
+html.light .contact-photo-card span,
+html.light .btn-apple-primary,
+html.light .btn-apple-primary span,
+html.light .pet-adopt-btn,
+html.light .pet-adopt-btn span {
+    color: #FFFFFF !important;
+}
+
+html.light .about-banner-container h2,
+html.light .contact-photo-card h3 {
+    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.85) !important;
+}
+
+html.light .about-banner-container p,
+html.light .contact-photo-card p {
+    color: rgba(255, 255, 255, 0.92) !important;
+    text-shadow: 0 1px 6px rgba(0, 0, 0, 0.85) !important;
+}
+
+html.light .pet-card-static-scrim h3 {
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.85) !important;
+}
+
+html.light .service-card-default-scrim h3 {
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.85) !important;
+}
+
+/* 📝 SECTION SUBHEADINGS (SLIGHTLY DARKER TONE FOR REFINED HIERARCHY) */
+.hero-subtext,
+.find-a-pet-header p,
+.services-header p,
+.about-header p,
+.contact-header p,
+.contact-form-intro p {
+    color: #94A3B8 !important;
+    text-shadow: none !important;
+}
+
+html.light .hero-subtext,
+html.light .find-a-pet-header p,
+html.light .services-header p,
+html.light .about-header p,
+html.light .contact-header p,
+html.light .contact-form-intro p {
+    color: #334155 !important;
+    text-shadow: none !important;
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    scrollbar-width: none !important;
+}
+
+*::-webkit-scrollbar {
+    display: none !important;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    min-height: 100dvh;
+    font-family: var(--font-body);
+    font-size: 16px;
+    line-height: 1.6;
+    color: #F8FAFC;
+    background-color: #0A0A0B;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+a,
+button {
+    text-decoration: none !important;
+}
+
+.shell {
+    width: 100%;
+    max-width: var(--shell);
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: clamp(16px, 3.4vw, 40px);
+    padding-right: clamp(16px, 3.4vw, 40px);
+}
+
+.font-heading {
+    font-family: var(--font-heading);
+}
+
+.font-mono {
+    font-family: var(--font-mono);
+}
+
+/* DYNAMIC GRADIENT TEXT */
+.text-gradient-emerald {
+    background: linear-gradient(135deg, #34D399 0%, #10B981 50%, #059669 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.text-gradient-cognac {
+    background: linear-gradient(135deg, #FFB800 0%, #FF8F1C 50%, #E06000 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* 🎬 FIXED CINEMATIC VIDEO BACKGROUND */
+#bg-video-container {
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+}
+
+#bg-video-element {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: brightness(0.85) contrast(1.08) saturate(1.15);
+    transform: scale(1.05);
+    will-change: transform;
+}
+
+.dark-video-scrim {
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    background: radial-gradient(circle at 50% 30%, rgba(10, 10, 11, 0.10) 0%, rgba(10, 10, 11, 0.42) 100%);
+    backdrop-filter: blur(3px) saturate(120%);
+    -webkit-backdrop-filter: blur(3px) saturate(120%);
+    pointer-events: none;
+    z-index: 1;
+}
+
+html.light #bg-video-element {
+    filter: brightness(1.04) contrast(1.02) saturate(1.2);
+}
+
+html.light .dark-video-scrim {
+    background: rgba(248, 250, 252, 0.62) !important;
+    backdrop-filter: blur(14px) saturate(135%) !important;
+    -webkit-backdrop-filter: blur(14px) saturate(135%) !important;
+}
+
+/* 🔮 AMBIENT ORBS */
+.ambient-orb {
+    position: absolute;
+    border-radius: 999px;
+    filter: blur(80px);
+    opacity: 0.25;
+    pointer-events: none;
+}
+
+.ambient-orb-1 {
+    width: 400px;
+    height: 400px;
+    background: #FF8F1C;
+    top: -100px;
+    left: -100px;
+}
+
+.ambient-orb-2 {
+    width: 500px;
+    height: 500px;
+    background: #059669;
+    bottom: 10%;
+    right: -150px;
+}
+
+.ambient-orb-3 {
+    width: 350px;
+    height: 350px;
+    background: #D97706;
+    top: 40%;
+    left: 30%;
+}
+
+/* 🔮 ULTRA-CLEAN LIQUID GLASS SYSTEM */
+.liquid-glass {
+    background: rgba(255, 255, 255, 0.04) !important;
+    backdrop-filter: blur(24px) saturate(160%);
+    -webkit-backdrop-filter: blur(24px) saturate(160%);
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4) !important;
+    position: relative;
+    overflow: hidden;
+}
+
+/* 🌟 HERO FROSTED GLASS BUTTONS WITH AMBER GLOW */
+.btn-hero-glass {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.75rem 1.75rem;
+    font-family: var(--font-heading);
+    font-size: 0.95rem;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    color: #FFFFFF !important;
+    background: rgba(255, 255, 255, 0.08) !important;
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.18) !important;
+    border-radius: 999px !important;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.3) !important;
+    transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+    cursor: pointer;
+    text-decoration: none !important;
+}
+
+.btn-hero-glass:hover {
+    color: #FF8F1C !important;
+    background: rgba(255, 255, 255, 0.16) !important;
+    border-color: rgba(255, 143, 28, 0.6) !important;
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.35), 0 0 25px rgba(255, 143, 28, 0.45), inset 0 1px 1px rgba(255, 255, 255, 0.5) !important;
+}
+
+html.light .btn-hero-glass {
+    color: #0F172A !important;
+    background: rgba(255, 255, 255, 0.65) !important;
+    border: 1px solid rgba(0, 0, 0, 0.1) !important;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06), inset 0 1px 1px rgba(255, 255, 255, 0.8) !important;
+}
+
+html.light .btn-hero-glass:hover {
+    color: #EA580C !important;
+    background: rgba(255, 255, 255, 0.9) !important;
+    border-color: rgba(234, 88, 12, 0.5) !important;
+    box-shadow: 0 12px 28px rgba(234, 88, 12, 0.2), 0 0 20px rgba(255, 143, 28, 0.3) !important;
+}
+
+.hero-image-glass-frame {
+    transition: all 0.4s var(--ease-out);
+}
+
+.hero-image-glass-frame:hover {
+    border-color: rgba(255, 143, 28, 0.35) !important;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5), 0 0 35px rgba(255, 143, 28, 0.15) !important;
+}
+
+.hero-subtext {
+    margin-top: 1.5rem !important;
+    margin-bottom: 2.75rem !important;
+    line-height: 1.75 !important;
+}
+
+/* 🐾 PET IMAGE STYLES & HOVERS */
+.pet-card-3d,
+.pet-adoption-card {
+    background: rgba(255, 255, 255, 0.04);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    transition: all 0.4s var(--ease-out);
+}
+
+.pet-card-3d:hover,
+.pet-adoption-card:hover {
+    transform: translateY(-6px) scale(1.01);
+    border-color: rgba(52, 211, 153, 0.45);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6), 0 0 30px rgba(52, 211, 153, 0.22);
+}
+
+/* 🔍 PREMIUM FIND A PET SECTION */
+.pet-search-panel {
+    background: rgba(255, 255, 255, 0.04);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    padding: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+    transition: all 0.3s ease;
+}
+
+html.light .pet-search-panel {
+    background: #FFFFFF;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+}
+
+.pet-search-input-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.pet-search-input {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 12px 14px 12px 42px;
+    font-size: 0.875rem;
+    color: #FFFFFF;
+    outline: none;
+    transition: all 0.2s ease;
+}
+
+.pet-search-input:focus {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: #FF8F1C;
+    box-shadow: 0 0 0 3px rgba(255, 143, 28, 0.15);
+}
+
+html.light .pet-search-input {
+    background: #F8FAFC;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    color: #0F172A;
+}
+
+html.light .pet-search-input:focus {
+    background: #FFFFFF;
+    border-color: #EA580C;
+    box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.12);
+}
+
+.pet-search-select {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 12px 14px 12px 38px;
+    font-size: 0.875rem;
+    color: #FFFFFF;
+    outline: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    appearance: none;
+}
+
+.pet-search-select option {
+    background: #18181B;
+    color: #FFFFFF;
+}
+
+html.light .pet-search-select {
+    background: #F8FAFC;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    color: #0F172A;
+}
+
+html.light .pet-search-select option {
+    background: #FFFFFF;
+    color: #0F172A;
+}
+
+.pet-category-btn {
+    padding: 8px 18px;
+    border-radius: 999px;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    color: rgba(255, 255, 255, 0.7);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+    cursor: pointer;
+}
+
+.pet-category-btn:hover {
+    color: #FFFFFF;
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.15);
+}
+
+.pet-category-btn.is-active {
+    color: #FFFFFF;
+    background: #FF8F1C;
+    border-color: #FF8F1C;
+    box-shadow: 0 4px 14px rgba(255, 143, 28, 0.35);
+}
+
+html.light .pet-category-btn {
+    color: #475569;
+    background: #F1F5F9;
+    border: 1px solid #E2E8F0;
+}
+
+html.light .pet-category-btn:hover {
+    color: #0F172A;
+    background: #E2E8F0;
+}
+
+html.light .pet-category-btn.is-active {
+    color: #FFFFFF;
+    background: #EA580C;
+    border-color: #EA580C;
+    box-shadow: 0 4px 14px rgba(234, 88, 12, 0.25);
+}
+
+/* 🐾 FIND A PET HEADER TO GRID VERTICAL SPACING */
+.find-a-pet-header {
+    margin-bottom: 3.5rem !important;
+}
+
+@media (min-width: 640px) {
+    .find-a-pet-header {
+        margin-bottom: 4.5rem !important;
+    }
+}
+
+#pet-cards-grid {
+    margin-top: 0.5rem !important;
+    margin-bottom: 3.5rem !important;
+}
+
+@media (min-width: 640px) {
+    #pet-cards-grid {
+        margin-bottom: 4.5rem !important;
+    }
+}
+
+/* 🐾 HOVER-REVEALED PET CARD SYSTEM */
+.pet-card-hover-wrapper {
+    position: relative;
+    border-radius: 24px;
+    overflow: hidden;
+    height: 420px;
+    background: #111113;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.35s ease, border-color 0.35s ease;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+}
+
+.pet-card-hover-wrapper:hover {
+    transform: translateY(-6px);
+    border-color: rgba(52, 211, 153, 0.45) !important;
+    box-shadow: 0 24px 50px rgba(0, 0, 0, 0.6), 0 0 35px rgba(52, 211, 153, 0.25), 0 0 15px rgba(255, 255, 255, 0.08) !important;
+}
+
+.pet-card-hover-bg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.pet-card-hover-wrapper:hover .pet-card-hover-bg {
+    transform: scale(1.06);
+}
+
+/* Static bottom scrim visible when NOT hovered */
+.pet-card-static-scrim {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0.88) 100%);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 24px;
+    transition: opacity 0.3s ease;
+    z-index: 2;
+}
+
+.pet-card-hover-wrapper:hover .pet-card-static-scrim {
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* Details Overlay revealed smoothly on hover (Soft, reduced filter for crisp pet visibility) */
+.pet-card-details-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0) 25%, rgba(10, 10, 12, 0.38) 65%, rgba(10, 10, 12, 0.85) 100%);
+    backdrop-filter: blur(1px);
+    -webkit-backdrop-filter: blur(1px);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: stretch;
+    text-align: left;
+    padding: 24px;
+    opacity: 0;
+    transform: translateY(12px);
+    transition: opacity 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+    pointer-events: none;
+    z-index: 3;
+}
+
+.pet-card-details-overlay>* {
+    text-align: left;
+    width: 100%;
+}
+
+.pet-card-hover-wrapper:hover .pet-card-details-overlay {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+
+/* 🌓 CARDS IN LIGHT MODE: Match Dark Mode Photo Card Treatment */
+html.light .pet-card-hover-wrapper {
+    background: #111113;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.12);
+}
+
+html.light .pet-card-hover-wrapper:hover {
+    border-color: rgba(16, 185, 129, 0.55) !important;
+    box-shadow: 0 20px 42px rgba(0, 0, 0, 0.22), 0 0 25px rgba(16, 185, 129, 0.22) !important;
+}
+
+html.light .pet-card-static-scrim {
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0.88) 100%) !important;
+}
+
+html.light .pet-card-static-scrim h3,
+html.light .pet-card-details-overlay h3 {
+    color: #FFFFFF !important;
+}
+
+html.light .pet-card-static-scrim p {
+    color: #CBD5E1 !important;
+}
+
+html.light .pet-card-details-overlay {
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0) 25%, rgba(10, 10, 12, 0.38) 65%, rgba(10, 10, 12, 0.85) 100%) !important;
+    backdrop-filter: blur(1px) !important;
+    -webkit-backdrop-filter: blur(1px) !important;
+}
+
+html.light .pet-card-details-overlay p {
+    color: #E2E8F0 !important;
+}
+
+/* 🌟 FROSTED GLASS ADOPT ME BUTTON (MATCHES FIND A PET BUTTON) */
+.pet-adopt-btn {
+    width: 100% !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 0.75rem 1.6rem !important;
+    font-family: var(--font-heading), sans-serif !important;
+    font-size: 0.875rem !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.01em !important;
+    color: #FFFFFF !important;
+    background: rgba(255, 255, 255, 0.08) !important;
+    backdrop-filter: blur(20px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.18) !important;
+    border-radius: 999px !important;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.3) !important;
+    transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) !important;
+    cursor: pointer !important;
+    gap: 0.6rem !important;
+    margin-top: 12px !important;
+    text-decoration: none !important;
+}
+
+.pet-adopt-btn:hover {
+    color: #FF8F1C !important;
+    background: rgba(255, 255, 255, 0.16) !important;
+    border-color: rgba(255, 143, 28, 0.6) !important;
+    transform: translateY(-2px) scale(1.02) !important;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.35), 0 0 25px rgba(255, 143, 28, 0.45), inset 0 1px 1px rgba(255, 255, 255, 0.5) !important;
+}
+
+.pet-adopt-btn:active {
+    transform: translateY(0) scale(0.99) !important;
+}
+
+html.light .pet-adopt-btn {
+    color: #FFFFFF !important;
+    background: linear-gradient(135deg, #FF8F1C 0%, #EA580C 100%) !important;
+    border: 1px solid rgba(234, 88, 12, 0.4) !important;
+    box-shadow: 0 8px 20px rgba(234, 88, 12, 0.28) !important;
+}
+
+html.light .pet-adopt-btn span {
+    color: #FFFFFF !important;
+    font-weight: 700 !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2) !important;
+}
+
+html.light .pet-adopt-btn:hover {
+    background: linear-gradient(135deg, #FF9B2E 0%, #F97316 100%) !important;
+    color: #FFFFFF !important;
+    box-shadow: 0 12px 28px rgba(234, 88, 12, 0.42) !important;
+    transform: translateY(-2px) scale(1.02) !important;
+}
+
+/* 🌟 VIEW ALL CTA BOX */
+.pet-view-all-cta {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 20px;
+    padding: 32px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+}
+
+html.light .pet-view-all-cta {
+    background: #F8FAFC;
+    border: 1px solid #E2E8F0;
+}
+
+/* GLOWING AMBIENT FEATURE CARDS */
+.glow-card-wrapper {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 340px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.glow-bg-layer {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    min-height: 280px;
+    opacity: 0.7;
+    pointer-events: none;
+    filter: blur(40px);
+    transition: opacity 0.4s ease;
+    border-radius: 36px;
+    z-index: 0;
+}
+
+.glow-card-wrapper:hover .glow-bg-layer {
+    opacity: 1;
+}
+
+.glow-card-foreground {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    min-height: 280px;
+    border-radius: 36px;
+    z-index: 10;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    transition: transform 0.4s var(--ease-out);
+}
+
+/* NAVBAR & 100% FULL WIDTH HEADER (EXPANDED & ELEGANT FROSTED BLUR) */
+.nav-fullwidth-tab,
+.nav-kindheart-fixed {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    z-index: 60 !important;
+    margin: 0 !important;
+    padding-top: 14px !important;
+    padding-bottom: 14px !important;
+    padding-left: clamp(20px, 4vw, 56px) !important;
+    padding-right: clamp(20px, 4vw, 56px) !important;
+    min-height: 68px !important;
+    background: rgba(10, 10, 11, 0.65) !important;
+    backdrop-filter: blur(24px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
+    border: none !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: 0 !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35) !important;
+    transform: none !important;
+    transition: all 0.3s var(--ease-out);
+}
+
+@media (max-width: 639px) {
+
+    .nav-fullwidth-tab,
+    .nav-kindheart-fixed {
+        padding-left: 16px !important;
+        padding-right: 16px !important;
+        padding-top: 10px !important;
+        padding-bottom: 10px !important;
+        min-height: 60px !important;
+    }
+}
+
+/* ☀️ LIGHT MODE HEADER - APPLE FROSTED LIQUID GLASS TRANSLUCENT BLUR */
+html.light .nav-kindheart-fixed,
+html.light .nav-fullwidth-tab {
+    background: rgba(255, 255, 255, 0.68) !important;
+    backdrop-filter: blur(32px) saturate(190%) !important;
+    -webkit-backdrop-filter: blur(32px) saturate(190%) !important;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05), inset 0 1px 1px rgba(255, 255, 255, 0.8) !important;
+}
+
+html.light .nav-kindheart-fixed span.text-white,
+html.light .nav-kindheart-fixed a,
+html.light .nav-kindheart-fixed button {
+    color: #0F172A !important;
+}
+
+/* 🐾 KINDHEART OFFICIAL BRAND LOGO (DARK & LIGHT THEME ADAPTATION) */
+.brand-logo-container {
+    transition: transform 0.22s var(--ease-out);
+    text-decoration: none !important;
+}
+
+.brand-logo-container:hover {
+    transform: scale(1.02);
+}
+
+.brand-icon-wrap {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+@media (min-width: 640px) {
+    .brand-icon-wrap {
+        width: 36px;
+        height: 36px;
+    }
+}
+
+.brand-logo-dark {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.brand-logo-light {
+    display: none;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+html.light .brand-logo-dark {
+    display: none !important;
+}
+
+html.light .brand-logo-light {
+    display: block !important;
+}
+
+html.light .brand-text {
+    color: #0F172A !important;
+}
+
+html.light .brand-text span {
+    color: #EA580C !important;
+}
+
+/* Footer Brand Logo Adaptation */
+.footer-logo-dark {
+    display: inline-block;
+}
+
+.footer-logo-light {
+    display: none;
+}
+
+html.light .footer-logo-dark {
+    display: none !important;
+}
+
+html.light .footer-logo-light {
+    display: inline-block !important;
+}
+
+html.light .footer-brand-text {
+    color: #0F172A !important;
+}
+
+/* 📱 BORDERLESS CENTER TABS & FROSTED GLASS CAPSULE HOVER (DESKTOP ONLY) */
+@media (max-width: 1023px) {
+    .iphone-camera-switcher {
+        display: none !important;
+    }
+}
+
+@media (min-width: 1024px) {
+    .iphone-camera-switcher {
+        position: relative;
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+    }
+}
+
+.iphone-mode-track {
+    background: transparent !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    gap: 4px;
+}
+
+.iphone-mode-tab {
+    padding: 6px 16px;
+    border-radius: 999px;
+    font-family: 'Outfit', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
+    font-size: 13.5px !important;
+    font-weight: 500 !important;
+    letter-spacing: 0.01em !important;
+    text-transform: capitalize;
+    color: rgba(255, 255, 255, 0.75);
+    background: transparent !important;
+    transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+    position: relative;
+    white-space: nowrap;
+    cursor: pointer;
+    border: none !important;
+}
+
+/* 📸 Tab Hover: Text color changes + Frosted Glass Back Capsule Pill */
+.iphone-mode-tab:hover {
+    color: #FF8F1C !important;
+    background: rgba(255, 255, 255, 0.12) !important;
+    backdrop-filter: blur(14px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(14px) saturate(180%) !important;
+    border-radius: 999px !important;
+    box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.25), 0 4px 15px rgba(0, 0, 0, 0.2) !important;
+    transform: translateY(-1px);
+}
+
+.iphone-mode-tab.is-active {
+    color: #FFFFFF !important;
+    background: rgba(255, 255, 255, 0.16) !important;
+    backdrop-filter: blur(14px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(14px) saturate(180%) !important;
+    box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.3), 0 4px 12px rgba(0, 0, 0, 0.25) !important;
+    font-weight: 600 !important;
+    border-radius: 999px !important;
+}
+
+html.light .iphone-mode-track {
+    background: transparent !important;
+    border: none !important;
+}
+
+html.light .iphone-mode-tab {
+    color: #334155 !important;
+}
+
+html.light .iphone-mode-tab:hover {
+    color: #EA580C !important;
+    background: rgba(0, 0, 0, 0.06) !important;
+    backdrop-filter: blur(12px) !important;
+    box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.06) !important;
+}
+
+html.light .iphone-mode-tab.is-active {
+    color: #0F172A !important;
+    background: rgba(0, 0, 0, 0.08) !important;
+}
+
+/* 🤏 SLEEK COMPACT NON-ORANGE FROSTED GLASS RIGHT-SIDE BUTTONS */
+.btn-header-sm {
+    padding: 0.25rem 0.75rem !important;
+    font-size: 0.72rem !important;
+    height: 28px !important;
+    font-weight: 600 !important;
+    border-radius: 999px !important;
+    transition: all 0.22s var(--ease-out) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: rgba(255, 255, 255, 0.08) !important;
+    backdrop-filter: blur(16px) !important;
+    -webkit-backdrop-filter: blur(16px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    color: #FFFFFF !important;
+}
+
+.btn-header-sm:hover {
+    background: rgba(255, 255, 255, 0.18) !important;
+    border-color: rgba(255, 255, 255, 0.25) !important;
+    transform: translateY(-1px) !important;
+}
+
+.btn-header-icon-sm {
+    width: 28px !important;
+    height: 28px !important;
+    padding: 0 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 0.75rem !important;
+    border-radius: 999px !important;
+    transition: all 0.22s var(--ease-out) !important;
+    background: rgba(255, 255, 255, 0.08) !important;
+    backdrop-filter: blur(16px) !important;
+    -webkit-backdrop-filter: blur(16px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    color: #FFFFFF !important;
+}
+
+.btn-header-icon-sm:hover {
+    background: rgba(255, 255, 255, 0.18) !important;
+    border-color: rgba(255, 255, 255, 0.25) !important;
+    transform: translateY(-1px) !important;
+}
+
+.btn-apple-secondary {
+    background: rgba(255, 255, 255, 0.08) !important;
+    backdrop-filter: blur(16px) !important;
+    -webkit-backdrop-filter: blur(16px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.18) !important;
+    border-radius: 999px !important;
+    color: #FFFFFF !important;
+}
+
+.btn-apple-secondary:hover {
+    background: rgba(255, 255, 255, 0.18) !important;
+    border-color: rgba(255, 143, 28, 0.6) !important;
+    color: #FF8F1C !important;
+    transform: translateY(-1px) !important;
+}
+
+html.light .btn-header-sm,
+html.light .btn-header-icon-sm,
+html.light .btn-apple-secondary {
+    background: rgba(0, 0, 0, 0.05) !important;
+    border: 1px solid rgba(0, 0, 0, 0.08) !important;
+    color: #0F172A !important;
+}
+
+html.light .btn-header-sm:hover,
+html.light .btn-header-icon-sm:hover,
+html.light .btn-apple-secondary:hover {
+    background: rgba(0, 0, 0, 0.1) !important;
+    color: #000000 !important;
+}
+
+.nav-link-pill {
+    padding: 8px 18px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.75);
+    transition: all 0.25s var(--ease-out);
+}
+
+.nav-link-pill:hover {
+    color: #FFFFFF;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.nav-link-pill.is-active {
+    background: linear-gradient(135deg, #FF8F1C 0%, #D97706 100%);
+    color: #FFFFFF;
+    box-shadow: 0 4px 15px rgba(255, 143, 28, 0.35);
+}
+
+/* BUTTONS */
+.btn-apple-primary,
+.btn-cognac-primary {
+    background: linear-gradient(135deg, #FF8F1C 0%, #E06000 100%) !important;
+    color: #FFFFFF !important;
+    font-family: var(--font-body) !important;
+    font-weight: 700 !important;
+    font-size: 0.875rem !important;
+    letter-spacing: 0.01em !important;
+    padding: 0.75rem 1.8rem !important;
+    border-radius: 999px !important;
+    box-shadow: 0 10px 25px rgba(255, 143, 28, 0.35) !important;
+    transition: all 0.3s var(--ease-out) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 0.6rem !important;
+    cursor: pointer !important;
+    white-space: nowrap !important;
+    border: none !important;
+}
+
+.btn-apple-primary:hover,
+.btn-cognac-primary:hover {
+    background: linear-gradient(135deg, #E06000 0%, #B84B00 100%) !important;
+    transform: translateY(-2px) scale(1.02) !important;
+    box-shadow: 0 14px 30px rgba(255, 143, 28, 0.5) !important;
+}
+
+.btn-glass-secondary {
+    background: rgba(255, 255, 255, 0.08) !important;
+    color: #FFFFFF !important;
+    font-family: var(--font-body) !important;
+    font-weight: 700 !important;
+    font-size: 0.875rem !important;
+    letter-spacing: 0.01em !important;
+    padding: 0.75rem 1.8rem !important;
+    border-radius: 999px !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    backdrop-filter: blur(12px) !important;
+    transition: all 0.3s var(--ease-out) !important;
+    cursor: pointer !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 0.6rem !important;
+    white-space: nowrap !important;
+}
+
+.btn-apple-secondary:hover,
+.btn-glass-secondary:hover {
+    background: rgba(255, 255, 255, 0.18) !important;
+    transform: translateY(-2px) scale(1.02) !important;
+}
+
+/* 🏥 SANCTUARY SERVICES HEADER SPACING & TOP SPACING (ARROW MARKED SECTION) */
+#services {
+    padding-top: 2rem !important;
+}
+
+@media (min-width: 640px) {
+    #services {
+        padding-top: 2.5rem !important;
+    }
+}
+
+.services-header {
+    margin-top: 0.5rem !important;
+    margin-bottom: 3.5rem !important;
+}
+
+@media (min-width: 640px) {
+    .services-header {
+        margin-top: 0.75rem !important;
+        margin-bottom: 4.5rem !important;
+    }
+}
+
+/* SERVICES CARDS */
+.service-card-image-blur {
+    position: relative;
+    border-radius: 28px;
+    overflow: hidden;
+    height: 340px;
+    background: #111113;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    transition: transform 0.4s var(--ease-out), border-color 0.4s ease, box-shadow 0.4s ease;
+    cursor: pointer;
+}
+
+.service-card-image-blur:hover {
+    transform: translateY(-6px);
+    border-color: rgba(52, 211, 153, 0.45) !important;
+    box-shadow: 0 24px 50px rgba(0, 0, 0, 0.6), 0 0 35px rgba(52, 211, 153, 0.22), 0 0 15px rgba(255, 255, 255, 0.08) !important;
+}
+
+html.light .service-card-image-blur {
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
+}
+
+html.light .service-card-image-blur:hover {
+    border-color: rgba(16, 185, 129, 0.45) !important;
+    box-shadow: 0 16px 32px rgba(0, 0, 0, 0.08), 0 0 25px rgba(16, 185, 129, 0.18) !important;
+}
+
+.service-card-bg-img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.7s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.service-card-image-blur:hover .service-card-bg-img {
+    transform: scale(1.08);
+}
+
+.service-card-default-scrim {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(10, 10, 12, 0.05) 0%, rgba(10, 10, 12, 0.3) 45%, rgba(10, 10, 12, 0.92) 100%);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 24px;
+    z-index: 2;
+}
+
+html.light .service-card-default-scrim {
+    background: linear-gradient(180deg, rgba(15, 23, 42, 0.05) 0%, rgba(15, 23, 42, 0.35) 45%, rgba(15, 23, 42, 0.92) 100%);
+}
+
+.service-close-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.15);
+    color: #FFF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border: none;
+}
+
+.service-close-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+/* MODALS & DRAWERS */
+#fullscreen-preview-modal,
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 100;
+    background: rgba(5, 6, 8, 0.9);
+    backdrop-filter: blur(28px);
+    -webkit-backdrop-filter: blur(28px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    transition: all 0.35s ease;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+#fullscreen-preview-modal.is-open,
+.modal-overlay.is-open {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+.modal-card {
+    width: 100%;
+    max-width: 540px;
+    border-radius: 32px;
+    background: rgba(18, 28, 26, 0.95);
+    backdrop-filter: blur(30px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0 30px 90px rgba(0, 0, 0, 0.8);
+}
+
+/* 🚪 MODAL CLOSE & PROFILE ACTION BUTTONS */
+.service-close-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    color: #FFFFFF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.service-close-btn:hover {
+    background: rgba(255, 255, 255, 0.22);
+    border-color: rgba(255, 255, 255, 0.35);
+    transform: scale(1.08);
+}
+
+html.light .service-close-btn {
+    background: #F1F5F9;
+    border: 1px solid #CBD5E1;
+    color: #0F172A;
+}
+
+html.light .service-close-btn:hover {
+    background: #E2E8F0;
+    border-color: #94A3B8;
+}
+
+html.light .modal-card {
+    background: rgba(255, 255, 255, 0.96);
+    border: 1px solid #E2E8F0;
+    box-shadow: 0 30px 90px rgba(0, 0, 0, 0.2);
+}
+
+html.light .modal-card h3,
+html.light .modal-card span.text-white {
+    color: #0F172A !important;
+}
+
+html.light .modal-card p,
+html.light .modal-card label {
+    color: #475569 !important;
+}
+
+html.light .modal-card input {
+    background: #F8FAFC !important;
+    border-color: #CBD5E1 !important;
+    color: #0F172A !important;
+}
+
+/* 🐾 PET ADOPTION AUTH MODAL DESIGN */
+.auth-modal-card {
+    width: 100%;
+    max-width: 480px;
+    border-radius: 28px;
+    padding: 1.75rem 1.75rem;
+    background: rgba(14, 18, 22, 0.94);
+    backdrop-filter: blur(32px) saturate(130%);
+    -webkit-backdrop-filter: blur(32px) saturate(130%);
+    border: 1px solid rgba(255, 143, 28, 0.3);
+    box-shadow: 0 25px 80px rgba(0, 0, 0, 0.8), 0 0 45px rgba(255, 143, 28, 0.18);
+    position: relative;
+    z-index: 10;
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.auth-card-glow {
+    position: absolute;
+    top: -60px;
+    right: -60px;
+    width: 180px;
+    height: 180px;
+    border-radius: 999px;
+    background: radial-gradient(circle, rgba(255, 143, 28, 0.22) 0%, transparent 70%);
+    filter: blur(28px);
+    z-index: -1;
+}
+
+.auth-input-styled {
+    font-family: var(--font-body);
+    font-size: 0.875rem;
+    font-weight: 400;
+    line-height: 1.5;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 14px;
+    padding: 0.75rem 1rem;
+    color: #FFFFFF;
+    outline: none;
+    transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.auth-input-styled::placeholder {
+    color: rgba(255, 255, 255, 0.45);
+}
+
+.auth-input-styled:focus {
+    background: rgba(255, 255, 255, 0.09);
+    border-color: #FF8F1C;
+    box-shadow: 0 0 0 3px rgba(255, 143, 28, 0.22), 0 6px 20px rgba(255, 143, 28, 0.12);
+}
+
+html.light .auth-modal-card {
+    background: rgba(255, 255, 255, 0.96);
+    border: 1px solid rgba(255, 143, 28, 0.35);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12), 0 0 35px rgba(255, 143, 28, 0.14);
+}
+
+html.light .auth-input-styled {
+    background: #F8FAFC;
+    border-color: #CBD5E1;
+    color: #0F172A;
+}
+
+html.light .auth-input-styled::placeholder {
+    color: #94A3B8;
+}
+
+html.light .auth-input-styled:focus {
+    background: #FFFFFF;
+    border-color: #FF8F1C;
+    box-shadow: 0 0 0 3px rgba(255, 143, 28, 0.18);
+}
+
+html.light .auth-modal-card h3 {
+    color: #0F172A !important;
+}
+
+html.light .auth-modal-card p,
+html.light .auth-modal-card label {
+    color: #475569 !important;
+}
+
+/* ✉️ CONTACT SUCCESS TOAST NOTIFICATION */
+#contact-toast {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%) translateY(30px) scale(0.9);
+    z-index: 110;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: all 0.4s var(--ease-out);
+}
+
+#contact-toast.show {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: translateX(-50%) translateY(0) scale(1);
+}
+
+.icon-spin {
+    display: inline-block;
+    animation: spin 0.5s ease-out;
+}
+
+@keyframes spin {
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.animate-fade-rise {
+    animation: fadeRise 0.5s ease-out forwards;
+}
+
+@keyframes fadeRise {
+    from {
+        opacity: 0;
+        transform: translateY(16px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.scroll-reveal {
+    opacity: 1;
+    transform: none;
+    transition: opacity 0.6s var(--ease-out), transform 0.6s var(--ease-out);
+}
+
+.scroll-reveal.is-visible {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+}
+
+/* 🔮 FEATURES, 📖 PROCESS & 📬 CONTACT SECTION SPACING */
+#sanctuary-banner {
+    padding-top: 3rem !important;
+    padding-bottom: 0 !important;
+    margin-bottom: 0 !important;
+}
+
+#features {
+    padding-top: 1.5rem !important;
+    padding-bottom: 1.5rem !important;
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+}
+
+#process {
+    padding-top: 1.5rem !important;
+    padding-bottom: 1rem !important;
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+}
+
+#contact {
+    padding-top: 3.5rem !important;
+    padding-bottom: 4.5rem !important;
+    margin-top: 0 !important;
+}
+
+@media (min-width: 640px) {
+    #sanctuary-banner {
+        padding-top: 4rem !important;
+        padding-bottom: 0 !important;
+        margin-bottom: 0 !important;
+    }
+
+    #features {
+        padding-top: 2rem !important;
+        padding-bottom: 2rem !important;
+        margin-top: 0 !important;
+        margin-bottom: 0 !important;
+    }
+
+    #process {
+        padding-top: 2rem !important;
+        padding-bottom: 1.5rem !important;
+        margin-top: 0 !important;
+        margin-bottom: 0 !important;
+    }
+
+    #contact {
+        padding-top: 4.5rem !important;
+        padding-bottom: 5.5rem !important;
+        margin-top: 0 !important;
+    }
+}
+
+/* 📬 HUMANIZED CONTACT SECTION FORM & PHOTO CARD */
+.contact-input-field {
+    font-family: var(--font-body);
+    font-size: 0.9375rem;
+    font-weight: 400;
+    line-height: 1.5;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    border-radius: 14px;
+    padding: 0.95rem 1.25rem;
+    color: #FFFFFF !important;
+    width: 100%;
+    outline: none;
+    transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.contact-field-label {
+    display: none !important;
+}
+
+.contact-input-field::placeholder,
+.contact-input-field::-webkit-input-placeholder,
+.contact-input-field::-moz-placeholder,
+.contact-input-field:-ms-input-placeholder {
+    color: #FFFFFF !important;
+    -webkit-text-fill-color: #FFFFFF !important;
+    font-weight: 500;
+    opacity: 1 !important;
+}
+
+.contact-input-field:focus {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: #FF8F1C;
+    box-shadow: 0 0 0 4px rgba(255, 143, 28, 0.18), 0 8px 24px -4px rgba(255, 143, 28, 0.12);
+}
+
+html.light .contact-input-field {
+    background: #FFFFFF !important;
+    border: 1px solid rgba(15, 23, 42, 0.18) !important;
+    color: #0F172A !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
+}
+
+html.light .contact-input-field::placeholder,
+html.light .contact-input-field::-webkit-input-placeholder,
+html.light .contact-input-field::-moz-placeholder,
+html.light .contact-input-field:-ms-input-placeholder {
+    color: #64748B !important;
+    -webkit-text-fill-color: #64748B !important;
+    opacity: 1 !important;
+}
+
+html.light .contact-input-field:focus {
+    background: #FFFFFF !important;
+    border-color: #FF8F1C !important;
+    box-shadow: 0 0 0 4px rgba(255, 143, 28, 0.18) !important;
+}
+
+.contact-photo-card {
+    position: relative;
+    border-radius: 28px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    background: #111113;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+    min-height: 460px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+}
+
+.contact-photo-img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.contact-photo-card:hover .contact-photo-img {
+    transform: scale(1.04);
+}
+
+.contact-photo-scrim {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0.55) 50%, rgba(0, 0, 0, 0.95) 100%);
+    pointer-events: none;
+}
+
+.contact-header {
+    margin-bottom: 3.5rem !important;
+}
+
+@media (min-width: 640px) {
+    .contact-header {
+        margin-bottom: 4.5rem !important;
+    }
+}
+
+.contact-form-card {
+    background: transparent !important;
+    border: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    padding: 0 0.5rem !important;
+}
+
+@media (min-width: 640px) {
+    .contact-form-card {
+        padding: 0 1.5rem !important;
+    }
+}
+
+.contact-form-intro {
+    margin-bottom: 2.5rem !important;
+}
+
+@media (min-width: 640px) {
+    .contact-form-intro {
+        margin-bottom: 3.25rem !important;
+    }
+}
+
+.contact-form-row {
+    margin-bottom: 1.5rem !important;
+    width: 100% !important;
+}
+
+@media (min-width: 640px) {
+    .contact-form-row {
+        margin-bottom: 1.75rem !important;
+    }
+}
+
+.contact-grid-two {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 1.25rem !important;
+}
+
+@media (min-width: 640px) {
+    .contact-grid-two {
+        grid-template-columns: 1fr 1fr !important;
+        gap: 1.5rem !important;
+    }
+}
+
+.contact-form-btn-wrap {
+    margin-top: 2rem !important;
+    padding-top: 0.25rem !important;
+    width: 100% !important;
+}
+
+@media (min-width: 640px) {
+    .contact-form-btn-wrap {
+        margin-top: 2.5rem !important;
+    }
+}
+
+.about-header {
+    margin-bottom: 2.75rem !important;
+}
+
+@media (min-width: 640px) {
+    .about-header {
+        margin-bottom: 3.5rem !important;
+    }
+}
+
+.about-impact-grid {
+    margin-top: 1.85rem !important;
+    margin-bottom: 1.85rem !important;
+}
+
+@media (min-width: 640px) {
+    .about-impact-grid {
+        margin-top: 2.35rem !important;
+        margin-bottom: 2.35rem !important;
+    }
+}
+
+.about-actions-group {
+    margin-top: 1.85rem !important;
+}
+
+@media (min-width: 640px) {
+    .about-actions-group {
+        margin-top: 2.35rem !important;
+    }
+}
+
+.about-banner-container {
+    position: relative;
+    border-radius: 2rem;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.5);
+}
+
+.about-banner-container h2 {
+    color: #FFFFFF !important;
+    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.75);
+}
+
+.about-banner-container p {
+    color: #E2E8F0 !important;
+    text-shadow: 0 1px 8px rgba(0, 0, 0, 0.75);
+}
+
+.about-banner-container .text-gradient-cognac {
+    background: linear-gradient(135deg, #FFB800, #FF8F1C, #FF7A00) !important;
+    -webkit-background-clip: text !important;
+    background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.6));
+}
+
+.about-banner-container .btn-apple-secondary {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 0.6rem !important;
+    font-family: var(--font-body) !important;
+    font-weight: 700 !important;
+    font-size: 0.875rem !important;
+    letter-spacing: 0.01em !important;
+    padding: 0.75rem 1.8rem !important;
+    border-radius: 999px !important;
+    color: #FFFFFF !important;
+    background: rgba(255, 255, 255, 0.1) !important;
+    border: 1px solid rgba(255, 255, 255, 0.22) !important;
+    backdrop-filter: blur(16px) !important;
+    -webkit-backdrop-filter: blur(16px) !important;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.3) !important;
+    transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) !important;
+    cursor: pointer !important;
+    text-decoration: none !important;
+    white-space: nowrap !important;
+}
+
+.about-banner-container .btn-apple-secondary:hover {
+    color: #FF8F1C !important;
+    background: rgba(255, 255, 255, 0.2) !important;
+    border-color: rgba(255, 143, 28, 0.6) !important;
+    transform: translateY(-2px) scale(1.02) !important;
+    box-shadow: 0 14px 30px rgba(0, 0, 0, 0.35), 0 0 20px rgba(255, 143, 28, 0.35), inset 0 1px 1px rgba(255, 255, 255, 0.5) !important;
+}
+
+html.light .about-banner-container .btn-apple-secondary {
+    color: #0F172A !important;
+    background: rgba(255, 255, 255, 0.65) !important;
+    border: 1px solid rgba(0, 0, 0, 0.12) !important;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06), inset 0 1px 1px rgba(255, 255, 255, 0.8) !important;
+}
+
+html.light .about-banner-container .btn-apple-secondary:hover {
+    color: #EA580C !important;
+    background: rgba(255, 255, 255, 0.9) !important;
+    border-color: rgba(234, 88, 12, 0.5) !important;
+    box-shadow: 0 12px 28px rgba(234, 88, 12, 0.2), 0 0 20px rgba(255, 143, 28, 0.3) !important;
+}
+
+.about-sanctuary-video {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: brightness(0.92) contrast(1.06) saturate(1.15);
+    pointer-events: none;
+}
+
+@keyframes pulseGlow {
+
+    0%,
+    100% {
+        opacity: 0.3;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 0.6;
+        transform: scale(1.08);
+    }
+}
+
+.about-ambient-glow {
+    position: absolute;
+    width: 350px;
+    height: 350px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 143, 28, 0.2) 0%, rgba(224, 96, 0, 0.05) 50%, transparent 70%);
+    filter: blur(40px);
+    pointer-events: none;
+    animation: pulseGlow 6s ease-in-out infinite;
+}
+
+/* Shimmer shine effect across about card */
+.about-shimmer-sweep {
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 60%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.06), transparent);
+    transform: skewX(-25deg);
+    animation: shimmerSweep 8s infinite ease-in-out;
+    pointer-events: none;
+}
+
+@keyframes shimmerSweep {
+    0% {
+        left: -100%;
+    }
+
+    20%,
+    100% {
+        left: 200%;
+    }
+}
+
+/* Interactive Centered Metric Pill */
+.about-impact-pill {
+    background: rgba(0, 0, 0, 0.45) !important;
+    border: 1px solid rgba(255, 255, 255, 0.16) !important;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.about-impact-pill:hover {
+    transform: translateY(-2px);
+    background: rgba(0, 0, 0, 0.6) !important;
+    border-color: rgba(255, 143, 28, 0.6) !important;
+    box-shadow: 0 10px 25px -5px rgba(255, 143, 28, 0.3);
+}
+
+/* 💌 CONTACT US SECTION LABELS - HIDDEN (PLACEHOLDERS PROVIDE DIRECT IN-BOX GUIDANCE) */
+.contact-field-label {
+    display: none !important;
+}
+
+/* 🌫️ FROSTED BLURRED COMPACT FULL-WIDTH FOOTER WITH BALANCED ROWS */
+.footer-kindheart-blurred {
+    width: 100% !important;
+    background: rgba(13, 14, 18, 0.7) !important;
+    backdrop-filter: blur(28px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(28px) saturate(180%) !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.12) !important;
+    position: relative !important;
+    z-index: 20 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+    padding-top: 1.5rem !important;
+    padding-bottom: 1.25rem !important;
+}
+
+@media (min-width: 640px) {
+    .footer-kindheart-blurred {
+        padding-top: 2rem !important;
+        padding-bottom: 1.5rem !important;
+    }
+}
+
+.footer-centered-content {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    width: 100% !important;
+    max-width: 56rem !important;
+}
+
+/* Arrow Section 1: Between Brand Heading and Navigation Menu */
+.footer-brand-wrap {
+    margin-bottom: 0.5rem !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    text-align: center !important;
+}
+
+@media (min-width: 640px) {
+    .footer-brand-wrap {
+        margin-bottom: 0.75rem !important;
+    }
+}
+
+/* Arrow Section 2: Between Navigation Menu and Social Icons */
+.footer-nav-wrap {
+    margin-bottom: 0.5rem !important;
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    justify-content: center !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    text-align: center !important;
+    width: 100% !important;
+}
+
+@media (min-width: 640px) {
+    .footer-nav-wrap {
+        margin-bottom: 0.75rem !important;
+    }
+}
+
+/* Arrow Section 3: Between Social Icons and Copyright Line */
+.footer-social-wrap {
+    margin-bottom: 0.5rem !important;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: center !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    text-align: center !important;
+    width: 100% !important;
+}
+
+@media (min-width: 640px) {
+    .footer-social-wrap {
+        margin-bottom: 0.75rem !important;
+    }
+}
+
+.footer-copyright-wrap {
+    margin-top: 0 !important;
+    text-align: center !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    width: 100% !important;
+}
+
+html.light .footer-kindheart-blurred {
+    background: rgba(255, 255, 255, 0.92) !important;
+    backdrop-filter: blur(28px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(28px) saturate(180%) !important;
+    border-top: 1px solid rgba(0, 0, 0, 0.08) !important;
+    box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.03) !important;
+}
+
+html.light .footer-brand-wrap span,
+html.light .footer-brand-wrap a {
+    color: #0F172A !important;
+}
+
+html.light .footer-brand-wrap span span {
+    color: #FF8F1C !important;
+}
+
+html.light .footer-nav-wrap a {
+    color: #475569 !important;
+}
+
+html.light .footer-nav-wrap a:hover {
+    color: #0F172A !important;
+}
+
+html.light .footer-social-wrap a {
+    border-color: rgba(0, 0, 0, 0.15) !important;
+    color: #475569 !important;
+}
+
+html.light .footer-social-wrap a:hover {
+    border-color: #FF8F1C !important;
+    color: #FF8F1C !important;
+    background: rgba(255, 143, 28, 0.08) !important;
+}
+
+html.light .footer-copyright-wrap {
+    color: #64748B !important;
+}
+
+html.light .footer-copyright-wrap strong {
+    color: #0F172A !important;
+}
+
+/* 📱 FROSTED GLASS MOBILE NAVIGATION DRAWER OVERLAPPING HERO (< 1024px) */
+.mobile-nav-drawer {
+    display: none !important;
+    position: fixed !important;
+    top: 60px !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    max-height: calc(100vh - 60px) !important;
+    overflow-y: auto !important;
+    z-index: 55 !important;
+    opacity: 0;
+    pointer-events: none;
+    background: rgba(10, 10, 11, 0.94) !important;
+    backdrop-filter: blur(28px) saturate(190%) !important;
+    -webkit-backdrop-filter: blur(28px) saturate(190%) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12) !important;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8) !important;
+}
+
+@media (min-width: 640px) {
+    .mobile-nav-drawer {
+        top: 68px !important;
+        max-height: calc(100vh - 68px) !important;
+    }
+}
+
+.mobile-nav-drawer.is-open {
+    display: block !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    animation: drawerSlideDown 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+}
+
+@keyframes drawerSlideDown {
+    from {
+        transform: translateY(-16px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* 🔘 UNIFIED HEADER CONTROLS (THEME TOGGLE, AMBIENT SOUND, LOGIN) */
+.btn-header-control {
+    display: inline-flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    position: static !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: rgba(255, 255, 255, 0.08) !important;
+    backdrop-filter: blur(16px) !important;
+    -webkit-backdrop-filter: blur(16px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.14) !important;
+    color: #FFFFFF !important;
+    cursor: pointer !important;
+    touch-action: manipulation !important;
+    z-index: 60 !important;
+    flex-shrink: 0 !important;
+    transition: all 0.22s var(--ease-out) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15), inset 0 1px 1px rgba(255, 255, 255, 0.15) !important;
+}
+
+.btn-header-control:hover {
+    background: rgba(255, 255, 255, 0.18) !important;
+    border-color: rgba(255, 143, 28, 0.5) !important;
+    color: #FF8F1C !important;
+    transform: translateY(-1px) !important;
+}
+
+/* 🔘 CIRCULAR CONTROLS (THEME TOGGLE & AMBIENT SOUND) */
+#theme-toggle-btn,
+button#theme-toggle-btn,
+#ambient-sound-btn,
+button#ambient-sound-btn,
+.btn-header-circle {
+    width: 36px !important;
+    height: 36px !important;
+    min-width: 36px !important;
+    min-height: 36px !important;
+    padding: 0 !important;
+    border-radius: 999px !important;
+    font-size: 0.85rem !important;
+}
+
+#theme-toggle-btn svg,
+button#theme-toggle-btn svg,
+#ambient-sound-btn svg,
+button#ambient-sound-btn svg {
+    width: 17px !important;
+    height: 17px !important;
+    display: block !important;
+    pointer-events: none !important;
+}
+
+/* 🔈 Ambient sound playing animation & glow */
+#ambient-sound-btn.is-playing,
+button#ambient-sound-btn.is-playing {
+    background: rgba(255, 143, 28, 0.22) !important;
+    border-color: rgba(255, 143, 28, 0.6) !important;
+    color: #FF8F1C !important;
+    box-shadow: 0 0 16px rgba(255, 143, 28, 0.4) !important;
+}
+
+#ambient-sound-btn #sound-label {
+    display: none !important;
+}
+
+/* 🔑 LOGIN / ACCOUNT BUTTON */
+#header-login-btn,
+button#header-login-btn,
+.auth-btn-login,
+.btn-header-login {
+    height: 36px !important;
+    min-height: 36px !important;
+    padding: 0 16px !important;
+    border-radius: 999px !important;
+    font-size: 0.8125rem !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.01em !important;
+    width: auto !important;
+    min-width: auto !important;
+    white-space: nowrap !important;
+}
+
+/* Mobile Navbar Controls (< 768px): Uniform 34px sized circles */
+@media (max-width: 767px) {
+
+    #theme-toggle-btn,
+    button#theme-toggle-btn,
+    #ambient-sound-btn,
+    button#ambient-sound-btn,
+    .btn-header-circle {
+        width: 34px !important;
+        height: 34px !important;
+        min-width: 34px !important;
+        min-height: 34px !important;
+    }
+
+    #theme-toggle-btn svg,
+    button#theme-toggle-btn svg,
+    #ambient-sound-btn svg,
+    button#ambient-sound-btn svg {
+        width: 15px !important;
+        height: 15px !important;
+    }
+
+    #header-login-btn,
+    button#header-login-btn,
+    .auth-btn-login,
+    .btn-header-login {
+        width: 34px !important;
+        height: 34px !important;
+        min-width: 34px !important;
+        min-height: 34px !important;
+        padding: 0 !important;
+        border-radius: 999px !important;
+        font-size: 0.85rem !important;
+    }
+
+    #mobile-menu-toggle-btn,
+    button#mobile-menu-toggle-btn,
+    .btn-mobile-hamburger {
+        width: 34px !important;
+        height: 34px !important;
+        min-width: 34px !important;
+        min-height: 34px !important;
+    }
+}
+
+/* ☀️ Light Mode styling for Header Controls */
+html.light .btn-header-control,
+html.light #theme-toggle-btn,
+html.light button#theme-toggle-btn,
+html.light #ambient-sound-btn,
+html.light button#ambient-sound-btn,
+html.light #header-login-btn,
+html.light button#header-login-btn,
+html.light .auth-btn-login,
+html.light .btn-header-login {
+    background: rgba(0, 0, 0, 0.05) !important;
+    border: 1px solid rgba(0, 0, 0, 0.09) !important;
+    color: #0F172A !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04), inset 0 1px 1px rgba(255, 255, 255, 0.8) !important;
+}
+
+html.light .btn-header-control:hover,
+html.light #theme-toggle-btn:hover,
+html.light button#theme-toggle-btn:hover,
+html.light #ambient-sound-btn:hover,
+html.light button#ambient-sound-btn:hover,
+html.light #header-login-btn:hover,
+html.light button#header-login-btn:hover,
+html.light .auth-btn-login:hover,
+html.light .btn-header-login:hover {
+    background: rgba(0, 0, 0, 0.09) !important;
+    border-color: rgba(234, 88, 12, 0.4) !important;
+    color: #EA580C !important;
+}
+
+html.light #ambient-sound-btn.is-playing,
+html.light button#ambient-sound-btn.is-playing {
+    background: rgba(234, 88, 12, 0.15) !important;
+    border-color: rgba(234, 88, 12, 0.5) !important;
+    color: #EA580C !important;
+    box-shadow: 0 0 14px rgba(234, 88, 12, 0.25) !important;
+}
+
+/* 🍔 DESKTOP SCREENS (>= 1024px): Strictly Hide Hamburger Button */
+@media (min-width: 1024px) {
+
+    #mobile-menu-toggle-btn,
+    button#mobile-menu-toggle-btn,
+    .btn-mobile-hamburger {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+        width: 0 !important;
+        height: 0 !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        border: none !important;
+        position: absolute !important;
+        left: -9999px !important;
+    }
+}
+
+/* 🍔 MOBILE & TABLET SCREENS (< 1024px): Hamburger Button is Prominently Visible & Functional */
+@media (max-width: 1023px) {
+
+    #mobile-menu-toggle-btn,
+    button#mobile-menu-toggle-btn,
+    .btn-mobile-hamburger {
+        display: inline-flex !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        pointer-events: auto !important;
+        position: static !important;
+        left: auto !important;
+        width: 36px !important;
+        height: 36px !important;
+        min-width: 36px !important;
+        min-height: 36px !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        align-items: center !important;
+        justify-content: center !important;
+        border-radius: 999px !important;
+        background: rgba(255, 255, 255, 0.12) !important;
+        backdrop-filter: blur(16px) !important;
+        -webkit-backdrop-filter: blur(16px) !important;
+        border: 1px solid rgba(255, 255, 255, 0.22) !important;
+        color: #FFFFFF !important;
+        cursor: pointer !important;
+        touch-action: manipulation !important;
+        z-index: 60 !important;
+        flex-shrink: 0 !important;
+        box-sizing: border-box !important;
+        transition: all 0.22s var(--ease-out) !important;
+    }
+
+    #mobile-menu-toggle-btn:hover,
+    .btn-mobile-hamburger:hover {
+        background: rgba(255, 255, 255, 0.22) !important;
+        border-color: rgba(255, 255, 255, 0.35) !important;
+        transform: scale(1.04) !important;
+    }
+
+    #mobile-menu-toggle-btn svg,
+    .btn-mobile-hamburger svg {
+        width: 20px !important;
+        height: 20px !important;
+        stroke: #FFFFFF !important;
+        display: block !important;
+        pointer-events: none !important;
+    }
+
+    #mobile-menu-toggle-btn svg line,
+    .btn-mobile-hamburger svg line {
+        stroke: #FFFFFF !important;
+        stroke-width: 2.2 !important;
+        stroke-linecap: round !important;
+    }
+}
+
+@media (max-width: 767px) {
+
+    #mobile-menu-toggle-btn,
+    button#mobile-menu-toggle-btn,
+    .btn-mobile-hamburger {
+        width: 34px !important;
+        height: 34px !important;
+        min-width: 34px !important;
+        min-height: 34px !important;
+    }
+
+    #mobile-menu-toggle-btn svg,
+    .btn-mobile-hamburger svg {
+        width: 18px !important;
+        height: 18px !important;
+    }
+}
+
+/* 🌟 Hero Viewport Clearance Beneath Sticky Header */
+#top {
+    padding-top: 105px !important;
+}
+
+@media (min-width: 640px) {
+    #top {
+        padding-top: 115px !important;
+    }
+}
+
+@media (min-width: 1024px) {
+    #top {
+        padding-top: 1rem !important;
+    }
+}
+
+.mobile-nav-link {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 13px 20px !important;
+    border-radius: 16px !important;
+    color: rgba(255, 255, 255, 0.85) !important;
+    font-family: var(--font-heading) !important;
+    font-size: 15px !important;
+    font-weight: 600 !important;
+    background: rgba(255, 255, 255, 0.04) !important;
+    border: 1px solid rgba(255, 255, 255, 0.06) !important;
+    transition: all 0.2s var(--ease-out) !important;
+    text-decoration: none !important;
+}
+
+.mobile-nav-link:hover,
+.mobile-nav-link.active {
+    background: rgba(255, 143, 28, 0.15) !important;
+    border-color: rgba(255, 143, 28, 0.4) !important;
+    color: #FF8F1C !important;
+    transform: translateX(4px) !important;
+}
+
+html.light .mobile-nav-drawer {
+    background: rgba(255, 255, 255, 0.96) !important;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1) !important;
+}
+
+html.light .mobile-nav-link {
+    color: #0F172A !important;
+    background: rgba(0, 0, 0, 0.03) !important;
+    border-color: rgba(0, 0, 0, 0.06) !important;
+}
+
+html.light .mobile-nav-link:hover,
+html.light .mobile-nav-link.active {
+    color: #EA580C !important;
+    background: rgba(255, 143, 28, 0.12) !important;
+    border-color: rgba(234, 88, 12, 0.35) !important;
+}
+
+/* 📜 SMOOTH HORIZONTAL SCROLLBAR HIDING FOR TOUCH */
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+
+.no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+/* ⬆️ SCROLL TO TOP FLOATING BUTTON (GENERATED BRAND LOGO) */
+#scroll-to-top-btn {
+    position: fixed !important;
+    bottom: 24px !important;
+    right: 24px !important;
+    width: 48px !important;
+    height: 48px !important;
+    border-radius: 999px !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    background: rgba(10, 10, 11, 0.85) !important;
+    backdrop-filter: blur(18px) !important;
+    -webkit-backdrop-filter: blur(18px) !important;
+    border: 1.5px solid rgba(255, 143, 28, 0.45) !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 20px rgba(255, 143, 28, 0.25) !important;
+    z-index: 50 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+    touch-action: manipulation !important;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+#scroll-to-top-btn img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    border-radius: 999px !important;
+    display: block !important;
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+#scroll-to-top-btn:hover {
+    border-color: #ff8f1c !important;
+    transform: translateY(-3px) scale(1.1) !important;
+    box-shadow: 0 14px 35px rgba(0, 0, 0, 0.6), 0 0 28px rgba(255, 143, 28, 0.5) !important;
+}
+
+#scroll-to-top-btn:hover img {
+    transform: scale(1.08) translateY(-1px) !important;
+}
+
+#scroll-to-top-btn:active {
+    transform: translateY(0) scale(0.95) !important;
+}
+
+html.light #scroll-to-top-btn {
+    background: rgba(255, 255, 255, 0.92) !important;
+    border: 1.5px solid rgba(255, 143, 28, 0.45) !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15), 0 0 16px rgba(255, 143, 28, 0.2) !important;
+}
+
+html.light #scroll-to-top-btn:hover {
+    border-color: #ea580c !important;
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.2), 0 0 24px rgba(255, 143, 28, 0.35) !important;
+}
+
+/* 📱 FLOATING CONTROLS ADAPTATION ON MOBILE & TABLET */
+@media (max-width: 639px) {
+    #scroll-to-top-btn {
+        bottom: 16px !important;
+        right: 16px !important;
+        width: 42px !important;
+        height: 42px !important;
+        z-index: 50 !important;
+    }
+}
+
+/* Responsive Overflow & Scroll-Up Button Fix */
+html, body {
+    max-width: 100vw !important;
+    overflow-x: hidden !important;
+}
+
+#scroll-to-top-btn {
+    right: 42px !important;
+    bottom: 32px !important;
+}
+
+@media (max-width: 639px) {
+    #scroll-to-top-btn {
+        right: 20px !important;
+        bottom: 20px !important;
+        width: 44px !important;
+        height: 44px !important;
+    }
+    .about-ambient-glow {
+        max-width: 260px !important;
+        max-height: 260px !important;
+    }
+}

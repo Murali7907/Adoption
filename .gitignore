@@ -1,0 +1,31 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+.venv/
+env/
+venv/
+ENV/
+
+# Node modules & build outputs
+node_modules/
+dist/
+*.timestamp-*.mjs
+
+# Scratch & Temporary files
+scratch/
+scratch_*.py
+scratch_*.cjs
+apply_settings_*.py
+clean_admin_links.py
+
+# Database
+db.sqlite3
+
+# IDE / OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

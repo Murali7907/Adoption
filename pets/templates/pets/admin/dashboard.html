@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Horizon UI Admin Dashboard - Clean Header</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS v4 Browser Build -->
+    <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+    <style type="text/css">
+        @import "tailwindcss";
+
+        :root {
+            --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        /* 🌿 HORIZON UI LUXURY SYSTEM: #A8D8B9 (Mint), #5B8C76 (Deep Emerald), #F4EDE2 (Warm Cream) */
+
+        * {
+            transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        /* 🚫 GLOBALLY HIDE ALL SCROLLBARS SYSTEM-WIDE (FIREFOX, CHROME, EDGE, SAFARI) */
+        *, html, body, main, div, aside, section {
+            -ms-overflow-style: none !important;
+            scrollbar-width: none !important;
+        }
+
+        *::-webkit-scrollbar,
+        html::-webkit-scrollbar,
+        body::-webkit-scrollbar,
+        main::-webkit-scrollbar,
+        div::-webkit-scrollbar,
+        aside::-webkit-scrollbar {
+            display: none !important;
+            width: 0px !important;
+            height: 0px !important;
+            background: transparent !important;
+        }
+
+        /* ☀️ LIGHT MODE: HORIZON UI ALABASTER CREAM (#F4EDE2) */
+        html:not(.dark) body { background-color: #F4EDE2 !important; color: #111A15 !important; }
+        
+        html:not(.dark) .apple-glass { 
+            background: #FFFFFF !important; 
+            border: 1px solid rgba(91, 140, 118, 0.35) !important; 
+            box-shadow: 0 18px 40px rgba(91, 140, 118, 0.12) !important; 
+        }
+        
+        html:not(.dark) .sidebar-bg { 
+            background: #EFE8DC !important; 
+            border-right: 1px solid rgba(91, 140, 118, 0.30) !important; 
+        }
+
+        html:not(.dark) .text-muted { color: #374151 !important; font-weight: 600 !important; }
+        html:not(.dark) .theme-accent-text { color: #1E3A2B !important; font-weight: 800 !important; }
+        html:not(.dark) .horizon-card-title { color: #4B5563 !important; font-weight: 700 !important; }
+        html:not(.dark) .horizon-metric-val { color: #111A15 !important; font-weight: 800 !important; }
+
+        /* 🌙 DARK MODE: ELEGANT DEEP EMERALD GLASS */
+        .dark body { background-color: #111A15 !important; color: #F4EDE2 !important; }
+        
+        .dark .apple-glass { 
+            background: rgba(27, 41, 33, 0.85) !important; 
+            backdrop-filter: blur(25px); 
+            border: 1px solid rgba(168, 216, 185, 0.22) !important; 
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.45) !important;
+        }
+        
+        .dark .sidebar-bg { 
+            background: rgba(14, 22, 18, 0.90) !important; 
+            border-right: 1px solid rgba(168, 216, 185, 0.15) !important; 
+        }
+
+        .dark .text-muted { color: #9CA3AF !important; font-weight: 500 !important; }
+        .dark .theme-accent-text { color: #A8D8B9 !important; font-weight: 800 !important; }
+        .dark .horizon-card-title { color: #A8D8B9 !important; font-weight: 700 !important; }
+        .dark .horizon-metric-val { color: #FFFFFF !important; font-weight: 800 !important; }
+
+        .nav-item-active {
+            background: linear-gradient(135deg, #5B8C76 0%, #2D4C3E 100%) !important;
+            color: #FFFFFF !important;
+            box-shadow: 0 8px 20px rgba(91, 140, 118, 0.45) !important;
+        }
+
+        .nav-item-hover-transform {
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .nav-item-hover-transform:hover {
+            background: rgba(91, 140, 118, 0.25);
+            transform: translateX(4px);
+        }
+    </style>
+</head>
+<body class="min-h-screen font-sans">
+
+    <div class="flex min-h-screen">
+        
+        <!-- HORIZON SIDEBAR -->
+        <!-- SIDEBAR -->
+        <aside class="w-64 sidebar-bg flex flex-col justify-between p-6 sticky top-0 h-screen z-30 overflow-y-auto">
+            <div>
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#5B8C76] to-[#A8D8B9] flex items-center justify-center text-[#111A15] font-extrabold text-xl shadow-lg shadow-[#5B8C76]/30">
+                        👨‍💼
+                    </div>
+                    <div>
+                        <span class="font-extrabold text-lg tracking-tight block">HORIZON <span class="text-[#5B8C76] dark:text-[#A8D8B9]">UI</span></span>
+                        <span class="text-[10px] theme-accent-text font-extrabold uppercase tracking-widest">Pet Adoption Suite</span>
+                    </div>
+                </div>
+
+                <nav class="space-y-1 text-xs font-bold">
+                    <a href="{% url 'admin_dashboard' %}" class="nav-item-active flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>📊</span> Dashboard Overview</a>
+                    <a href="{% url 'admin_users' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>👥</span> User Management</a>
+                    
+                    <div class="space-y-1 my-2 py-2 border-y border-[#5B8C76]/25">
+                        <a href="{% url 'admin_shelters' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>🏠</span> Shelter Management</a>
+                        <a href="{% url 'admin_pets' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>🐶</span> Pet Management</a>
+                        <a href="{% url 'admin_requests' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>🐾</span> Adoption Requests</a>
+                        <a href="{% url 'admin_payments' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>💳</span> Payments</a>
+                        <a href="{% url 'admin_deliveries' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>🚚</span> Delivery Control</a>
+                        <a href="{% url 'admin_audit_logs' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>🔍</span> Audit Logs</a>
+                        <a href="{% url 'admin_revenue' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>💰</span> Revenue & Profit</a>
+                    </div>
+
+                    <a href="{% url 'admin_reports' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>📈</span> Reports & Analytics</a>
+                    <a href="{% url 'admin_notifications' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl">
+                        <span>🔔</span> Notifications
+                    </a>
+                    <a href="{% url 'admin_announcements' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl">
+                        <span>📢</span> Announcements
+                    </a>
+                    <a href="{% url 'admin_health' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl">
+                        <span>🩺</span> Pet Health
+                    </a>
+                    <a href="{% url 'admin_settings' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl">
+                        <span>⚙️</span> System Settings
+                    </a>
+                    <a href="{% url 'admin_roles' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl">
+                        <span>🔐</span> Roles & Permissions
+                    </a>
+                </nav>
+            </div>
+
+            <div class="pt-4 border-t border-[#5B8C76]/25 space-y-1">
+                <a href="{% url 'home' %}" class="flex items-center gap-3 px-4 py-2 hover:bg-[#5B8C76]/20 rounded-2xl text-xs font-bold">
+                    <span>🌐</span> Main Website
+                </a>
+                <a href="{% url 'login' %}" class="flex items-center gap-3 px-4 py-2 hover:bg-red-500/20 text-red-500 rounded-2xl text-xs font-bold">
+                    <span>🚪</span> Logout
+                </a>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <main class="flex-1 p-8 overflow-y-auto">
+            
+            <!-- 🚀 HORIZON CLEAN TOP HEADER NAVBAR (NO SEARCH BAR & NO BACK BUTTON) -->
+            <header class="flex items-center justify-between mb-8 pb-2">
+                <!-- BREADCRUMB & PAGE TITLE -->
+                <div>
+                    <div class="text-xs text-muted font-bold mb-0.5">
+                        <span>Pages</span> / <span class="theme-accent-text font-extrabold">Dashboard Overview</span>
+                    </div>
+                    <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight">Main Dashboard 📊</h1>
+                </div>
+
+                <!-- CLEAN ACTION PILL CONTAINER -->
+                <div class="apple-glass rounded-full px-4 py-2 flex items-center gap-3 shadow-lg">
+                    <!-- THEME TOGGLER -->
+                    <button type="button" onclick="toggleTheme()" class="w-8 h-8 bg-[#5B8C76]/20 hover:bg-[#5B8C76]/30 border border-[#5B8C76]/40 rounded-full text-sm font-extrabold flex items-center justify-center cursor-pointer shadow-sm" title="Toggle Light/Dark Theme">
+                        <span id="theme-icon">🌙</span>
+                    </button>
+
+                    <!-- NOTIFICATION BELL -->
+                    <a href="{% url 'admin_notifications' %}" class="w-8 h-8 bg-[#5B8C76]/20 hover:bg-[#5B8C76]/30 border border-[#5B8C76]/40 rounded-full text-xs font-extrabold flex items-center justify-center relative shadow-sm" title="Notifications">
+                        🔔 <span class="w-2 h-2 rounded-full bg-red-500 absolute top-1 right-1 animate-ping"></span>
+                    </a>
+
+                    <!-- USER AVATAR PILL -->
+                    <div class="w-8 h-8 rounded-full bg-gradient-to-br from-[#5B8C76] to-[#A8D8B9] flex items-center justify-center font-extrabold text-xs text-[#111A15] shadow-sm" title="Admin User">
+                        A
+                    </div>
+                </div>
+            </header>
+
+            <!-- 📊 HORIZON SIGNATURE STAT CARDS (CIRCULAR ICON BADGES) -->
+
+            <!-- SECTION 1: USERS & SHELTERS -->
+            <section class="mb-8">
+                <h3 class="text-xs theme-accent-text font-extrabold uppercase tracking-wider mb-4 flex items-center gap-2">
+                    <span>👥</span> User & Shelter Operations
+                </h3>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                    
+                    <a href="{% url 'admin_users' %}" class="apple-glass rounded-[24px] p-5 flex items-center gap-4 hover:scale-[1.02] hover:border-[#5B8C76]/60 group shadow-lg">
+                        <div class="w-14 h-14 rounded-full bg-[#5B8C76]/15 dark:bg-[#A8D8B9]/20 flex items-center justify-center text-2xl text-[#5B8C76] dark:text-[#A8D8B9] shrink-0 shadow-inner">
+                            👥
+                        </div>
+                        <div>
+                            <span class="text-xs horizon-card-title uppercase block">Total Users</span>
+                            <div class="text-2xl font-extrabold horizon-metric-val">1,245</div>
+                            <span class="text-[10px] text-emerald-600 dark:text-emerald-400 font-extrabold">+14% this month ↗</span>
+                        </div>
+                    </a>
+
+                    <a href="{% url 'admin_users' %}" class="apple-glass rounded-[24px] p-5 flex items-center gap-4 hover:scale-[1.02] hover:border-[#5B8C76]/60 group shadow-lg">
+                        <div class="w-14 h-14 rounded-full bg-emerald-500/15 flex items-center justify-center text-2xl text-emerald-600 dark:text-emerald-400 shrink-0 shadow-inner">
+                            🟢
+                        </div>
+                        <div>
+                            <span class="text-xs horizon-card-title uppercase block">Active Adopters</span>
+                            <div class="text-2xl font-extrabold text-[#5B8C76] dark:text-[#A8D8B9]">1,180</div>
+                            <span class="text-[10px] text-emerald-600 dark:text-emerald-400 font-extrabold">Verified accounts ↗</span>
+                        </div>
+                    </a>
+
+                    <a href="{% url 'admin_shelters' %}" class="apple-glass rounded-[24px] p-5 flex items-center gap-4 hover:scale-[1.02] hover:border-[#5B8C76]/60 group shadow-lg">
+                        <div class="w-14 h-14 rounded-full bg-purple-500/15 flex items-center justify-center text-2xl text-purple-600 dark:text-purple-400 shrink-0 shadow-inner">
+                            🏠
+                        </div>
+                        <div>
+                            <span class="text-xs horizon-card-title uppercase block">Verified Shelters</span>
+                            <div class="text-2xl font-extrabold horizon-metric-val">38</div>
+                            <span class="text-[10px] text-purple-600 dark:text-purple-400 font-extrabold">Licensed shelters ↗</span>
+                        </div>
+                    </a>
+
+                    <a href="{% url 'admin_shelters' %}" class="apple-glass rounded-[24px] p-5 flex items-center gap-4 hover:scale-[1.02] hover:border-amber-500/60 group shadow-lg">
+                        <div class="w-14 h-14 rounded-full bg-amber-500/15 flex items-center justify-center text-2xl text-amber-600 dark:text-amber-400 shrink-0 shadow-inner">
+                            ⏳
+                        </div>
+                        <div>
+                            <span class="text-xs horizon-card-title uppercase block">Pending Review</span>
+                            <div class="text-2xl font-extrabold text-amber-600 dark:text-amber-400">3</div>
+                            <span class="text-[10px] text-amber-600 dark:text-amber-400 font-extrabold">Awaiting license ↗</span>
+                        </div>
+                    </a>
+                </div>
+            </section>
+
+            <!-- SECTION 2: PETS & ADOPTIONS -->
+            <section class="mb-8">
+                <h3 class="text-xs theme-accent-text font-extrabold uppercase tracking-wider mb-4 flex items-center gap-2">
+                    <span>🐶</span> Animal & Adoption Pipeline
+                </h3>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                    
+                    <a href="{% url 'admin_pets' %}" class="apple-glass rounded-[24px] p-5 flex items-center gap-4 hover:scale-[1.02] hover:border-[#5B8C76]/60 group shadow-lg">
+                        <div class="w-14 h-14 rounded-full bg-[#5B8C76]/15 flex items-center justify-center text-2xl text-[#5B8C76] dark:text-[#A8D8B9] shrink-0 shadow-inner">
+                            🐶
+                        </div>
+                        <div>
+                            <span class="text-xs horizon-card-title uppercase block">Total Pets</span>
+                            <div class="text-2xl font-extrabold horizon-metric-val">220</div>
+                            <span class="text-[10px] text-emerald-600 dark:text-emerald-400 font-extrabold">On platform ↗</span>
+                        </div>
+                    </a>
+
+                    <a href="{% url 'admin_pets' %}" class="apple-glass rounded-[24px] p-5 flex items-center gap-4 hover:scale-[1.02] hover:border-[#5B8C76]/60 group shadow-lg">
+                        <div class="w-14 h-14 rounded-full bg-emerald-500/15 flex items-center justify-center text-2xl text-emerald-600 dark:text-emerald-400 shrink-0 shadow-inner">
+                            🐾
+                        </div>
+                        <div>
+                            <span class="text-xs horizon-card-title uppercase block">Available Pets</span>
+                            <div class="text-2xl font-extrabold text-[#5B8C76] dark:text-[#A8D8B9]">156</div>
+                            <span class="text-[10px] text-emerald-600 dark:text-emerald-400 font-extrabold">Ready to adopt ↗</span>
+                        </div>
+                    </a>
+
+                    <a href="{% url 'admin_pets' %}" class="apple-glass rounded-[24px] p-5 flex items-center gap-4 hover:scale-[1.02] hover:border-sky-500/60 group shadow-lg">
+                        <div class="w-14 h-14 rounded-full bg-sky-500/15 flex items-center justify-center text-2xl text-sky-600 dark:text-sky-400 shrink-0 shadow-inner">
+                            ❤️
+                        </div>
+                        <div>
+                            <span class="text-xs horizon-card-title uppercase block">Adopted Pets</span>
+                            <div class="text-2xl font-extrabold text-sky-600 dark:text-sky-400">64</div>
+                            <span class="text-[10px] text-sky-600 dark:text-sky-400 font-extrabold">Happy homes ↗</span>
+                        </div>
+                    </a>
+
+                    <a href="{% url 'admin_requests' %}" class="apple-glass rounded-[24px] p-5 flex items-center gap-4 hover:scale-[1.02] hover:border-amber-500/60 group shadow-lg">
+                        <div class="w-14 h-14 rounded-full bg-amber-500/15 flex items-center justify-center text-2xl text-amber-600 dark:text-amber-400 shrink-0 shadow-inner">
+                            📋
+                        </div>
+                        <div>
+                            <span class="text-xs horizon-card-title uppercase block">Pending Requests</span>
+                            <div class="text-2xl font-extrabold text-amber-600 dark:text-amber-400">23</div>
+                            <span class="text-[10px] text-amber-600 dark:text-amber-400 font-extrabold">Shelter review ↗</span>
+                        </div>
+                    </a>
+                </div>
+            </section>
+
+            <!-- SECTION 3: LOGISTICS & FINANCIALS -->
+            <section class="mb-8">
+                <h3 class="text-xs theme-accent-text font-extrabold uppercase tracking-wider mb-4 flex items-center gap-2">
+                    <span>💰</span> Logistics & Financial Performance
+                </h3>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                    
+                    <a href="{% url 'admin_deliveries' %}" class="apple-glass rounded-[24px] p-5 flex items-center gap-4 hover:scale-[1.02] hover:border-sky-500/60 group shadow-lg">
+                        <div class="w-14 h-14 rounded-full bg-sky-500/15 flex items-center justify-center text-2xl text-sky-600 dark:text-sky-400 shrink-0 shadow-inner">
+                            🚚
+                        </div>
+                        <div>
+                            <span class="text-xs horizon-card-title uppercase block">Active Transport</span>
+                            <div class="text-2xl font-extrabold text-sky-600 dark:text-sky-400">12</div>
+                            <span class="text-[10px] text-sky-600 dark:text-sky-400 font-extrabold">In transit ↗</span>
+                        </div>
+                    </a>
+
+                    <a href="{% url 'admin_deliveries' %}" class="apple-glass rounded-[24px] p-5 flex items-center gap-4 hover:scale-[1.02] hover:border-[#5B8C76]/60 group shadow-lg">
+                        <div class="w-14 h-14 rounded-full bg-[#5B8C76]/15 flex items-center justify-center text-2xl text-[#5B8C76] dark:text-[#A8D8B9] shrink-0 shadow-inner">
+                            🏁
+                        </div>
+                        <div>
+                            <span class="text-xs horizon-card-title uppercase block">Delivered Home</span>
+                            <div class="text-2xl font-extrabold text-[#5B8C76] dark:text-[#A8D8B9]">52</div>
+                            <span class="text-[10px] text-emerald-600 dark:text-emerald-400 font-extrabold">Safely completed ↗</span>
+                        </div>
+                    </a>
+
+                    <a href="{% url 'admin_revenue' %}" class="apple-glass rounded-[24px] p-5 flex items-center gap-4 hover:scale-[1.02] hover:border-[#5B8C76]/60 group shadow-lg">
+                        <div class="w-14 h-14 rounded-full bg-[#5B8C76]/15 flex items-center justify-center text-2xl text-[#5B8C76] dark:text-[#A8D8B9] shrink-0 shadow-inner">
+                            💰
+                        </div>
+                        <div>
+                            <span class="text-xs horizon-card-title uppercase block">Monthly Revenue</span>
+                            <div class="text-2xl font-extrabold text-[#5B8C76] dark:text-[#A8D8B9]">₹48,500</div>
+                            <span class="text-[10px] text-emerald-600 dark:text-emerald-400 font-extrabold">August 2026 ↗</span>
+                        </div>
+                    </a>
+
+                    <a href="{% url 'admin_revenue' %}" class="apple-glass rounded-[24px] p-5 flex items-center gap-4 hover:scale-[1.02] hover:border-[#5B8C76]/60 group shadow-lg">
+                        <div class="w-14 h-14 rounded-full bg-[#5B8C76]/15 flex items-center justify-center text-2xl text-[#5B8C76] dark:text-[#A8D8B9] shrink-0 shadow-inner">
+                            📈
+                        </div>
+                        <div>
+                            <span class="text-xs horizon-card-title uppercase block">Estimated Profit</span>
+                            <div class="text-2xl font-extrabold text-[#5B8C76] dark:text-[#A8D8B9]">₹21,300</div>
+                            <span class="text-[10px] text-emerald-600 dark:text-emerald-400 font-extrabold">43.9% net margin ↗</span>
+                        </div>
+                    </a>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- DYNAMIC MOON / SUN ICON THEME TOGGLER -->
+    <script>
+        function toggleTheme() {
+            const isDark = document.documentElement.classList.contains('dark');
+            const themeIcon = document.getElementById('theme-icon');
+
+            if (isDark) { 
+                document.documentElement.classList.remove('dark'); 
+                localStorage.setItem('theme', 'light'); 
+                if (themeIcon) themeIcon.textContent = '☀️';
+            } else { 
+                document.documentElement.classList.add('dark'); 
+                localStorage.setItem('theme', 'dark'); 
+                if (themeIcon) themeIcon.textContent = '🌙';
+            }
+        }
+
+        if (localStorage.getItem('theme') === 'light') {
+            document.documentElement.classList.remove('dark');
+            const themeIcon = document.getElementById('theme-icon');
+            if (themeIcon) themeIcon.textContent = '☀️';
+        } else {
+            const themeIcon = document.getElementById('theme-icon');
+            if (themeIcon) themeIcon.textContent = '🌙';
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Management - Clean Horizon Header</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS v4 Browser Build -->
+    <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+    <style type="text/css">
+        @import "tailwindcss";
+
+        :root {
+            --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        * {
+            transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        /* 🚫 GLOBALLY HIDE ALL SCROLLBARS SYSTEM-WIDE (FIREFOX, CHROME, EDGE, SAFARI) */
+        *, html, body, main, div, aside, section {
+            -ms-overflow-style: none !important;
+            scrollbar-width: none !important;
+        }
+
+        *::-webkit-scrollbar,
+        html::-webkit-scrollbar,
+        body::-webkit-scrollbar,
+        main::-webkit-scrollbar,
+        div::-webkit-scrollbar,
+        aside::-webkit-scrollbar {
+            display: none !important;
+            width: 0px !important;
+            height: 0px !important;
+            background: transparent !important;
+        }
+
+        /* ☀️ LIGHT MODE: HORIZON UI ALABASTER CREAM (#F4EDE2) */
+        html:not(.dark) body { background-color: #F4EDE2 !important; color: #111A15 !important; }
+        
+        html:not(.dark) .apple-glass { 
+            background: #FFFFFF !important; 
+            border: 1px solid rgba(91, 140, 118, 0.35) !important; 
+            box-shadow: 0 18px 40px rgba(91, 140, 118, 0.12) !important; 
+        }
+        
+        html:not(.dark) .sidebar-bg { 
+            background: #EFE8DC !important; 
+            border-right: 1px solid rgba(91, 140, 118, 0.30) !important; 
+        }
+        
+        html:not(.dark) .modal-bg { 
+            background: #FFFFFF !important; 
+            border: 1px solid rgba(91, 140, 118, 0.40) !important; 
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25) !important; 
+        }
+
+        html:not(.dark) .user-name-text { color: #111A15 !important; font-weight: 800 !important; }
+        html:not(.dark) .text-muted { color: #374151 !important; font-weight: 600 !important; }
+        html:not(.dark) .theme-accent-text { color: #1E3A2B !important; font-weight: 800 !important; }
+        html:not(.dark) .table-header-text { color: #111A15 !important; font-weight: 800 !important; }
+        
+        html:not(.dark) .input-box {
+            background: #FFFFFF !important;
+            border: 1px solid #789D8C !important;
+            color: #111A15 !important;
+            font-weight: 600 !important;
+        }
+        html:not(.dark) .input-box::placeholder { color: #4B5563 !important; }
+
+        html:not(.dark) .card-inner-box {
+            background: #F4EDE2 !important;
+            border: 1px solid #A3C4B5 !important;
+            color: #111A15 !important;
+        }
+
+        /* SOLID HOVER STYLE MATCHING "APPROVE SAFE" BUTTON */
+        .btn-preview-doc {
+            background-color: #5B8C76 !important;
+            color: #FFFFFF !important;
+            font-weight: 800 !important;
+            border-radius: 0.75rem !important;
+            box-shadow: 0 4px 12px rgba(91, 140, 118, 0.35) !important;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+        }
+        .btn-preview-doc:hover {
+            background-color: #2D4C3E !important;
+            transform: translateY(-1px) !important;
+            box-shadow: 0 6px 16px rgba(45, 76, 62, 0.45) !important;
+        }
+
+        /* LIGHT MODE BADGES & BUTTONS */
+        html:not(.dark) .badge-adopter {
+            background-color: #D1FAE5 !important;
+            color: #064E3B !important;
+            border: 1px solid #6EE7B7 !important;
+            font-weight: 800 !important;
+        }
+
+        html:not(.dark) .badge-shelter {
+            background-color: #F3E8FF !important;
+            color: #581C87 !important;
+            border: 1px solid #C084FC !important;
+            font-weight: 800 !important;
+        }
+
+        html:not(.dark) .badge-verified {
+            background-color: #D1FAE5 !important;
+            color: #065F46 !important;
+            border: 1px solid #6EE7B7 !important;
+            font-weight: 800 !important;
+        }
+
+        html:not(.dark) .badge-active {
+            background-color: #DCFCE7 !important;
+            color: #14532D !important;
+            font-weight: 800 !important;
+        }
+
+        html:not(.dark) .btn-block {
+            background-color: #FEF3C7 !important;
+            color: #78350F !important;
+            border: 1px solid #FCD34D !important;
+            font-weight: 800 !important;
+        }
+
+        html:not(.dark) .btn-delete {
+            background-color: #FEE2E2 !important;
+            color: #7F1D1D !important;
+            border: 1px solid #FCA5A5 !important;
+            font-weight: 800 !important;
+        }
+
+        html:not(.dark) .tab-inactive {
+            background-color: #E5E7EB !important;
+            color: #111827 !important;
+            border: 1px solid #9CA3AF !important;
+            font-weight: 700 !important;
+        }
+
+        html:not(.dark) .tab-blocked-inactive {
+            background-color: #FEE2E2 !important;
+            color: #7F1D1D !important;
+            border: 1px solid #FCA5A5 !important;
+            font-weight: 700 !important;
+        }
+
+        /* 🌙 DARK MODE: ELEGANT DEEP EMERALD */
+        .dark body { background-color: #111A15 !important; color: #F4EDE2 !important; }
+        
+        .dark .apple-glass { 
+            background: rgba(27, 41, 33, 0.85) !important; 
+            backdrop-filter: blur(25px); 
+            border: 1px solid rgba(168, 216, 185, 0.22) !important; 
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.45) !important;
+        }
+        
+        .dark .sidebar-bg { 
+            background: rgba(14, 22, 18, 0.90) !important; 
+            border-right: 1px solid rgba(168, 216, 185, 0.15) !important; 
+        }
+        
+        .dark .modal-bg { 
+            background: rgba(22, 33, 27, 0.96) !important; 
+            border: 1px solid rgba(168, 216, 185, 0.3) !important; 
+        }
+
+        .dark .user-name-text { color: #FFFFFF !important; font-weight: 800 !important; }
+        .dark .text-muted { color: #9CA3AF !important; font-weight: 500 !important; }
+        .dark .theme-accent-text { color: #A8D8B9 !important; font-weight: 800 !important; }
+        .dark .table-header-text { color: #A8D8B9 !important; font-weight: 800 !important; }
+        
+        .dark .input-box {
+            background: rgba(17, 26, 21, 0.8) !important;
+            border: 1px solid rgba(168, 216, 185, 0.25) !important;
+            color: #F4EDE2 !important;
+        }
+
+        .dark .card-inner-box {
+            background: rgba(17, 26, 21, 0.6) !important;
+            border: 1px solid rgba(168, 216, 185, 0.2) !important;
+            color: #F4EDE2 !important;
+        }
+
+        .dark .badge-adopter {
+            background-color: rgba(91, 140, 118, 0.2) !important;
+            color: #A8D8B9 !important;
+            border: 1px solid rgba(168, 216, 185, 0.3) !important;
+        }
+
+        .dark .badge-shelter {
+            background-color: rgba(168, 85, 247, 0.2) !important;
+            color: #D8B4FE !important;
+            border: 1px solid rgba(192, 132, 252, 0.3) !important;
+        }
+
+        .dark .badge-verified {
+            background-color: rgba(91, 140, 118, 0.3) !important;
+            color: #A8D8B9 !important;
+        }
+
+        .dark .badge-active {
+            background-color: rgba(16, 185, 129, 0.2) !important;
+            color: #34D399 !important;
+        }
+
+        .dark .btn-block {
+            background-color: rgba(245, 158, 11, 0.2) !important;
+            color: #FBBF24 !important;
+        }
+
+        .dark .btn-delete {
+            background-color: rgba(239, 68, 68, 0.2) !important;
+            color: #F87171 !important;
+        }
+
+        .dark .tab-inactive {
+            background-color: rgba(91, 140, 118, 0.2) !important;
+            color: #F4EDE2 !important;
+            border: 1px solid rgba(168, 216, 185, 0.2) !important;
+        }
+
+        .dark .tab-blocked-inactive {
+            background-color: rgba(239, 68, 68, 0.2) !important;
+            color: #F87171 !important;
+        }
+
+        .nav-item-active {
+            background: linear-gradient(135deg, #5B8C76 0%, #2D4C3E 100%) !important;
+            color: #FFFFFF !important;
+            box-shadow: 0 8px 20px rgba(91, 140, 118, 0.45) !important;
+        }
+
+        .nav-item-hover-transform {
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .nav-item-hover-transform:hover {
+            background: rgba(91, 140, 118, 0.25);
+            transform: translateX(4px);
+        }
+    </style>
+</head>
+<body class="min-h-screen font-sans">
+
+    <div class="flex min-h-screen">
+        
+        <!-- SIDEBAR -->
+        <aside class="w-64 sidebar-bg flex flex-col justify-between p-6 sticky top-0 h-screen z-30 overflow-y-auto">
+            <div>
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#5B8C76] to-[#A8D8B9] flex items-center justify-center text-[#111A15] font-extrabold text-xl shadow-lg shadow-[#5B8C76]/30">
+                        👨‍💼
+                    </div>
+                    <div>
+                        <span class="font-extrabold text-lg tracking-tight block">HORIZON <span class="text-[#5B8C76] dark:text-[#A8D8B9]">UI</span></span>
+                        <span class="text-[10px] theme-accent-text font-extrabold uppercase tracking-widest">Pet Adoption Suite</span>
+                    </div>
+                </div>
+
+                <nav class="space-y-1 text-xs font-bold">
+                    <a href="{% url 'admin_dashboard' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>📊</span> Dashboard Overview</a>
+                    <a href="{% url 'admin_users' %}" class="nav-item-active flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>👥</span> User Management</a>
+                    
+                    <div class="space-y-1 my-2 py-2 border-y border-[#5B8C76]/25">
+                        <a href="{% url 'admin_shelters' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>🏠</span> Shelter Management</a>
+                        <a href="{% url 'admin_pets' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>🐶</span> Pet Management</a>
+                        <a href="{% url 'admin_requests' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>🐾</span> Adoption Requests</a>
+                        <a href="{% url 'admin_payments' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>💳</span> Payments</a>
+                        <a href="{% url 'admin_deliveries' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>🚚</span> Delivery Control</a>
+                        <a href="{% url 'admin_audit_logs' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>🔍</span> Audit Logs</a>
+                        <a href="{% url 'admin_revenue' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>💰</span> Revenue & Profit</a>
+                    </div>
+
+                    <a href="{% url 'admin_reports' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>📈</span> Reports & Analytics</a>
+                    <a href="{% url 'admin_notifications' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>🔔</span> Notifications</a>
+                    <a href="{% url 'admin_announcements' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>📢</span> Announcements</a>
+                    <a href="{% url 'admin_health' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>🩺</span> Pet Health</a>
+                    <a href="{% url 'admin_settings' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>⚙️</span> System Settings</a>
+                    <a href="{% url 'admin_roles' %}" class="nav-item-hover-transform flex items-center gap-3 px-4 py-2.5 rounded-2xl"><span>🔐</span> Roles & Permissions</a>
+                </nav>
+            </div>
+            
+            <div class="pt-4 border-t border-[#5B8C76]/25 space-y-1">
+                <a href="{% url 'home' %}" class="flex items-center gap-3 px-4 py-2 hover:bg-[#5B8C76]/20 rounded-2xl text-xs font-bold"><span>🌐</span> Main Website</a>
+                <a href="{% url 'login' %}" class="flex items-center gap-3 px-4 py-2 hover:bg-red-500/20 text-red-500 rounded-2xl text-xs font-bold"><span>🚪</span> Logout</a>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <main class="flex-1 p-8 overflow-y-auto">
+            
+            <!-- 🚀 HORIZON FLOATING TOP HEADER NAVBAR (NO BACK BUTTON) -->
+            <header class="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 gap-4">
+                <div>
+                    <div class="text-xs text-muted font-bold mb-0.5">
+                        <span>Pages</span> / <span class="theme-accent-text font-extrabold">User Management</span>
+                    </div>
+                    <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight">Interactive User Directory 👥</h1>
+                </div>
+
+                <div class="apple-glass rounded-full px-4 py-2 flex items-center gap-3 shadow-lg">
+                    <button type="button" onclick="openAddUserModal()" class="px-3.5 py-1.5 bg-[#5B8C76] hover:bg-[#2D4C3E] text-white text-xs font-extrabold rounded-full shadow-sm flex items-center gap-1 cursor-pointer">
+                        <span>➕</span> Add User
+                    </button>
+
+                    <button type="button" onclick="toggleTheme()" class="w-8 h-8 bg-[#5B8C76]/20 hover:bg-[#5B8C76]/30 border border-[#5B8C76]/40 rounded-full text-sm font-extrabold flex items-center justify-center cursor-pointer shadow-sm" title="Toggle Theme">
+                        <span id="theme-icon">🌙</span>
+                    </button>
+
+                    <a href="{% url 'admin_notifications' %}" class="w-8 h-8 bg-[#5B8C76]/20 hover:bg-[#5B8C76]/30 border border-[#5B8C76]/40 rounded-full text-xs font-extrabold flex items-center justify-center relative shadow-sm" title="Notifications">
+                        🔔 <span class="w-2 h-2 rounded-full bg-red-500 absolute top-1 right-1 animate-ping"></span>
+                    </a>
+
+                    <div class="w-8 h-8 rounded-full bg-gradient-to-br from-[#5B8C76] to-[#A8D8B9] flex items-center justify-center font-extrabold text-xs text-[#111A15] shadow-sm">
+                        A
+                    </div>
+                </div>
+            </header>
+
+            <!-- 🔍 INTERACTIVE SEARCH & TAB FILTERS -->
+            <div class="apple-glass rounded-[28px] p-4 mb-6 flex flex-col md:flex-row justify-between items-center gap-4">
+                <div class="relative w-full md:w-80">
+                    <input type="text" id="user-search-input" onkeyup="filterUsers()" placeholder="Search by name, email, phone, or location..." class="w-full py-2.5 px-4 pr-9 input-box rounded-2xl text-xs font-semibold focus:outline-none focus:border-[#5B8C76]">
+                    <span class="absolute right-3 top-2.5 text-xs text-muted">🔍</span>
+                </div>
+
+                <div class="flex flex-wrap gap-2 w-full md:w-auto" id="filter-tabs">
+                    <button onclick="setActiveTab('all')" id="tab-all" class="px-4 py-2 bg-[#5B8C76] text-white text-xs font-extrabold rounded-2xl cursor-pointer shadow-md">All Users (4)</button>
+                    <button onclick="setActiveTab('customer')" id="tab-customer" class="px-4 py-2 tab-inactive text-xs font-extrabold rounded-2xl cursor-pointer">Customers (2)</button>
+                    <button onclick="setActiveTab('shelter')" id="tab-shelter" class="px-4 py-2 tab-inactive text-xs font-extrabold rounded-2xl cursor-pointer">Shelter Managers (1)</button>
+                    <button onclick="setActiveTab('blocked')" id="tab-blocked" class="px-4 py-2 tab-blocked-inactive text-xs font-extrabold rounded-2xl cursor-pointer">Blocked Users (1)</button>
+                </div>
+            </div>
+
+            <!-- 📋 HORIZON DATA TABLE -->
+            <div class="apple-glass rounded-[28px] p-6 shadow-xl">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs" id="users-table">
+                        <thead>
+                            <tr class="border-b border-[#5B8C76]/25 table-header-text uppercase tracking-wider">
+                                <th class="pb-3">UserProfile</th>
+                                <th class="pb-3">Role</th>
+                                <th class="pb-3">Check Status</th>
+                                <th class="pb-3 text-right">Interactive Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-[#5B8C76]/20 font-medium">
+                            
+                            <!-- USER 1: CUSTOMER -->
+                            <tr class="user-row" data-id="1" data-role="CUSTOMER" data-status="ACTIVE" data-name="Rahul Sharma" data-email="rahul@example.com" data-phone="+91 98765 43210" data-address="Kochi, Kerala, India" data-password="Password@2026" data-joined="12 Aug 2026" data-adoptions="2 Adoptions (Bruno - Golden Retriever, Milo - Cat)" data-payments="Total Spent: ₹4,250 • Last TXN #TXN-904128" data-history="15 Aug 2026: Adopted Bruno (Golden Retriever) • Paid ₹3,500&#10;16 Aug 2026: Adopted Milo (Cat) • Paid ₹750" data-doc-name="GOVT-ID-PROOF-8821.pdf" data-doc-status="VERIFIED" data-image="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=250">
+                                <td class="py-4">
+                                    <button onclick="openProfileModal(1)" class="text-left group cursor-pointer flex items-center gap-3">
+                                        <img class="w-10 h-10 rounded-2xl object-cover border border-[#5B8C76]/40 shadow-sm" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=250" alt="Rahul Sharma">
+                                        <div>
+                                            <div class="font-extrabold text-sm user-name-text group-hover:text-[#5B8C76]">Rahul Sharma</div>
+                                            <div class="text-[11px] text-muted font-semibold">rahul@example.com</div>
+                                        </div>
+                                    </button>
+                                </td>
+                                <td class="py-4">
+                                    <span class="px-3 py-1 badge-adopter text-[11px] font-extrabold rounded-full">Adopter</span>
+                                </td>
+                                <td class="py-4">
+                                    <div class="flex items-center gap-2" id="spam-badge-1">
+                                        <button onclick="openProfileModal(1)" class="px-2.5 py-0.5 badge-verified font-extrabold text-[10px] rounded-lg cursor-pointer">Verified Safe ✅</button>
+                                        <span class="px-2.5 py-0.5 badge-active font-extrabold text-[10px] rounded-lg" id="status-badge-1">Active</span>
+                                    </div>
+                                </td>
+                                <td class="py-4 text-right space-x-1.5">
+                                    <button id="block-btn-1" onclick="openBlockModal(1, 'Rahul Sharma', false)" class="px-3.5 py-1.5 btn-block font-extrabold text-xs rounded-2xl cursor-pointer">Block</button>
+                                    <button onclick="openDeleteModal(1, 'Rahul Sharma')" class="px-3.5 py-1.5 btn-delete font-extrabold text-xs rounded-2xl cursor-pointer">Delete</button>
+                                </td>
+                            </tr>
+
+                            <!-- USER 2: SHELTER -->
+                            <tr class="user-row" data-id="2" data-role="SHELTER" data-status="ACTIVE" data-name="ABC Shelter Admin" data-email="contact@abcshelter.org" data-phone="+1 555-0192" data-address="45 Rescue Lane, San Francisco, CA" data-password="ShelterPass#99" data-joined="01 Aug 2026" data-adoptions="42 Rescue Pets Listed • 15 Adoptions Completed" data-payments="Total Volume Handled: ₹52,400" data-history="42 Rescue Pets Listed • 15 Successful Adoptions Completed • License #SH-2025-992 Verified" data-doc-name="SHELTER-LICENSE-CERT-992.pdf" data-doc-status="VERIFIED" data-image="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=250">
+                                <td class="py-4">
+                                    <button onclick="openProfileModal(2)" class="text-left group cursor-pointer flex items-center gap-3">
+                                        <img class="w-10 h-10 rounded-2xl object-cover border border-purple-400/40 shadow-sm" src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=250" alt="ABC Shelter Admin">
+                                        <div>
+                                            <div class="font-extrabold text-sm user-name-text group-hover:text-[#5B8C76]">ABC Shelter Admin</div>
+                                            <div class="text-[11px] text-muted font-semibold">contact@abcshelter.org</div>
+                                        </div>
+                                    </button>
+                                </td>
+                                <td class="py-4">
+                                    <span class="px-3 py-1 badge-shelter text-[11px] font-extrabold rounded-full">Shelter Admin</span>
+                                </td>
+                                <td class="py-4">
+                                    <div class="flex items-center gap-2" id="spam-badge-2">
+                                        <button onclick="openProfileModal(2)" class="px-2.5 py-0.5 badge-verified font-extrabold text-[10px] rounded-lg cursor-pointer">Verified Safe ✅</button>
+                                        <span class="px-2.5 py-0.5 badge-active font-extrabold text-[10px] rounded-lg" id="status-badge-2">Verified</span>
+                                    </div>
+                                </td>
+                                <td class="py-4 text-right space-x-1.5">
+                                    <button id="block-btn-2" onclick="openBlockModal(2, 'ABC Shelter Admin', false)" class="px-3.5 py-1.5 btn-block font-extrabold text-xs rounded-2xl cursor-pointer">Block</button>
+                                    <button onclick="openDeleteModal(2, 'ABC Shelter Admin')" class="px-3.5 py-1.5 btn-delete font-extrabold text-xs rounded-2xl cursor-pointer">Delete</button>
+                                </td>
+                            </tr>
+
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- 📜 COMPREHENSIVE PROFILE, DOCUMENT & SEPARATE HISTORY DRAWER MODAL -->
+    <div id="profile-modal" class="fixed inset-0 bg-black/75 backdrop-blur-lg z-50 flex items-center justify-center p-4 hidden">
+        <div class="modal-bg rounded-[32px] p-6 sm:p-8 max-w-2xl w-full shadow-2xl relative space-y-6 max-h-[90vh] overflow-y-auto">
+            <button onclick="closeProfileModal()" class="absolute top-6 right-6 text-muted hover:text-[#5B8C76] font-extrabold text-lg cursor-pointer">✕</button>
+            
+            <!-- HEADER WITH HIGH-DEF PROFILE PHOTO -->
+            <div class="flex items-center gap-4 border-b border-[#5B8C76]/25 pb-4">
+                <div class="relative group cursor-pointer" onclick="expandPhotoViewer()">
+                    <img id="modal-profile-img" class="w-18 h-18 rounded-2xl object-cover border-2 border-[#5B8C76]/40 shadow-md group-hover:scale-105" src="" alt="Profile Photo">
+                    <span class="absolute bottom-0 right-0 bg-[#5B8C76] text-white text-[10px] px-1.5 py-0.5 rounded-md font-extrabold shadow-sm">🔍 View</span>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-extrabold user-name-text" id="modal-name">Rahul Sharma</h2>
+                    <div class="flex items-center gap-2 mt-1">
+                        <span class="px-3 py-0.5 badge-adopter text-xs font-extrabold rounded-full" id="modal-role-badge">Adopter</span>
+                        <span class="text-xs text-muted font-semibold" id="modal-joined">Joined: 12 Aug 2026</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 📄 DEDICATED DOCUMENT VERIFICATION SECTION INSIDE PROFILE -->
+            <div class="p-4 card-inner-box rounded-2xl space-y-3">
+                <div class="flex justify-between items-center font-bold">
+                    <span class="text-xs theme-accent-text font-extrabold">📄 Verification Document Audit</span>
+                    <span class="text-[11px] px-2.5 py-0.5 badge-verified rounded-lg font-extrabold" id="drawer-doc-status-badge">Verified Safe ✅</span>
+                </div>
+                <div class="text-xs font-semibold flex justify-between items-center">
+                    <span>Submitted File: <strong class="theme-accent-text font-extrabold" id="drawer-doc-name">GOVT-ID-PROOF-8821.pdf 📄</strong></span>
+                    
+                    <button type="button" onclick="triggerDrawerDocumentPreview()" class="px-4 py-1.5 btn-preview-doc rounded-xl text-xs font-extrabold cursor-pointer flex items-center gap-1">
+                        Preview File 📄
+                    </button>
+                </div>
+                <div class="flex gap-2 pt-1">
+                    <button type="button" onclick="verifyUserDocumentFromDrawer(false)" class="flex-1 py-2 bg-[#5B8C76] hover:bg-[#2D4C3E] text-white text-xs font-extrabold rounded-xl shadow-sm cursor-pointer transition-all">Approve Safe ✅</button>
+                    <button type="button" onclick="verifyUserDocumentFromDrawer(true)" class="flex-1 py-2 btn-delete text-xs font-extrabold rounded-xl cursor-pointer">Flag Spam ⛔</button>
+                </div>
+            </div>
+
+            <!-- EDIT PROFILE FORM -->
+            <form onsubmit="initiatePasswordChangeOrSave(event)" class="space-y-4 text-xs font-bold">
+                <input type="hidden" id="edit-user-id">
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block mb-1 user-name-text">Full Name *</label>
+                        <input type="text" id="edit-name" required class="w-full py-2.5 px-4 input-box rounded-2xl text-xs font-semibold">
+                    </div>
+                    <div>
+                        <label class="block mb-1 user-name-text">Email Address *</label>
+                        <input type="email" id="edit-email" required class="w-full py-2.5 px-4 input-box rounded-2xl text-xs font-semibold">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block mb-1 user-name-text">Phone Number</label>
+                        <input type="text" id="edit-phone" class="w-full py-2.5 px-4 input-box rounded-2xl text-xs font-semibold">
+                    </div>
+                    <div>
+                        <label class="block mb-1 user-name-text">Account Password (Admin View) 🔑</label>
+                        <div class="relative">
+                            <input type="password" id="edit-password" value="Password@2026" class="w-full py-2.5 px-4 pr-10 input-box rounded-2xl text-xs font-semibold">
+                            <button type="button" onclick="togglePasswordVisibility()" class="absolute right-3 top-2.5 text-muted hover:text-[#5B8C76] cursor-pointer" id="pwd-eye-btn">
+                                👁️
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 📜 DEDICATED SEPARATE HISTORY SECTION INSIDE PROFILE -->
+                <div class="p-4 card-inner-box rounded-2xl space-y-3">
+                    <div class="flex justify-between items-center border-b border-[#5B8C76]/25 pb-2">
+                        <h4 class="font-extrabold text-xs theme-accent-text flex items-center gap-1.5">
+                            <span>📜</span> Separate Adoption & Financial History
+                        </h4>
+                        <span class="text-[10px] badge-verified px-2 py-0.5 rounded-md font-extrabold">Audit Verified ✅</span>
+                    </div>
+
+                    <div class="text-xs text-muted font-semibold space-y-2">
+                        <div class="p-2.5 card-inner-box rounded-xl flex justify-between items-center">
+                            <span>🐶 Adoptions Completed:</span>
+                            <strong class="font-extrabold user-name-text" id="modal-adoptions-text">2 Adoptions (Bruno, Milo)</strong>
+                        </div>
+                        <div class="p-2.5 card-inner-box rounded-xl flex justify-between items-center">
+                            <span>💰 Total Paid:</span>
+                            <strong class="theme-accent-text font-extrabold" id="modal-payments-text">Total Spent: ₹4,250</strong>
+                        </div>
+                        <div class="p-3 card-inner-box rounded-xl space-y-1">
+                            <div class="text-[11px] font-extrabold theme-accent-text mb-1">Timestamped Log Trail:</div>
+                            <div class="whitespace-pre-line leading-relaxed text-[11px] font-semibold" id="modal-history-content">
+                                15 Aug 2026: Adopted Bruno (Golden Retriever) • Paid ₹3,500
+                                16 Aug 2026: Adopted Milo (Domestic Cat) • Paid ₹750
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex justify-end gap-3 pt-2">
+                    <button type="button" onclick="closeProfileModal()" class="px-4 py-2 tab-inactive text-xs font-extrabold rounded-2xl cursor-pointer">Cancel</button>
+                    <button type="submit" class="px-5 py-2 bg-[#5B8C76] hover:bg-[#2D4C3E] text-white text-xs font-extrabold rounded-2xl shadow-md cursor-pointer">Save Profile Changes 💾</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 📄 INTERACTIVE DOCUMENT PREVIEW MODAL -->
+    <div id="doc-viewer-modal" class="fixed inset-0 bg-black/85 backdrop-blur-xl z-50 flex items-center justify-center p-4 hidden">
+        <div class="modal-bg rounded-[32px] p-6 sm:p-8 max-w-xl w-full shadow-2xl relative space-y-5">
+            <button onclick="closeDocumentViewerModal()" class="absolute top-6 right-6 text-muted hover:text-[#5B8C76] font-extrabold text-lg cursor-pointer">✕</button>
+            
+            <div class="flex items-center gap-3 border-b border-[#5B8C76]/25 pb-4">
+                <div class="w-12 h-12 rounded-2xl bg-[#5B8C76]/20 text-[#5B8C76] dark:text-[#A8D8B9] flex items-center justify-center text-xl font-bold">📄</div>
+                <div>
+                    <h3 class="text-xl font-extrabold user-name-text" id="doc-viewer-title">Verification Document Preview</h3>
+                    <p class="text-xs text-muted font-semibold" id="doc-viewer-user">Rahul Sharma</p>
+                </div>
+            </div>
+
+            <div class="p-6 card-inner-box rounded-2xl text-center space-y-4 shadow-inner">
+                <div class="w-16 h-16 rounded-2xl bg-[#5B8C76]/20 text-[#5B8C76] dark:text-[#A8D8B9] flex items-center justify-center text-3xl mx-auto font-bold shadow-md">📜</div>
+                <div>
+                    <h4 class="font-extrabold text-sm theme-accent-text" id="doc-viewer-filename">GOVT-ID-PROOF-8821.pdf</h4>
+                    <p class="text-[11px] text-muted font-semibold mt-0.5">Government Issued Photo Identification Certificate • PDF Format (1.4 MB)</p>
+                </div>
+                <div class="p-3 badge-verified rounded-xl text-xs font-extrabold">
+                    ✓ Verified Digital Seal & Signature Authenticated
+                </div>
+            </div>
+
+            <div class="flex gap-3 pt-2">
+                <button type="button" onclick="alert('Downloading Document Certificate...')" class="flex-1 py-2.5 tab-inactive text-xs font-extrabold rounded-2xl cursor-pointer">Download File 📥</button>
+                <button type="button" onclick="closeDocumentViewerModal()" class="flex-1 py-2.5 bg-[#5B8C76] hover:bg-[#2D4C3E] text-white font-extrabold text-xs rounded-2xl shadow-md cursor-pointer">Close Document</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 🖼️ EXPANDED PHOTO VIEWER MODAL -->
+    <div id="photo-viewer-modal" class="fixed inset-0 bg-black/85 backdrop-blur-xl z-50 flex items-center justify-center p-4 hidden" onclick="closePhotoViewerModal()">
+        <div class="relative max-w-lg w-full text-center space-y-3">
+            <button onclick="closePhotoViewerModal()" class="absolute -top-10 right-0 text-white font-extrabold text-2xl cursor-pointer">✕</button>
+            <img id="expanded-photo-img" class="w-full max-h-[75vh] object-cover rounded-[32px] shadow-2xl border-2 border-[#5B8C76]/40" src="" alt="Expanded Profile Photo">
+            <p class="text-xs text-muted font-bold" id="expanded-photo-name">HD Profile Photo</p>
+        </div>
+    </div>
+
+    <!-- IN-PAGE BLOCK MODAL -->
+    <div id="block-modal" class="fixed inset-0 bg-black/75 backdrop-blur-lg z-50 flex items-center justify-center p-4 hidden">
+        <div class="modal-bg rounded-[32px] p-6 max-w-md w-full shadow-2xl text-center space-y-4">
+            <div class="w-14 h-14 rounded-full btn-block flex items-center justify-center text-2xl mx-auto font-bold">⚠️</div>
+            <div>
+                <h3 class="text-xl font-extrabold user-name-text" id="block-modal-title">Block User Account?</h3>
+                <p class="text-xs text-muted mt-1 font-semibold" id="block-modal-desc">Are you sure you want to suspend access for this user?</p>
+            </div>
+            <div class="flex gap-3 pt-2">
+                <button type="button" onclick="closeBlockModal()" class="flex-1 py-2.5 tab-inactive text-xs font-extrabold rounded-2xl cursor-pointer">Cancel</button>
+                <button type="button" id="confirm-block-btn" class="flex-1 py-2.5 bg-amber-500 hover:bg-amber-600 text-white font-extrabold text-xs rounded-2xl shadow-md cursor-pointer">Confirm Block</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- IN-PAGE DELETE MODAL -->
+    <div id="delete-modal" class="fixed inset-0 bg-black/75 backdrop-blur-lg z-50 flex items-center justify-center p-4 hidden">
+        <div class="modal-bg rounded-[32px] p-6 max-w-md w-full shadow-2xl text-center space-y-4">
+            <div class="w-14 h-14 rounded-full btn-delete flex items-center justify-center text-2xl mx-auto font-bold">🗑️</div>
+            <div>
+                <h3 class="text-xl font-extrabold user-name-text">Permanently Delete Account?</h3>
+                <p class="text-xs text-muted mt-1 font-semibold" id="delete-modal-desc">Are you sure you want to delete this user profile?</p>
+            </div>
+            <div class="flex gap-3 pt-2">
+                <button type="button" onclick="closeDeleteModal()" class="flex-1 py-2.5 tab-inactive text-xs font-extrabold rounded-2xl cursor-pointer">Cancel</button>
+                <button type="button" id="confirm-delete-btn" class="flex-1 py-2.5 bg-red-500 hover:bg-red-600 text-white font-extrabold text-xs rounded-2xl shadow-md cursor-pointer">Confirm Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ADD USER MODAL -->
+    <div id="add-user-modal" class="fixed inset-0 bg-black/75 backdrop-blur-lg z-50 flex items-center justify-center p-4 hidden">
+        <div class="modal-bg rounded-[32px] p-6 sm:p-8 max-w-xl w-full shadow-2xl relative space-y-6">
+            <button onclick="closeAddUserModal()" class="absolute top-6 right-6 text-muted hover:text-[#5B8C76] font-extrabold text-lg cursor-pointer">✕</button>
+            <div>
+                <h2 class="text-xl font-extrabold user-name-text">➕ Add New User Account</h2>
+                <p class="text-xs text-muted mt-1 font-semibold">Create a new user profile.</p>
+            </div>
+            <form onsubmit="createNewUser(event)" class="space-y-4 text-xs font-bold">
+                <div>
+                    <label class="block mb-1 user-name-text">Full Name *</label>
+                    <input type="text" id="add-name" required placeholder="e.g. Ananya Sen" class="w-full py-2.5 px-4 input-box rounded-2xl text-xs font-semibold">
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block mb-1 user-name-text">Email Address *</label>
+                        <input type="email" id="add-email" required placeholder="ananya@example.com" class="w-full py-2.5 px-4 input-box rounded-2xl text-xs font-semibold">
+                    </div>
+                    <div>
+                        <label class="block mb-1 user-name-text">Phone Number</label>
+                        <input type="text" id="add-phone" placeholder="+91 98765 00000" class="w-full py-2.5 px-4 input-box rounded-2xl text-xs font-semibold">
+                    </div>
+                </div>
+                <div class="flex justify-end gap-3 pt-2">
+                    <button type="button" onclick="closeAddUserModal()" class="px-4 py-2 tab-inactive text-xs font-extrabold rounded-2xl cursor-pointer">Cancel</button>
+                    <button type="submit" class="px-5 py-2 bg-[#5B8C76] hover:bg-[#2D4C3E] text-white text-xs font-extrabold rounded-2xl shadow-md cursor-pointer">Create User 🚀</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ⚡ CONTROLLERS -->
+    <script>
+        let currentTab = 'all';
+
+        function setActiveTab(tab) {
+            currentTab = tab;
+            ['all', 'customer', 'shelter', 'blocked'].forEach(t => {
+                const btn = document.getElementById(`tab-${t}`);
+                if (btn) {
+                    if (t === tab) btn.className = "px-4 py-2 bg-[#5B8C76] text-white text-xs font-extrabold rounded-2xl cursor-pointer transition-all shadow-md";
+                    else if (t === 'blocked') btn.className = "px-4 py-2 tab-blocked-inactive text-xs font-extrabold rounded-2xl cursor-pointer";
+                    else btn.className = "px-4 py-2 tab-inactive text-xs font-extrabold rounded-2xl cursor-pointer";
+                }
+            });
+            filterUsers();
+        }
+
+        function filterUsers() {
+            const query = document.getElementById('user-search-input').value.toLowerCase();
+            document.querySelectorAll('.user-row').forEach(row => {
+                const role = row.getAttribute('data-role');
+                const status = row.getAttribute('data-status');
+                const name = row.getAttribute('data-name').toLowerCase();
+                const email = row.getAttribute('data-email').toLowerCase();
+
+                let matchesTab = (currentTab === 'all') || (currentTab === 'customer' && role === 'CUSTOMER') || (currentTab === 'shelter' && role === 'SHELTER') || (currentTab === 'blocked' && status === 'BLOCKED');
+                let matchesQuery = name.includes(query) || email.includes(query);
+                row.style.display = (matchesTab && matchesQuery) ? '' : 'none';
+            });
+        }
+
+        function openProfileModal(id) {
+            const row = document.querySelector(`.user-row[data-id="${id}"]`);
+            if (!row) return;
+
+            document.getElementById('edit-user-id').value = id;
+            document.getElementById('edit-name').value = row.getAttribute('data-name');
+            document.getElementById('edit-email').value = row.getAttribute('data-email');
+            document.getElementById('edit-phone').value = row.getAttribute('data-phone');
+            document.getElementById('edit-password').value = row.getAttribute('data-password') || 'Password@2026';
+            
+            document.getElementById('modal-name').textContent = row.getAttribute('data-name');
+            document.getElementById('modal-adoptions-text').textContent = row.getAttribute('data-adoptions') || '0 Adoptions';
+            document.getElementById('modal-payments-text').textContent = row.getAttribute('data-payments') || 'Total Spent: ₹0';
+            document.getElementById('modal-history-content').textContent = row.getAttribute('data-history') || 'No activity log.';
+
+            const profileImg = row.getAttribute('data-image');
+            if (profileImg) {
+                document.getElementById('modal-profile-img').src = profileImg;
+            }
+
+            const docName = row.getAttribute('data-doc-name') || 'GOVT-ID-PROOF-8821.pdf';
+            const docStatus = row.getAttribute('data-doc-status') || 'VERIFIED';
+            document.getElementById('drawer-doc-name').textContent = `${docName} 📄`;
+
+            const drawerBadge = document.getElementById('drawer-doc-status-badge');
+            if (docStatus === 'SPAM') {
+                drawerBadge.className = "text-[11px] px-2.5 py-0.5 btn-delete rounded-lg font-extrabold";
+                drawerBadge.textContent = "Spam Flagged ⛔";
+            } else {
+                drawerBadge.className = "text-[11px] px-2.5 py-0.5 badge-verified rounded-lg font-extrabold";
+                drawerBadge.textContent = "Verified Safe ✅";
+            }
+
+            document.getElementById('profile-modal').classList.remove('hidden');
+        }
+
+        function closeProfileModal() { document.getElementById('profile-modal').classList.add('hidden'); }
+
+        function openDocumentViewerModal(docFilename, userName) {
+            document.getElementById('doc-viewer-title').textContent = `Document Audit: ${docFilename}`;
+            document.getElementById('doc-viewer-user').textContent = `Submitted by ${userName}`;
+            document.getElementById('doc-viewer-filename').textContent = docFilename;
+            document.getElementById('doc-viewer-modal').classList.remove('hidden');
+        }
+
+        function closeDocumentViewerModal() { document.getElementById('doc-viewer-modal').classList.add('hidden'); }
+
+        function triggerDrawerDocumentPreview() {
+            const docFilename = document.getElementById('drawer-doc-name').textContent.replace(' 📄', '');
+            const userName = document.getElementById('modal-name').textContent;
+            openDocumentViewerModal(docFilename, userName);
+        }
+
+        function expandPhotoViewer() {
+            const currentImg = document.getElementById('modal-profile-img').src;
+            const currentName = document.getElementById('modal-name').textContent;
+            document.getElementById('expanded-photo-img').src = currentImg;
+            document.getElementById('expanded-photo-name').textContent = `${currentName} - HD Profile Photo`;
+            document.getElementById('photo-viewer-modal').classList.remove('hidden');
+        }
+
+        function closePhotoViewerModal() { document.getElementById('photo-viewer-modal').classList.add('hidden'); }
+
+        function verifyUserDocumentFromDrawer(isSpam) {
+            const userId = document.getElementById('edit-user-id').value;
+            const row = document.querySelector(`.user-row[data-id="${userId}"]`);
+            const spamBadge = document.getElementById(`spam-badge-${userId}`);
+            const drawerBadge = document.getElementById('drawer-doc-status-badge');
+
+            if (isSpam) {
+                if (row) row.setAttribute('data-doc-status', 'SPAM');
+                if (spamBadge) spamBadge.innerHTML = '<span class="px-2 py-0.5 btn-delete font-extrabold text-[10px] rounded-lg">Spam Flagged ⛔</span>';
+                if (drawerBadge) {
+                    drawerBadge.className = "text-[11px] px-2.5 py-0.5 btn-delete rounded-lg font-extrabold";
+                    drawerBadge.textContent = "Spam Flagged ⛔";
+                }
+            } else {
+                if (row) row.setAttribute('data-doc-status', 'VERIFIED');
+                if (spamBadge) spamBadge.innerHTML = '<button onclick="openProfileModal(' + userId + ')" class="px-2.5 py-0.5 badge-verified font-extrabold text-[10px] rounded-lg cursor-pointer">Verified Safe ✅</button>';
+                if (drawerBadge) {
+                    drawerBadge.className = "text-[11px] px-2.5 py-0.5 badge-verified rounded-lg font-extrabold";
+                    drawerBadge.textContent = "Verified Safe ✅";
+                }
+            }
+        }
+
+        let activeBlockUserId = null;
+        let activeBlockState = false;
+
+        function openBlockModal(id, username, isBlocked) {
+            activeBlockUserId = id;
+            activeBlockState = isBlocked;
+            document.getElementById('block-modal-title').textContent = isBlocked ? `Unblock ${username}?` : `Block ${username}?`;
+            document.getElementById('confirm-block-btn').onclick = function() { confirmBlockAction(); };
+            document.getElementById('block-modal').classList.remove('hidden');
+        }
+        function closeBlockModal() { document.getElementById('block-modal').classList.add('hidden'); }
+
+        function confirmBlockAction() {
+            if (!activeBlockUserId) return;
+            const row = document.querySelector(`.user-row[data-id="${activeBlockUserId}"]`);
+            if (row) row.setAttribute('data-status', activeBlockState ? 'ACTIVE' : 'BLOCKED');
+            closeBlockModal();
+            filterUsers();
+        }
+
+        let activeDeleteUserId = null;
+        function openDeleteModal(id, username) {
+            activeDeleteUserId = id;
+            document.getElementById('confirm-delete-btn').onclick = function() { confirmDeleteAction(); };
+            document.getElementById('delete-modal').classList.remove('hidden');
+        }
+        function closeDeleteModal() { document.getElementById('delete-modal').classList.add('hidden'); }
+
+        function confirmDeleteAction() {
+            if (!activeDeleteUserId) return;
+            const row = document.querySelector(`.user-row[data-id="${activeDeleteUserId}"]`);
+            if (row) row.remove();
+            closeDeleteModal();
+        }
+
+        function openAddUserModal() { document.getElementById('add-user-modal').classList.remove('hidden'); }
+        function closeAddUserModal() { document.getElementById('add-user-modal').classList.add('hidden'); }
+
+        function createNewUser(e) {
+            e.preventDefault();
+            closeAddUserModal();
+            filterUsers();
+        }
+
+        function togglePasswordVisibility() {
+            const pwdInput = document.getElementById('edit-password');
+            const eyeBtn = document.getElementById('pwd-eye-btn');
+            if (pwdInput.type === 'password') { pwdInput.type = 'text'; eyeBtn.textContent = '🙈'; }
+            else { pwdInput.type = 'password'; eyeBtn.textContent = '👁️'; }
+        }
+
+        function initiatePasswordChangeOrSave(e) {
+            e.preventDefault();
+            closeProfileModal();
+        }
+
+        function toggleTheme() {
+            const isDark = document.documentElement.classList.contains('dark');
+            const themeIcon = document.getElementById('theme-icon');
+
+            if (isDark) { 
+                document.documentElement.classList.remove('dark'); 
+                localStorage.setItem('theme', 'light'); 
+                if (themeIcon) themeIcon.textContent = '☀️';
+            } else { 
+                document.documentElement.classList.add('dark'); 
+                localStorage.setItem('theme', 'dark'); 
+                if (themeIcon) themeIcon.textContent = '🌙';
+            }
+        }
+
+        if (localStorage.getItem('theme') === 'light') {
+            document.documentElement.classList.remove('dark');
+            const themeIcon = document.getElementById('theme-icon');
+            if (themeIcon) themeIcon.textContent = '☀️';
+        } else {
+            const themeIcon = document.getElementById('theme-icon');
+            if (themeIcon) themeIcon.textContent = '🌙';
+        }
+    </script>
+</body>
+</html>
