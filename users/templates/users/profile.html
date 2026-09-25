@@ -1704,11 +1704,11 @@
                                     </div>
                                     <span class="text-[10px] text-slate-400 font-mono group-hover:text-white">&rarr;</span>
                                 </a>
-                                <a href="#view-pet-inventory" onclick="switchDashboardTab('pet-inventory'); toggleUserDropdown(false);"
+                                <a href="#view-shelters" onclick="switchDashboardTab('shelters'); toggleUserDropdown(false);"
                                     class="flex items-center justify-between px-3 py-2 rounded-xl text-slate-300 hover:text-white hover:bg-white/5 transition-colors group">
                                     <div class="flex items-center gap-2.5">
-                                        <i data-lucide="paw-print" class="w-4 h-4 text-purple-400"></i>
-                                        <span>All Pets Directory</span>
+                                        <i data-lucide="home" class="w-4 h-4 text-purple-400"></i>
+                                        <span>Partner Shelters</span>
                                     </div>
                                     <span class="text-[10px] text-slate-400 font-mono group-hover:text-white">&rarr;</span>
                                 </a>
@@ -8245,7 +8245,7 @@
             }
 
             // All Pets directory is removed from Admin module
-            if (tabId === 'pets' && KindHeartData && KindHeartData.currentRole === 'admin') {
+            if ((tabId === 'pets' || tabId === 'pet-inventory') && KindHeartData && KindHeartData.currentRole === 'admin') {
                 switchDashboardTab('dashboard');
                 return;
             }
