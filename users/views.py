@@ -9,7 +9,7 @@ from django.contrib.auth import login as auth_login, logout as auth_logout
 from django.contrib.auth.models import User
 from django.db import models
 from django.utils import timezone
-from .models import UserProfile, ShelterProfile
+from .models import UserProfile, ShelterProfile, SystemSetting, RolePermission
 from pets.models import Pet, DeliveryPartner
 
 def login_view(request):
@@ -458,9 +458,9 @@ def profile_view(request):
             'complaints': 0
         })
 
-    # 2. Real Verified SHELTERS (Shelter Facilities)
-    verified_shelter_profiles = UserProfile.objects.filter(is_verified=True, role='SHELTER').select_related('user').order_by('-created_at')
-    for sp in verified_shelter_profiles:
+    # 2. Real Registered SHELTERS (Shelter Facilities)
+    all_shelter_profiles = UserProfile.objects.filter(role='SHELTER').select_related('user').order_by('-created_at')
+    for sp in all_shelter_profiles:
         sp_user = sp.user
         sp_shelter = getattr(sp_user, 'shelter_profile', None)
         s_name = (sp_shelter.shelter_name if sp_shelter else '') or f"{sp_user.first_name} Shelter & Rescue".strip() or 'Community Shelter'
@@ -469,16 +469,23 @@ def profile_view(request):
         s_location = (sp_shelter.location if sp_shelter and sp_shelter.location != 'Pending Onboarding' else 'Panampilly Nagar, Kochi, Kerala')
         s_pets_count = Pet.objects.filter(shelter=sp_shelter).count() if sp_shelter else 0
         s_available_count = Pet.objects.filter(shelter=sp_shelter, status='AVAILABLE').count() if sp_shelter else 0
+        
+        v_status = 'Verified' if sp.is_verified else ('Rejected' if sp.verification_status == 'REJECTED' else 'Pending Verification')
+        acc_status = 'Active' if (sp.is_active and sp_user.is_active) else 'Suspended'
+
         verified_shelters_list.append({
             'id': f"SH-{sp_user.id}",
             'profile_id': sp.id,
+            'user_id': sp_user.id,
             'name': s_name,
             'license': f"KL-SH-{sp_user.id:04d}",
             'contactPerson': s_contact,
             'phone': s_phone,
             'email': sp_user.email or f"{sp_user.username}@happypaws.org",
             'address': s_location,
-            'verificationStatus': 'Verified' if sp.is_verified else 'Pending Verification',
+            'verificationStatus': v_status,
+            'accountStatus': acc_status,
+            'is_active': (sp.is_active and sp_user.is_active),
             'totalPets': s_pets_count,
             'availablePets': s_available_count,
             'totalOrders': 0,
@@ -490,6 +497,20 @@ def profile_view(request):
             'auditPassRate': "100%",
             'lastAudit': sp.created_at.strftime('%d %b %Y') if sp.created_at else 'Recent',
         })
+
+    # Fetch System Settings & Role Permissions from database
+    db_system_settings = {}
+    for ss in SystemSetting.objects.all():
+        try:
+            db_system_settings[ss.key] = json.loads(ss.value)
+        except Exception:
+            db_system_settings[ss.key] = ss.value
+
+    db_role_permissions = {}
+    for rp in RolePermission.objects.all():
+        if rp.role not in db_role_permissions:
+            db_role_permissions[rp.role] = {}
+        db_role_permissions[rp.role][rp.permission_key] = rp.is_granted
 
     context = {
         'customer_name': customer_name,
@@ -512,6 +533,8 @@ def profile_view(request):
         'verified_customers_count': len(verified_customers_list),
         'verified_shelters_json': json.dumps(verified_shelters_list),
         'verified_shelters_count': len(verified_shelters_list),
+        'db_system_settings_json': json.dumps(db_system_settings),
+        'db_role_permissions_json': json.dumps(db_role_permissions),
     }
 
     # Preload database pets to hydrate KindHeartData.pets
@@ -1416,4 +1439,172 @@ def api_purge_adoption_data(request):
         'success': True,
         'message': 'Record completely erased across Admin, Customer, Delivery, and Shelter modules.'
     })
+
+
+@csrf_exempt
+def api_admin_toggle_user_active(request):
+    """
+    Deactivate or Activate user account in the database (User and UserProfile).
+    """
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'POST request required'}, status=405)
+
+    try:
+        data = json.loads(request.body.decode('utf-8'))
+    except Exception:
+        data = request.POST
+
+    role_param = str(data.get('role', '')).lower()
+    user_role = str(request.session.get('user_role', '')).lower()
+    referer = str(request.META.get('HTTP_REFERER', '')).lower()
+    is_admin = (
+        (request.user.is_authenticated and (request.user.is_staff or request.user.is_superuser or (hasattr(request.user, 'profile') and request.user.profile.role == 'ADMIN')))
+        or user_role == 'admin'
+        or role_param == 'admin'
+        or 'role=admin' in referer
+    )
+    if not is_admin:
+        return JsonResponse({'success': False, 'error': 'Administrator authorization required'}, status=403)
+
+    user_id = data.get('user_id') or data.get('profile_id')
+    action = data.get('action', '').strip().lower()  # 'deactivate' or 'activate'
+
+    if not user_id:
+        return JsonResponse({'success': False, 'error': 'User ID is required'}, status=400)
+
+    clean_id = str(user_id).replace('KH-USR-', '').replace('KHD-USR-', '').replace('USR-', '').replace('SH-', '').replace('DEL-', '').strip()
+    profile = None
+    if clean_id.isdigit():
+        profile = UserProfile.objects.filter(models.Q(id=int(clean_id)) | models.Q(user__id=int(clean_id))).first()
+
+    if not profile:
+        return JsonResponse({'success': False, 'error': f"User profile for ID '{user_id}' not found"}, status=404)
+
+    if request.user.is_authenticated and profile.user == request.user and action == 'deactivate':
+        return JsonResponse({'success': False, 'error': 'Cannot deactivate your own active administrator session'}, status=400)
+
+    target_active = (action == 'activate')
+    profile.is_active = target_active
+    profile.save()
+
+    profile.user.is_active = target_active
+    profile.user.save()
+
+    if hasattr(profile.user, 'delivery_partner_profile'):
+        dp = profile.user.delivery_partner_profile
+        dp.is_active = target_active
+        dp.save()
+
+    new_status = 'Active' if target_active else 'Suspended'
+    msg = f"Account for '{profile.user.username}' successfully {'activated' if target_active else 'deactivated'} in database."
+
+    return JsonResponse({
+        'success': True,
+        'message': msg,
+        'user_id': profile.user.id,
+        'profile_id': profile.id,
+        'is_active': target_active,
+        'accountStatus': new_status
+    })
+
+
+@csrf_exempt
+def api_admin_delete_user(request):
+    """
+    Safely delete a user account from database after confirmation.
+    """
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'POST request required'}, status=405)
+
+    try:
+        data = json.loads(request.body.decode('utf-8'))
+    except Exception:
+        data = request.POST
+
+    role_param = str(data.get('role', '')).lower()
+    user_role = str(request.session.get('user_role', '')).lower()
+    referer = str(request.META.get('HTTP_REFERER', '')).lower()
+    is_admin = (
+        (request.user.is_authenticated and (request.user.is_staff or request.user.is_superuser or (hasattr(request.user, 'profile') and request.user.profile.role == 'ADMIN')))
+        or user_role == 'admin'
+        or role_param == 'admin'
+        or 'role=admin' in referer
+    )
+    if not is_admin:
+        return JsonResponse({'success': False, 'error': 'Administrator authorization required'}, status=403)
+
+    user_id = data.get('user_id') or data.get('profile_id')
+    if not user_id:
+        return JsonResponse({'success': False, 'error': 'User ID is required'}, status=400)
+
+    clean_id = str(user_id).replace('KH-USR-', '').replace('KHD-USR-', '').replace('USR-', '').replace('SH-', '').replace('DEL-', '').strip()
+    profile = None
+    if clean_id.isdigit():
+        profile = UserProfile.objects.filter(models.Q(id=int(clean_id)) | models.Q(user__id=int(clean_id))).first()
+
+    if not profile:
+        return JsonResponse({'success': False, 'error': f"User profile for ID '{user_id}' not found"}, status=404)
+
+    if profile.user.is_superuser or (request.user.is_authenticated and profile.user == request.user):
+        return JsonResponse({'success': False, 'error': 'Cannot delete superuser or primary administrator account'}, status=400)
+
+    u_name = profile.user.username
+    target_user = profile.user
+    target_user.delete()
+
+    return JsonResponse({
+        'success': True,
+        'message': f"Account '{u_name}' permanently deleted from database.",
+        'user_id': clean_id
+    })
+
+
+@csrf_exempt
+def api_admin_save_settings(request):
+    """
+    Save system settings payload directly to SystemSetting database table.
+    """
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'POST request required'}, status=405)
+
+    try:
+        data = json.loads(request.body.decode('utf-8'))
+    except Exception:
+        data = request.POST
+
+    settings_payload = data.get('settings', data)
+    if isinstance(settings_payload, dict):
+        for k, v in settings_payload.items():
+            val_str = json.dumps(v) if isinstance(v, (dict, list)) else str(v)
+            SystemSetting.objects.update_or_create(key=k, defaults={'value': val_str})
+
+    return JsonResponse({'success': True, 'message': 'System settings saved to database successfully.'})
+
+
+@csrf_exempt
+def api_admin_save_permissions(request):
+    """
+    Save role permissions matrix directly to RolePermission database table.
+    """
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'POST request required'}, status=405)
+
+    try:
+        data = json.loads(request.body.decode('utf-8'))
+    except Exception:
+        data = request.POST
+
+    perms_matrix = data.get('permissions', data)
+    if isinstance(perms_matrix, dict):
+        for role_key, p_dict in perms_matrix.items():
+            if isinstance(p_dict, dict):
+                for p_key, is_g in p_dict.items():
+                    RolePermission.objects.update_or_create(
+                        role=role_key.lower(),
+                        permission_key=p_key,
+                        defaults={'is_granted': bool(is_g)}
+                    )
+
+    return JsonResponse({'success': True, 'message': 'Role permissions saved to database successfully.'})
+
 

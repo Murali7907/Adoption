@@ -57,3 +57,24 @@ class ShelterProfile(models.Model):
 
     def __str__(self):
         return f"{self.shelter_name} [{self.verification_status}]"
+
+class SystemSetting(models.Model):
+    key = models.CharField(max_length=100, unique=True)
+    value = models.TextField(blank=True, null=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.key} = {self.value}"
+
+class RolePermission(models.Model):
+    role = models.CharField(max_length=50)  # e.g., 'admin', 'shelter', 'adopter', 'delivery'
+    permission_key = models.CharField(max_length=100)
+    is_granted = models.BooleanField(default=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ('role', 'permission_key')
+
+    def __str__(self):
+        return f"{self.role} - {self.permission_key}: {self.is_granted}"
+

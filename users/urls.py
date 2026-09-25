@@ -18,4 +18,9 @@ urlpatterns = [
     path('api/update-profile/', views.api_update_profile, name='api_update_profile'),
     path('api/notify-adoption/', views.api_notify_adoption, name='api_notify_adoption'),
     path('api/purge-adoption-data/', views.api_purge_adoption_data, name='api_purge_adoption_data'),
+    path('api/admin/toggle-active/', views.api_admin_toggle_user_active, name='api_admin_toggle_user_active'),
+    path('api/admin/delete-user/', views.api_admin_delete_user, name='api_admin_delete_user'),
+    path('api/admin/save-settings/', views.api_admin_save_settings, name='api_admin_save_settings'),
+    path('api/admin/save-permissions/', views.api_admin_save_permissions, name='api_admin_save_permissions'),
 ]
+

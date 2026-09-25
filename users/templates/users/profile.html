@@ -5933,6 +5933,8 @@
     <script id="verified-shelters-data" type="application/json">{{ verified_shelters_json|default:"[]"|safe }}</script>
     <script id="db-pets-data" type="application/json">{{ db_pets_json|default:"[]"|safe }}</script>
     <script id="db-delivery-partners-data" type="application/json">{{ db_delivery_partners_json|default:"[]"|safe }}</script>
+    <script id="db-system-settings-data" type="application/json">{{ db_system_settings_json|default:"{}"|safe }}</script>
+    <script id="db-role-permissions-data" type="application/json">{{ db_role_permissions_json|default:"{}"|safe }}</script>
     <script>
         /* ==========================================================
            KINDHEART DATA STORE (Extensible for Django REST Endpoints)
@@ -5940,6 +5942,9 @@
         const KindHeartData = {
             currentRole: '{{ current_role|default:"adopter" }}',
             accountStatus: 'Active',
+            dbSystemSettings: JSON.parse(document.getElementById('db-system-settings-data')?.textContent || '{}'),
+            dbRolePermissions: JSON.parse(document.getElementById('db-role-permissions-data')?.textContent || '{}'),
+
             currentUser: {
                 id: '{{ customer_id|default:0 }}',
                 username: '{{ customer_username|default:""|escapejs }}',
@@ -8235,6 +8240,12 @@
             // Security: System Settings is strictly accessible ONLY to Admin
             if (tabId === 'system-settings' && (!KindHeartData || KindHeartData.currentRole !== 'admin')) {
                 showToast('⛔ Access Denied: System Settings is restricted to Platform Administrators.');
+                switchDashboardTab('dashboard');
+                return;
+            }
+
+            // All Pets directory is removed from Admin module
+            if (tabId === 'pets' && KindHeartData && KindHeartData.currentRole === 'admin') {
                 switchDashboardTab('dashboard');
                 return;
             }
@@ -10791,7 +10802,6 @@
                         title: 'OPERATIONS',
                         links: [
                             { id: 'adoption-orders', label: 'Orders', icon: 'shopping-bag' },
-                            { id: 'pets', label: 'Pets', icon: 'paw-print' },
                             { id: 'shelters', label: 'Shelters', icon: 'home' },
                             { id: 'customers', label: 'Customers', icon: 'users' },
                             { id: 'delivery-logistics', label: 'Delivery', icon: 'truck' }
@@ -12581,17 +12591,18 @@
 
             tbody.innerHTML = filtered.map(s => {
                 const city = s.city || (s.address ? s.address.split(',').slice(-2)[0].trim() : 'Kochi');
-                const passRate = s.compliancePassRate || s.auditPassRate || '99%';
-                const petsCount = s.activePets || s.totalPets || 12;
-                const status = s.verificationStatus || s.status || 'Verified';
+                const petsCount = s.activePets || s.totalPets || 0;
+                const status = s.verificationStatus || s.status || 'Pending Verification';
                 const isVerified = status.toLowerCase().includes('verif');
-                const isAuditFailed = passRate.toLowerCase().includes('fail');
-                const isAuditPending = passRate.toLowerCase().includes('pending');
-                const auditBadgeClass = isAuditFailed
-                    ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30'
-                    : isAuditPending
-                    ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
-                    : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30';
+                const isRejected = status.toLowerCase().includes('reject');
+                const isActive = (s.accountStatus === 'Active') || (s.is_active !== false);
+
+                const statusBadgeClass = isVerified
+                    ? 'badge-status-approved'
+                    : (isRejected ? 'badge-status-rejected' : 'badge-status-review');
+
+                const uId = s.user_id || s.profile_id || s.id;
+                const safeName = (s.name || 'Shelter').replace(/'/g, "\\'");
 
                 return `
                 <tr class="hover:bg-white/[0.02] transition-colors">
@@ -12604,17 +12615,27 @@
                         <div class="text-[10px] text-slate-400 font-mono mt-0.5">${s.phone}</div>
                     </td>
                     <td class="p-4">
-                        <span class="px-2 py-0.5 rounded-full font-mono text-[10px] font-bold ${auditBadgeClass}">${passRate}</span>
+                        <span class="px-2 py-0.5 rounded font-mono text-[10px] font-bold ${isActive ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'}">${isActive ? 'ACTIVE' : 'DEACTIVATED'}</span>
                     </td>
                     <td class="p-4 font-mono text-white font-bold">${petsCount}</td>
                     <td class="p-4">
-                        <span class="badge-status ${isVerified ? 'badge-status-approved' : 'badge-status-review'} text-[10px]">${status}</span>
+                        <span class="badge-status ${statusBadgeClass} text-[10px]">${status}</span>
                     </td>
                     <td class="p-4 text-right">
-                        <button type="button" onclick="openShelterDetail('${s.id}')" class="btn-apple-secondary text-xs !py-1.5 !px-3 inline-flex items-center gap-1.5">
-                            <i data-lucide="eye" class="w-3.5 h-3.5"></i>
-                            <span>View</span>
-                        </button>
+                        <div class="flex items-center justify-end gap-1.5">
+                            <button type="button" onclick="openShelterDetail('${s.id}')" class="btn-apple-secondary text-[11px] !py-1 !px-2.5 inline-flex items-center gap-1" title="View details">
+                                <i data-lucide="eye" class="w-3 h-3"></i>
+                                <span>View</span>
+                            </button>
+                            <button type="button" onclick="adminToggleUserActive('${uId}', ${isActive})" class="btn-apple-secondary text-[11px] !py-1 !px-2.5 inline-flex items-center gap-1 ${isActive ? 'hover:border-amber-500/50 hover:text-amber-400' : 'hover:border-emerald-500/50 hover:text-emerald-400'}" title="${isActive ? 'Deactivate account' : 'Activate account'}">
+                                <i data-lucide="${isActive ? 'user-x' : 'user-check'}" class="w-3 h-3"></i>
+                                <span>${isActive ? 'Deactivate' : 'Activate'}</span>
+                            </button>
+                            <button type="button" onclick="adminConfirmDeleteUser('${uId}', '${safeName}')" class="btn-apple-secondary text-[11px] !py-1 !px-2.5 inline-flex items-center gap-1 text-rose-400 hover:border-rose-500/50 hover:bg-rose-500/10" title="Delete account">
+                                <i data-lucide="trash-2" class="w-3 h-3"></i>
+                                <span>Delete</span>
+                            </button>
+                        </div>
                     </td>
                 </tr>`;
             }).join('');
@@ -12713,7 +12734,10 @@
 
             tbody.innerHTML = KindHeartData.customers.map(c => {
                 const city = c.city || (c.address ? c.address.split(',').slice(-2, -1)[0]?.trim() || c.address : 'N/A');
-                const adoptions = c.completedAdoptions != null ? c.completedAdoptions : (c.adoptionCount || 0);
+                const isActive = (c.accountStatus === 'Active') || (c.is_active !== false);
+                const uId = c.user_id || c.profile_id || c.id;
+                const safeName = (c.name || 'User').replace(/'/g, "\\'");
+
                 return `
                 <tr class="hover:bg-white/[0.02] transition-colors">
                     <td class="p-4">
@@ -12732,12 +12756,24 @@
                         <div class="text-slate-500">${c.phone || '—'}</div>
                     </td>
                     <td class="p-4 text-slate-300">${city}</td>
-                    <td class="p-4 font-mono text-white font-bold">${adoptions} Completed</td>
+                    <td class="p-4">
+                        <span class="px-2 py-0.5 rounded font-mono text-[10px] font-bold ${isActive ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'}">${isActive ? 'ACTIVE' : 'DEACTIVATED'}</span>
+                    </td>
                     <td class="p-4 text-right">
-                        <button type="button" onclick="openCustomerDetail('${c.id}')" class="btn-apple-secondary text-xs !py-1.5 !px-3 inline-flex items-center gap-1.5">
-                            <i data-lucide="eye" class="w-3.5 h-3.5"></i>
-                            <span>View</span>
-                        </button>
+                        <div class="flex items-center justify-end gap-1.5">
+                            <button type="button" onclick="openCustomerDetail('${c.id}')" class="btn-apple-secondary text-[11px] !py-1 !px-2.5 inline-flex items-center gap-1" title="View details">
+                                <i data-lucide="eye" class="w-3 h-3"></i>
+                                <span>View</span>
+                            </button>
+                            <button type="button" onclick="adminToggleUserActive('${uId}', ${isActive})" class="btn-apple-secondary text-[11px] !py-1 !px-2.5 inline-flex items-center gap-1 ${isActive ? 'hover:border-amber-500/50 hover:text-amber-400' : 'hover:border-emerald-500/50 hover:text-emerald-400'}" title="${isActive ? 'Deactivate account' : 'Activate account'}">
+                                <i data-lucide="${isActive ? 'user-x' : 'user-check'}" class="w-3 h-3"></i>
+                                <span>${isActive ? 'Deactivate' : 'Activate'}</span>
+                            </button>
+                            <button type="button" onclick="adminConfirmDeleteUser('${uId}', '${safeName}')" class="btn-apple-secondary text-[11px] !py-1 !px-2.5 inline-flex items-center gap-1 text-rose-400 hover:border-rose-500/50 hover:bg-rose-500/10" title="Delete account">
+                                <i data-lucide="trash-2" class="w-3 h-3"></i>
+                                <span>Delete</span>
+                            </button>
+                        </div>
                     </td>
                 </tr>`;
             }).join('');
@@ -14145,15 +14181,30 @@
             saveAllRolePermissions();
         }
 
-        // Persist role permissions to localStorage and create audit log
+        // Persist role permissions to Django DB and localStorage, create audit log
         function persistRolePermissions(targetRoleKey = 'all') {
             try {
                 localStorage.setItem('kindheart_role_permissions', JSON.stringify(allRolePermissions));
-                // Also mirror admin permissions into old key for backwards-compatibility
                 if (allRolePermissions.admin) {
                     localStorage.setItem('kindheart_admin_permissions', JSON.stringify(allRolePermissions.admin));
                 }
             } catch(e) {}
+
+            fetch('/users/api/admin/save-permissions/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken') || ''
+                },
+                body: JSON.stringify({ permissions: allRolePermissions })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success && KindHeartData) {
+                    KindHeartData.dbRolePermissions = allRolePermissions;
+                }
+            })
+            .catch(err => console.warn('Permissions API sync notice:', err));
 
             const roleName = targetRoleKey === 'all'
                 ? 'All Platform Roles'
@@ -14332,6 +14383,23 @@
         let currentEditingSettingsGroup = null;
 
         function getActiveSystemSettings() {
+            if (KindHeartData && KindHeartData.dbSystemSettings && Object.keys(KindHeartData.dbSystemSettings).length > 0) {
+                const db = KindHeartData.dbSystemSettings;
+                return {
+                    platform: { ...DEFAULT_SYSTEM_SETTINGS.platform, ...(db.platform || {}) },
+                    adoption: { ...DEFAULT_SYSTEM_SETTINGS.adoption, ...(db.adoption || {}) },
+                    listing: { ...DEFAULT_SYSTEM_SETTINGS.listing, ...(db.listing || {}) },
+                    delivery: { ...DEFAULT_SYSTEM_SETTINGS.delivery, ...(db.delivery || {}) },
+                    payment: { ...DEFAULT_SYSTEM_SETTINGS.payment, ...(db.payment || {}) },
+                    notification: {
+                        ...DEFAULT_SYSTEM_SETTINGS.notification,
+                        ...(db.notification || {}),
+                        events: { ...DEFAULT_SYSTEM_SETTINGS.notification.events, ...((db.notification && db.notification.events) || {}) }
+                    },
+                    security: { ...DEFAULT_SYSTEM_SETTINGS.security, ...(db.security || {}) },
+                    maintenance: { ...DEFAULT_SYSTEM_SETTINGS.maintenance, ...(db.maintenance || {}) }
+                };
+            }
             try {
                 const stored = localStorage.getItem('kindheart_system_settings');
                 if (stored) {
@@ -15266,10 +15334,11 @@
                 changesSummary = `Maintenance mode: ${settings.maintenance.maintenanceMode ? 'ON' : 'OFF'}, Audit retention: ${auditRet}d`;
             }
 
-            // Persist
+            // Persist to backend and localStorage
             try {
                 localStorage.setItem('kindheart_system_settings', JSON.stringify(settings));
             } catch(e) {}
+            persistSystemSettingsToBackend(settings);
 
             // Immediately update summary cards
             renderSystemSettings();
@@ -15280,6 +15349,105 @@
 
             closeSettingsEditModal();
             showToast('Settings updated successfully.');
+        }
+
+        function persistSystemSettingsToBackend(settingsPayload) {
+            fetch('/users/api/admin/save-settings/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken') || ''
+                },
+                body: JSON.stringify({ settings: settingsPayload })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success && KindHeartData) {
+                    KindHeartData.dbSystemSettings = settingsPayload;
+                }
+            })
+            .catch(err => console.warn('Settings backend sync warning:', err));
+        }
+
+        function adminToggleUserActive(userId, isCurrentlyActive) {
+            const action = isCurrentlyActive ? 'deactivate' : 'activate';
+            const actionCap = isCurrentlyActive ? 'Deactivate' : 'Activate';
+            
+            if (!confirm(`Are you sure you want to ${actionCap.toLowerCase()} this account?`)) {
+                return;
+            }
+
+            fetch('/users/api/admin/toggle-active/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken') || ''
+                },
+                body: JSON.stringify({ user_id: userId, action: action })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    showToast(data.message);
+                    if (KindHeartData.shelters) {
+                        const s = KindHeartData.shelters.find(item => String(item.id) === String(userId) || String(item.user_id) === String(userId) || String(item.profile_id) === String(userId));
+                        if (s) {
+                            s.is_active = data.is_active;
+                            s.accountStatus = data.accountStatus;
+                        }
+                    }
+                    if (KindHeartData.customers) {
+                        const c = KindHeartData.customers.find(item => String(item.id) === String(userId) || String(item.user_id) === String(userId) || String(item.profile_id) === String(userId));
+                        if (c) {
+                            c.is_active = data.is_active;
+                            c.accountStatus = data.accountStatus;
+                        }
+                    }
+                    if (typeof renderVerifiedShelters === 'function') renderVerifiedShelters();
+                    if (typeof renderAdminCustomersTable === 'function') renderAdminCustomersTable();
+                } else {
+                    showToast(data.error || 'Failed to update account status');
+                }
+            })
+            .catch(err => {
+                showToast('Server connection error. Please try again.');
+            });
+        }
+
+        function adminConfirmDeleteUser(userId, userName) {
+            if (!confirm(`Delete account for '${userName}' permanently?\n\nThis action will delete account records from the database. Review dependencies before continuing.`)) {
+                return;
+            }
+
+            fetch('/users/api/admin/delete-user/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken') || ''
+                },
+                body: JSON.stringify({ user_id: userId })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    showToast(data.message);
+                    if (KindHeartData.shelters) {
+                        KindHeartData.shelters = KindHeartData.shelters.filter(item => String(item.id) !== String(userId) && String(item.user_id) !== String(userId) && String(item.profile_id) !== String(userId));
+                    }
+                    if (KindHeartData.customers) {
+                        KindHeartData.customers = KindHeartData.customers.filter(item => String(item.id) !== String(userId) && String(item.user_id) !== String(userId) && String(item.profile_id) !== String(userId));
+                    }
+                    closeModal('modal-customer-detail');
+                    closeModal('modal-shelter-detail');
+                    if (typeof renderVerifiedShelters === 'function') renderVerifiedShelters();
+                    if (typeof renderAdminCustomersTable === 'function') renderAdminCustomersTable();
+                } else {
+                    showToast(data.error || 'Failed to delete account');
+                }
+            })
+            .catch(err => {
+                showToast('Server connection error. Please try again.');
+            });
         }
 
         // Reset single editing group to defaults
@@ -15300,6 +15468,7 @@
             try {
                 localStorage.setItem('kindheart_system_settings', JSON.stringify(active));
             } catch(e) {}
+            persistSystemSettingsToBackend(active);
 
             renderSystemSettings();
             logAuditEvent('Admin', 'System Setting Reset', `${group.toUpperCase()} Rules`, 'Restored factory defaults');
@@ -15318,6 +15487,7 @@
             try {
                 localStorage.setItem('kindheart_system_settings', JSON.stringify(DEFAULT_SYSTEM_SETTINGS));
             } catch(e) {}
+            persistSystemSettingsToBackend(DEFAULT_SYSTEM_SETTINGS);
 
             renderSystemSettings();
             logAuditEvent('Admin', 'System Setting Updated', 'All Platform Rules', 'Restored platform factory defaults');

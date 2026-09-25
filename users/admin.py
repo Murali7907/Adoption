@@ -2,7 +2,19 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.models import User
 from django.utils import timezone
-from .models import UserProfile, ShelterProfile
+from .models import UserProfile, ShelterProfile, SystemSetting, RolePermission
+
+@admin.register(SystemSetting)
+class SystemSettingAdmin(admin.ModelAdmin):
+    list_display = ('key', 'value', 'updated_at')
+    search_fields = ('key', 'value')
+
+@admin.register(RolePermission)
+class RolePermissionAdmin(admin.ModelAdmin):
+    list_display = ('role', 'permission_key', 'is_granted', 'updated_at')
+    list_filter = ('role', 'is_granted')
+    search_fields = ('role', 'permission_key')
+
 
 @admin.action(description="Verify & Approve selected profiles")
 def approve_profiles(modeladmin, request, queryset):
