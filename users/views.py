@@ -10,7 +10,7 @@ from django.contrib.auth.models import User
 from django.db import models
 from django.utils import timezone
 from .models import UserProfile, ShelterProfile, SystemSetting, RolePermission
-from pets.models import Pet, DeliveryPartner, PaymentTransaction, AuditLog
+from pets.models import Pet, DeliveryPartner, PaymentTransaction, AuditLog, AdoptionRequest
 
 def login_view(request):
     # Retrieve any registration status notice from session
@@ -635,6 +635,55 @@ def profile_view(request):
         db_settlements = []
 
     context['db_settlements_json'] = json.dumps(db_settlements)
+
+    # 6. Database Adoption Requests
+    db_adoptions = []
+    try:
+        reqs = AdoptionRequest.objects.select_related('pet', 'customer', 'shelter', 'shelter__user').all().order_by('-id')
+        for r in reqs:
+            pet_name = r.pet.name if r.pet else "Companion Pet"
+            cust_name = r.customer.get_full_name() or r.customer.username if r.customer else "Adopter"
+            sh_name = r.shelter.shelter_name if r.shelter else "Happy Paws Shelter"
+            sh_id = f"SH-{r.shelter.user.id}" if (r.shelter and r.shelter.user) else "SH-101"
+            st_disp = r.get_status_display() if hasattr(r, 'get_status_display') else r.status
+            db_adoptions.append({
+                'id': f"KH102{r.id:02d}",
+                'db_id': r.id,
+                'petId': f"P{r.pet.id}" if r.pet else "P101",
+                'pet': pet_name,
+                'customer': cust_name,
+                'shelter': sh_name,
+                'shelterId': sh_id,
+                'status': st_disp,
+                'date': r.request_date.strftime("%d %b %Y") if r.request_date else "Recent",
+                'notes': r.notes or "Adoption request submitted via KindHeart portal."
+            })
+    except Exception as e:
+        db_adoptions = []
+
+    context['db_adoptions_json'] = json.dumps(db_adoptions)
+
+    # 7. Database System Audit Logs
+    db_audit_logs = []
+    try:
+        logs = AuditLog.objects.select_related('user').all().order_by('-timestamp')
+        for l in logs:
+            u_name = l.user.username if l.user else "System"
+            db_audit_logs.append({
+                'id': f"LOG-{l.id:04d}",
+                'user': u_name,
+                'role': l.user_role or "Admin",
+                'action': l.action or "System Audit",
+                'module': l.module or "System",
+                'desc': l.description,
+                'time': l.timestamp.strftime("%d %b %Y, %H:%M") if l.timestamp else "Recent",
+                'ip': l.ip_address or "127.0.0.1"
+            })
+    except Exception as e:
+        db_audit_logs = []
+
+    context['db_audit_logs_json'] = json.dumps(db_audit_logs)
+
     return render(request, 'users/profile.html', context)
 
 @csrf_exempt

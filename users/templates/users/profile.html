@@ -5934,6 +5934,8 @@
     <script id="db-pets-data" type="application/json">{{ db_pets_json|default:"[]"|safe }}</script>
     <script id="db-delivery-partners-data" type="application/json">{{ db_delivery_partners_json|default:"[]"|safe }}</script>
     <script id="db-settlements-data" type="application/json">{{ db_settlements_json|default:"[]"|safe }}</script>
+    <script id="db-adoptions-data" type="application/json">{{ db_adoptions_json|default:"[]"|safe }}</script>
+    <script id="db-audit-logs-data" type="application/json">{{ db_audit_logs_json|default:"[]"|safe }}</script>
     <script id="db-system-settings-data" type="application/json">{{ db_system_settings_json|default:"{}"|safe }}</script>
     <script id="db-role-permissions-data" type="application/json">{{ db_role_permissions_json|default:"{}"|safe }}</script>
     <script>
@@ -8086,6 +8088,32 @@
                 }
             } catch (err) {
                 console.warn("Could not parse db settlements data:", err);
+            }
+        }
+
+        // Inject real adoption requests from database into KindHeartData.adoptionOrders
+        const dbAdoptionsScriptEl = document.getElementById('db-adoptions-data');
+        if (dbAdoptionsScriptEl) {
+            try {
+                const parsedDbAdoptions = JSON.parse(dbAdoptionsScriptEl.textContent || '[]');
+                if (Array.isArray(parsedDbAdoptions) && parsedDbAdoptions.length > 0) {
+                    KindHeartData.adoptionOrders = parsedDbAdoptions;
+                }
+            } catch (err) {
+                console.warn("Could not parse db adoptions data:", err);
+            }
+        }
+
+        // Inject real audit logs from database into KindHeartData.auditLogs
+        const dbAuditLogsScriptEl = document.getElementById('db-audit-logs-data');
+        if (dbAuditLogsScriptEl) {
+            try {
+                const parsedDbAuditLogs = JSON.parse(dbAuditLogsScriptEl.textContent || '[]');
+                if (Array.isArray(parsedDbAuditLogs) && parsedDbAuditLogs.length > 0) {
+                    KindHeartData.auditLogs = parsedDbAuditLogs;
+                }
+            } catch (err) {
+                console.warn("Could not parse db audit logs data:", err);
             }
         }
 
