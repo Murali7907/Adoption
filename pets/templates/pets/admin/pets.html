@@ -477,25 +477,21 @@
                     </div>
                 </div>
 
-                <!-- 🩺 SEPARATE VACCINATION STATUS & HEALTH PASSPORT INSPECTOR BOX -->
+                <!-- 🩺 VACCINATION STATUS INSPECTOR BOX -->
                 <div class="p-3.5 card-inner-box rounded-2xl space-y-2 mt-2">
                     <div class="flex items-center justify-between border-b border-[#5B8C76]/20 pb-2">
                         <div class="text-xs font-extrabold user-name-text uppercase tracking-wider flex items-center gap-1.5">
-                            <span>🩺 Health & Vaccination Passport Audit</span>
+                            <span>🩺 Health & Vaccination Audit</span>
                         </div>
                         <button type="button" onclick="openEditPetModal()" class="px-3 py-1 bg-[#5B8C76] hover:bg-[#2D4C3E] text-white rounded-xl text-xs font-extrabold cursor-pointer flex items-center gap-1 shadow-sm">
                             <span>✏️ Edit Medical Status</span>
                         </button>
                     </div>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs font-semibold pt-1">
+                    <div class="text-xs font-semibold pt-1">
                         <div>
                             <span class="text-muted text-[10px] uppercase block">Vaccination Status:</span>
                             <span id="prof-card-vaccination-text" class="text-emerald-400 font-bold">Fully Vaccinated ✅</span>
-                        </div>
-                        <div>
-                            <span class="text-muted text-[10px] uppercase block">Health Passport Status:</span>
-                            <span id="prof-card-passport-text" class="theme-accent-text font-bold">Healthy & Active ✅</span>
                         </div>
                     </div>
 
@@ -573,28 +569,15 @@
                     </div>
                 </div>
 
-                <!-- 💉 TWO SEPARATE DROPDOWNS FOR VACCINATION & HEALTH PASSPORT -->
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-muted mb-1">Vaccination Status Dropdown:</label>
-                        <select id="edit-vaccination-status" required class="w-full py-2.5 px-3.5 input-box rounded-2xl text-xs font-semibold">
-                            <option value="Fully Vaccinated ✅">Fully Vaccinated ✅</option>
-                            <option value="Partially Vaccinated 💉">Partially Vaccinated 💉</option>
-                            <option value="Vaccination Due Soon ⏳">Vaccination Due Soon ⏳</option>
-                            <option value="Not Vaccinated ❌">Not Vaccinated ❌</option>
-                        </select>
-                    </div>
-
-                    <div>
-                        <label class="block text-muted mb-1">Health Passport Status Dropdown:</label>
-                        <select id="edit-health-passport-status" required class="w-full py-2.5 px-3.5 input-box rounded-2xl text-xs font-semibold">
-                            <option value="Healthy & Active ✅">Healthy & Active ✅</option>
-                            <option value="Neutered & Spayed ✂️">Neutered & Spayed ✂️</option>
-                            <option value="Under Treatment / Special Care 💊">Under Treatment / Special Care 💊</option>
-                            <option value="Quarantined / Observation 🏥">Quarantined / Observation 🏥</option>
-                            <option value="Pending Health Clearance ⏳">Pending Health Clearance ⏳</option>
-                        </select>
-                    </div>
+                <!-- 💉 VACCINATION STATUS DROPDOWN -->
+                <div>
+                    <label class="block text-muted mb-1">Vaccination Status Dropdown:</label>
+                    <select id="edit-vaccination-status" required class="w-full py-2.5 px-3.5 input-box rounded-2xl text-xs font-semibold">
+                        <option value="Fully Vaccinated ✅">Fully Vaccinated ✅</option>
+                        <option value="Partially Vaccinated 💉">Partially Vaccinated 💉</option>
+                        <option value="Vaccination Due Soon ⏳">Vaccination Due Soon ⏳</option>
+                        <option value="Not Vaccinated ❌">Not Vaccinated ❌</option>
+                    </select>
                 </div>
 
                 <div class="grid grid-cols-2 gap-3">

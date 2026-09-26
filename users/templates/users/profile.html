@@ -5933,6 +5933,7 @@
     <script id="verified-shelters-data" type="application/json">{{ verified_shelters_json|default:"[]"|safe }}</script>
     <script id="db-pets-data" type="application/json">{{ db_pets_json|default:"[]"|safe }}</script>
     <script id="db-delivery-partners-data" type="application/json">{{ db_delivery_partners_json|default:"[]"|safe }}</script>
+    <script id="db-settlements-data" type="application/json">{{ db_settlements_json|default:"[]"|safe }}</script>
     <script id="db-system-settings-data" type="application/json">{{ db_system_settings_json|default:"{}"|safe }}</script>
     <script id="db-role-permissions-data" type="application/json">{{ db_role_permissions_json|default:"{}"|safe }}</script>
     <script>
@@ -8072,6 +8073,19 @@
                 }
             } catch (err) {
                 console.warn("Could not parse db delivery partners data:", err);
+            }
+        }
+
+        // Inject real payment transactions from database into KindHeartData.settlements
+        const dbSettlementsScriptEl = document.getElementById('db-settlements-data');
+        if (dbSettlementsScriptEl) {
+            try {
+                const parsedDbSettlements = JSON.parse(dbSettlementsScriptEl.textContent || '[]');
+                if (Array.isArray(parsedDbSettlements) && parsedDbSettlements.length > 0) {
+                    KindHeartData.settlements = parsedDbSettlements;
+                }
+            } catch (err) {
+                console.warn("Could not parse db settlements data:", err);
             }
         }
 
@@ -15403,6 +15417,9 @@
                             c.accountStatus = data.accountStatus;
                         }
                     }
+                    if (typeof logAuditEvent === 'function') {
+                        logAuditEvent('Admin', 'User Management', action === 'activate' ? 'REQUEST_APPROVED' : 'REQUEST_REJECTED', `Account ID ${userId} ${action === 'activate' ? 'activated' : 'suspended'}`);
+                    }
                     if (typeof renderAdminSheltersTable === 'function') renderAdminSheltersTable();
                     if (typeof renderAdminCustomersTable === 'function') renderAdminCustomersTable();
                 } else {
@@ -15439,7 +15456,10 @@
                     }
                     closeModal('modal-customer-detail');
                     closeModal('modal-shelter-detail');
-                    if (typeof renderVerifiedShelters === 'function') renderVerifiedShelters();
+                    if (typeof logAuditEvent === 'function') {
+                        logAuditEvent('Admin', 'User Management', 'REQUEST_REJECTED', `Account '${userName}' (ID ${userId}) permanently deleted`);
+                    }
+                    if (typeof renderAdminSheltersTable === 'function') renderAdminSheltersTable();
                     if (typeof renderAdminCustomersTable === 'function') renderAdminCustomersTable();
                 } else {
                     showToast(data.error || 'Failed to delete account');

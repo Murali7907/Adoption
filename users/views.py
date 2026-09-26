@@ -10,7 +10,7 @@ from django.contrib.auth.models import User
 from django.db import models
 from django.utils import timezone
 from .models import UserProfile, ShelterProfile, SystemSetting, RolePermission
-from pets.models import Pet, DeliveryPartner
+from pets.models import Pet, DeliveryPartner, PaymentTransaction, AuditLog
 
 def login_view(request):
     # Retrieve any registration status notice from session
@@ -600,6 +600,41 @@ def profile_view(request):
         db_delivery_partners = []
 
     context['db_delivery_partners_json'] = json.dumps(db_delivery_partners)
+
+    # 5. Financial Payment Transactions
+    db_settlements = []
+    try:
+        txns = PaymentTransaction.objects.select_related('adoption_request', 'adoption_request__pet', 'customer', 'adoption_request__shelter').all().order_by('-transaction_date')
+        for t in txns:
+            pet_name = t.adoption_request.pet.name if (t.adoption_request and t.adoption_request.pet) else "Companion Pet"
+            cust_name = t.customer.get_full_name() or t.customer.username if t.customer else "Adopter"
+            sh_name = t.adoption_request.shelter.shelter_name if (t.adoption_request and t.adoption_request.shelter) else "Partner Shelter"
+            gross = float(t.total_amount)
+            fee = float(t.delivery_fee)
+            adopt_fee = float(t.adoption_fee)
+            db_settlements.append({
+                'id': t.transaction_id,
+                'txnId': t.transaction_id,
+                'orderId': f"KH102{t.id:02d}",
+                'customer': cust_name,
+                'pet': pet_name,
+                'shelter': sh_name,
+                'shelterName': sh_name,
+                'adoptionFee': adopt_fee,
+                'deliveryFee': fee,
+                'platformFee': round(gross * 0.05, 2),
+                'commission': round(gross * 0.05, 2),
+                'total': gross,
+                'grossAmount': gross,
+                'paymentStatus': t.get_status_display() if hasattr(t, 'get_status_display') else t.status,
+                'status': t.status,
+                'settlementStatus': 'Settled' if t.status == 'SUCCESSFUL' else 'Pending Payout',
+                'date': t.transaction_date.strftime("%d %b %Y, %H:%M") if t.transaction_date else "Recent"
+            })
+    except Exception as e:
+        db_settlements = []
+
+    context['db_settlements_json'] = json.dumps(db_settlements)
     return render(request, 'users/profile.html', context)
 
 @csrf_exempt
@@ -1495,8 +1530,24 @@ def api_admin_toggle_user_active(request):
         dp.is_active = target_active
         dp.save()
 
+    if hasattr(profile.user, 'shelter_profile'):
+        sp_obj = profile.user.shelter_profile
+        sp_obj.verification_status = 'VERIFIED' if target_active else 'SUSPENDED'
+        sp_obj.save()
+
     new_status = 'Active' if target_active else 'Suspended'
     msg = f"Account for '{profile.user.username}' successfully {'activated' if target_active else 'deactivated'} in database."
+
+    try:
+        AuditLog.objects.create(
+            user=request.user if request.user.is_authenticated else None,
+            user_role='Admin',
+            action='REQUEST_APPROVED' if target_active else 'REQUEST_REJECTED',
+            module='User Management',
+            description=f"Account '{profile.user.username}' (ID {clean_id}) {'activated' if target_active else 'deactivated'} by Admin."
+        )
+    except Exception:
+        pass
 
     return JsonResponse({
         'success': True,
@@ -1550,13 +1601,27 @@ def api_admin_delete_user(request):
 
     u_name = profile.user.username
     target_user = profile.user
-    target_user.delete()
 
-    return JsonResponse({
-        'success': True,
-        'message': f"Account '{u_name}' permanently deleted from database.",
-        'user_id': clean_id
-    })
+    try:
+        target_user.delete()
+        try:
+            AuditLog.objects.create(
+                user=request.user if request.user.is_authenticated else None,
+                user_role='Admin',
+                action='REQUEST_REJECTED',
+                module='User Management',
+                description=f"Account '{u_name}' (ID {clean_id}) permanently deleted by Admin."
+            )
+        except Exception:
+            pass
+
+        return JsonResponse({
+            'success': True,
+            'message': f"Account '{u_name}' permanently deleted from database.",
+            'user_id': clean_id
+        })
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': f"Failed to delete account from database: {str(e)}"}, status=500)
 
 
 @csrf_exempt
