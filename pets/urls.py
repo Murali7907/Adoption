@@ -11,6 +11,11 @@ urlpatterns = [
     path('adopt/', views.adoption_form_view, name='adoption_form'),
     path('adopt/<int:pet_id>/', views.adoption_form_view, name='adoption_form_detail'),
 
+    # Explicit Delivery Module Named Routes
+    path('delivery-dashboard/', views.role_dashboard_view, {'role': 'delivery', 'page': 'dashboard'}, name='delivery_dashboard'),
+    path('delivery-dashboard/tracking/', views.role_dashboard_view, {'role': 'delivery', 'page': 'tracking'}, name='delivery_tracking'),
+    path('delivery-dashboard/confirmation/', views.role_dashboard_view, {'role': 'delivery', 'page': 'confirmation'}, name='delivery_confirmation'),
+
     # Generic Dashboard Routing
     path('<str:role>-dashboard/', views.role_dashboard_view, name='role_dashboard_home'),
     path('<str:role>-dashboard/<str:page>/', views.role_dashboard_view, name='role_dashboard_page'),

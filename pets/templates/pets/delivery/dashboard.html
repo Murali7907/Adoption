@@ -522,9 +522,9 @@
                             aria-label="User account menu" aria-haspopup="true">
                             <div id="header-user-avatar"
                                 class="w-8 h-8 rounded-full bg-gradient-to-br from-[#FF8F1C] to-[#E06000] flex items-center justify-center font-bold text-white text-xs font-heading shadow-md shrink-0">
-                                JD
+                                {{ request.user.username|slice:":2"|upper|default:"DP" }}
                             </div>
-                            <span class="hidden md:inline text-xs font-bold text-white light:text-slate-900 font-heading">John Driver</span>
+                            <span class="hidden md:inline text-xs font-bold text-white light:text-slate-900 font-heading">{{ request.user.get_full_name|default:request.user.username }}</span>
                             <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-slate-400 transition-transform duration-200" id="user-dropdown-arrow"></i>
                         </button>
 
@@ -535,15 +535,15 @@
                             <!-- User Header Card -->
                             <div class="flex items-center gap-3 pb-3.5 border-b border-white/10">
                                 <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-[#FF8F1C] to-[#E06000] flex items-center justify-center font-black text-white text-sm font-heading shadow-lg shrink-0">
-                                    JD
+                                    {{ request.user.username|slice:":2"|upper|default:"DP" }}
                                 </div>
                                 <div class="flex-1 min-w-0">
-                                    <div class="font-heading font-bold text-sm text-white truncate">John Driver</div>
-                                    <div class="text-[11px] text-slate-400 font-mono truncate">courier@kindheart.org</div>
+                                    <div class="font-heading font-bold text-sm text-white truncate">{{ request.user.get_full_name|default:request.user.username }}</div>
+                                    <div class="text-[11px] text-slate-400 font-mono truncate">{{ request.user.email|default:"driver@kindheart.org" }}</div>
                                     <div class="flex items-center gap-1.5 mt-1">
                                         <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold font-mono bg-[#FF8F1C]/20 text-[#FF8F1C] border border-[#FF8F1C]/30">
                                             <i data-lucide="truck" class="w-3 h-3 text-[#FF8F1C]"></i>
-                                            <span>Transport Staff</span>
+                                            <span>Delivery Personnel</span>
                                         </span>
                                     </div>
                                 </div>
@@ -614,6 +614,75 @@
                     </div>
                     <!-- Ambient orange glow -->
                     <div class="absolute -right-16 -top-16 w-64 h-64 rounded-full bg-[#FF8F1C]/10 blur-[90px] pointer-events-none"></div>
+                </section>
+
+                <!-- DELIVERY PERSONNEL IDENTITY & VERIFICATION CARD (Replaces Health Passport) -->
+                <section class="mb-8">
+                    <div class="dash-card p-6 rounded-2xl border border-white/10 bg-gradient-to-r from-[#121620] via-[#1A1F2C] to-[#121620]">
+                        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-white/10">
+                            <div class="flex items-center gap-3.5">
+                                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-[#FF8F1C] to-[#E06000] text-white flex items-center justify-center font-black text-lg font-heading shadow-lg shrink-0">
+                                    {{ request.user.username|slice:":2"|upper|default:"DP" }}
+                                </div>
+                                <div>
+                                    <div class="flex items-center gap-2">
+                                        <h3 class="text-lg font-bold font-heading text-white">{{ request.user.get_full_name|default:request.user.username }}</h3>
+                                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center gap-1">
+                                            <i data-lucide="shield-check" class="w-3 h-3"></i> Verified &amp; Active
+                                        </span>
+                                    </div>
+                                    <p class="text-xs text-slate-400 font-mono">Driver ID: {{ driver_partner.partner_id|default:"DP-0045" }} &bull; Affiliated Shelter: {{ driver_partner.shelter.shelter_name|default:"SanathHouse Fleet" }}</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="px-3 py-1 rounded-xl text-xs font-mono bg-white/5 border border-white/10 text-slate-300">
+                                    Status: On Duty &bull; Active Dispatch
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
+                            <!-- Aadhaar -->
+                            <div class="p-3.5 rounded-xl bg-white/[0.02] border border-white/10">
+                                <div class="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400 mb-1 flex items-center gap-1.5">
+                                    <i data-lucide="credit-card" class="w-3.5 h-3.5 text-[#FF8F1C]"></i>
+                                    <span>Aadhaar Identity</span>
+                                </div>
+                                <div class="text-sm font-bold font-mono text-white">XXXX XXXX 4821</div>
+                                <div class="text-[11px] text-emerald-400 mt-0.5">Government Verified</div>
+                            </div>
+
+                            <!-- Driving License -->
+                            <div class="p-3.5 rounded-xl bg-white/[0.02] border border-white/10">
+                                <div class="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400 mb-1 flex items-center gap-1.5">
+                                    <i data-lucide="file-text" class="w-3.5 h-3.5 text-blue-400"></i>
+                                    <span>Driving License</span>
+                                </div>
+                                <div class="text-sm font-bold font-mono text-white">DL-KL07-2022-9981</div>
+                                <div class="text-[11px] text-blue-400 mt-0.5">Commercial LMV Badge</div>
+                            </div>
+
+                            <!-- Vehicle Details -->
+                            <div class="p-3.5 rounded-xl bg-white/[0.02] border border-white/10">
+                                <div class="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400 mb-1 flex items-center gap-1.5">
+                                    <i data-lucide="truck" class="w-3.5 h-3.5 text-purple-400"></i>
+                                    <span>Assigned Vehicle</span>
+                                </div>
+                                <div class="text-sm font-bold text-white">Climate Van #04</div>
+                                <div class="text-[11px] text-slate-400 font-mono mt-0.5">Reg: KL-07-BW-4821</div>
+                            </div>
+
+                            <!-- Fleet Authority -->
+                            <div class="p-3.5 rounded-xl bg-white/[0.02] border border-white/10">
+                                <div class="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400 mb-1 flex items-center gap-1.5">
+                                    <i data-lucide="building" class="w-3.5 h-3.5 text-amber-400"></i>
+                                    <span>Fleet Provider</span>
+                                </div>
+                                <div class="text-sm font-bold text-white truncate">{{ driver_partner.shelter.shelter_name|default:"SanathHouse" }}</div>
+                                <div class="text-[11px] text-amber-400 mt-0.5">Authorized Courier</div>
+                            </div>
+                        </div>
+                    </div>
                 </section>
 
                 <!-- OPERATIONAL OVERVIEW SECTION (Tags removed, renamed per request) -->
@@ -694,22 +763,22 @@
                 </div>
             </section>
 
-            <!-- ASSIGNED DELIVERIES CARDS -->
+            <!-- ASSIGNED DELIVERIES CARDS (Dynamic Backend Data) -->
             <section class="space-y-4">
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
                     <div>
-                        <h3 class="text-lg sm:text-xl font-bold font-heading text-white light:text-slate-900">Assigned Deliveries Today</h3>
-                        <p class="text-xs text-slate-400 light:text-slate-500">Active transit assignments requiring courier milestone updates.</p>
+                        <h3 class="text-lg sm:text-xl font-bold font-heading text-white light:text-slate-900">Assigned Deliveries</h3>
+                        <p class="text-xs text-slate-400 light:text-slate-500">Active transport assignments requiring courier milestone updates.</p>
                     </div>
                     <div class="flex items-center gap-2">
                         <span class="px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold bg-white/[0.04] light:bg-slate-200 text-slate-300 light:text-slate-700 border border-white/10 light:border-slate-300">
-                            Showing 1 Active Order
+                            Showing {{ deliv_requests|length }} Active Order{{ deliv_requests|length|pluralize }}
                         </span>
                     </div>
                 </div>
 
-                <!-- ORDER CARD #DEL-1024 -->
-                <div class="dash-card p-6 sm:p-8 rounded-3xl space-y-6 shadow-xl relative overflow-hidden">
+                {% for order in deliv_requests %}
+                <div class="dash-card p-6 sm:p-8 rounded-3xl space-y-6 shadow-xl relative overflow-hidden mb-6">
                     
                     <!-- Top Status & ID Bar -->
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-white/10 light:border-slate-200">
@@ -719,12 +788,12 @@
                             </div>
                             <div>
                                 <div class="flex items-center gap-2">
-                                    <span class="text-xs font-mono font-bold text-[#FF8F1C] uppercase tracking-wider">Delivery #DEL-1024</span>
+                                    <span class="text-xs font-mono font-bold text-[#FF8F1C] uppercase tracking-wider">Delivery {{ order.id }}</span>
                                     <span class="text-slate-400 text-xs">&bull;</span>
-                                    <span class="text-[11px] font-mono text-slate-400">Order Ref: KH-ORD-8821</span>
+                                    <span class="text-[11px] font-mono text-slate-400">App Ref: {{ order.appId }}</span>
                                 </div>
                                 <h4 class="text-xl sm:text-2xl font-bold font-heading text-white light:text-slate-900 mt-0.5">
-                                    Pet: Bruno <span class="text-sm sm:text-base font-normal text-slate-400">(Golden Retriever)</span>
+                                    Pet: {{ order.petName }} <span class="text-sm sm:text-base font-normal text-slate-400">({{ order.petBreed }})</span>
                                 </h4>
                             </div>
                         </div>
@@ -732,7 +801,7 @@
                         <div class="flex items-center gap-2">
                             <span class="px-3 py-1 bg-amber-500/20 text-amber-300 border border-amber-500/30 font-mono font-bold text-xs rounded-full flex items-center gap-1.5">
                                 <span class="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span>
-                                Assigned &bull; Ready for Pickup
+                                Status: {{ order.statusDisplay|default:order.status }}
                             </span>
                         </div>
                     </div>
@@ -743,8 +812,8 @@
                         <!-- Left: Realistic Pet Image -->
                         <div class="md:col-span-4 relative group">
                             <div class="w-full h-48 sm:h-56 rounded-2xl overflow-hidden border border-white/10 light:border-slate-300 relative shadow-lg bg-black/40">
-                                <img src="{% static 'pets/images/bruno_landscape.jpg' %}" 
-                                     alt="Bruno - Golden Retriever" 
+                                <img src="{{ order.petImage }}" 
+                                     alt="{{ order.petName }}" 
                                      class="w-full h-full object-cover pet-photo-zoom"
                                      onerror="this.src='/static/kindheart_bruno.jpg'; this.onerror=function(){this.src='https://images.unsplash.com/photo-1552053831-71594a27632d?auto=format&fit=crop&w=800&q=80'};">
                                 
@@ -752,18 +821,18 @@
                                 
                                 <div class="absolute bottom-3 left-3 right-3 flex items-center justify-between text-[11px] font-mono text-white keep-white font-medium">
                                     <span class="px-2 py-0.5 rounded-md bg-black/60 backdrop-blur-md border border-white/20 text-white keep-white">
-                                        Golden Retriever &bull; 2 Yrs
+                                        {{ order.petBreed }} &bull; {{ order.petSpecies }}
                                     </span>
                                     <span class="px-2 py-0.5 rounded-md bg-emerald-500/80 backdrop-blur-md text-white keep-white font-bold flex items-center gap-1">
                                         <i data-lucide="check" class="w-3 h-3 text-white keep-white"></i>
-                                        <span class="text-white keep-white">Vet Cleared</span>
+                                        <span class="text-white keep-white">Health Cleared</span>
                                     </span>
                                 </div>
                             </div>
                             
                             <div class="mt-2.5 flex items-center justify-between text-[11px] font-mono text-slate-400 px-1">
-                                <span>Chip: #98514100293</span>
-                                <span>Weight: 28 kg (Large Crate)</span>
+                                <span>Pet ID: {{ order.petId }}</span>
+                                <span>Fee: ₹{{ order.totalFee }}</span>
                             </div>
                         </div>
 
@@ -779,13 +848,13 @@
                                         <i data-lucide="building" class="w-3.5 h-3.5 text-purple-400"></i>
                                         <span>PICKUP LOCATION</span>
                                     </div>
-                                    <div class="text-sm font-bold text-white light:text-slate-900">ABC Animal Shelter</div>
+                                    <div class="text-sm font-bold text-white light:text-slate-900">{{ order.shelterName }}</div>
                                     <div class="text-xs text-slate-300 light:text-slate-600 mt-0.5 flex items-start gap-1.5">
                                         <i data-lucide="map-pin" class="w-3.5 h-3.5 text-purple-400 shrink-0 mt-0.5"></i>
-                                        <span>45 Rescue Lane, Bangalore East</span>
+                                        <span>{{ order.shelterLocation }}</span>
                                     </div>
                                     <div class="mt-3 pt-2.5 border-t border-white/10 light:border-slate-200 text-[11px] text-slate-400 flex items-center justify-between">
-                                        <span>Contact: Dr. Ananya Roy</span>
+                                        <span>Contact: {{ order.shelterPhone }}</span>
                                         <span class="text-emerald-400 font-mono font-bold">Shelter Cleared</span>
                                     </div>
                                 </div>
@@ -796,14 +865,14 @@
                                         <i data-lucide="home" class="w-3.5 h-3.5 text-[#FF8F1C]"></i>
                                         <span>DROP DESTINATION</span>
                                     </div>
-                                    <div class="text-sm font-bold text-white light:text-slate-900">Customer: Rahul Sharma</div>
+                                    <div class="text-sm font-bold text-white light:text-slate-900">Customer: {{ order.customerName }}</div>
                                     <div class="text-xs text-slate-300 light:text-slate-600 mt-0.5 flex items-start gap-1.5">
                                         <i data-lucide="map-pin" class="w-3.5 h-3.5 text-[#FF8F1C] shrink-0 mt-0.5"></i>
-                                        <span>124 Palm St, Indiranagar, Bangalore</span>
+                                        <span>{{ order.dropAddress }}</span>
                                     </div>
                                     <div class="mt-3 pt-2.5 border-t border-white/10 light:border-slate-200 text-[11px] text-slate-400 flex items-center justify-between">
-                                        <span>Recipient: +91 98765 43210</span>
-                                        <span class="text-blue-400 font-mono font-bold">Escrow Confirmed</span>
+                                        <span>Recipient: {{ order.customerPhone }}</span>
+                                        <span class="text-blue-400 font-mono font-bold">Verified Adopter</span>
                                     </div>
                                 </div>
 
@@ -818,11 +887,11 @@
                                     </span>
                                     <span class="text-slate-400 text-[11px] flex items-center gap-1">
                                         <i data-lucide="clock" class="w-3.5 h-3.5"></i>
-                                        Target Delivery Window: 04:30 PM Today
+                                        Scheduled Date: {{ order.preferredDate }}
                                     </span>
                                 </div>
                                 <div class="text-[11px] text-slate-400 font-mono">
-                                    Vehicle: Climate Van #04
+                                    Driver: {{ order.agent }} ({{ order.agentId }})
                                 </div>
                             </div>
 
@@ -830,20 +899,55 @@
 
                     </div>
 
-                    <!-- Bottom Action Buttons -->
-                    <div class="pt-4 border-t border-white/10 light:border-slate-200 flex flex-col sm:flex-row gap-3 items-center">
-                        <a href="{% url 'delivery_tracking' %}" class="btn-apple-primary w-full sm:flex-1 py-3 px-6 shadow-md text-center">
+                    <!-- Bottom Action Buttons with Real Backend API Integration -->
+                    <div class="pt-4 border-t border-white/10 light:border-slate-200 flex flex-wrap gap-3 items-center">
+                        {% if order.status == 'ASSIGNED' %}
+                        <button onclick="updateDeliveryStatus('{{ order.db_id }}', 'READY_FOR_PICKUP')" class="btn-apple-primary py-2.5 px-5 text-xs">
+                            <i data-lucide="check-circle" class="w-4 h-4"></i>
+                            <span>Mark Ready for Pickup</span>
+                        </button>
+                        {% elif order.status == 'READY_FOR_PICKUP' %}
+                        <button onclick="updateDeliveryStatus('{{ order.db_id }}', 'PICKED_UP')" class="btn-apple-primary py-2.5 px-5 text-xs">
+                            <i data-lucide="box" class="w-4 h-4"></i>
+                            <span>Confirm Shelter Pickup</span>
+                        </button>
+                        {% elif order.status == 'PICKED_UP' %}
+                        <button onclick="updateDeliveryStatus('{{ order.db_id }}', 'IN_TRANSIT')" class="btn-apple-primary py-2.5 px-5 text-xs">
                             <i data-lucide="truck" class="w-4 h-4"></i>
-                            <span>Accept &amp; Start Transport</span>
-                            <i data-lucide="arrow-right" class="w-4 h-4"></i>
-                        </a>
-                        <a href="{% url 'delivery_confirmation' %}" class="btn-apple-secondary w-full sm:w-auto py-3 px-6 text-center">
+                            <span>Start In-Transit Transport</span>
+                        </button>
+                        {% elif order.status == 'IN_TRANSIT' %}
+                        <button onclick="updateDeliveryStatus('{{ order.db_id }}', 'ARRIVED_AT_CUSTOMER')" class="btn-apple-primary py-2.5 px-5 text-xs">
+                            <i data-lucide="navigation" class="w-4 h-4"></i>
+                            <span>Mark Arrived at Customer</span>
+                        </button>
+                        {% elif order.status == 'ARRIVED_AT_CUSTOMER' or order.status == 'HANDOVER_CONFIRMED' %}
+                        <button onclick="openProofUploadModal('{{ order.db_id }}')" class="btn-apple-primary py-2.5 px-5 text-xs">
                             <i data-lucide="camera" class="w-4 h-4"></i>
-                            <span>Upload Proof</span>
+                            <span>Upload Proof &amp; Complete Delivery</span>
+                        </button>
+                        {% else %}
+                        <span class="px-3 py-1.5 rounded-xl bg-emerald-500/20 text-emerald-300 font-mono font-bold text-xs border border-emerald-500/30">
+                            Completed &bull; Handover Verified
+                        </span>
+                        {% endif %}
+
+                        <a href="{% url 'delivery_tracking' %}?delivery_id={{ order.db_id }}" class="btn-apple-secondary py-2.5 px-4 text-xs">
+                            <i data-lucide="navigation" class="w-4 h-4"></i>
+                            <span>Track Route</span>
                         </a>
                     </div>
 
                 </div>
+                {% empty %}
+                <div class="dash-card p-12 text-center rounded-3xl border border-white/10">
+                    <div class="w-16 h-16 rounded-full bg-white/5 text-slate-400 flex items-center justify-center mx-auto mb-4">
+                        <i data-lucide="truck" class="w-8 h-8 text-[#FF8F1C]"></i>
+                    </div>
+                    <h4 class="text-lg font-bold text-white font-heading">No Active Deliveries Assigned</h4>
+                    <p class="text-xs text-slate-400 mt-1">When an animal shelter assigns a transport job to your account, it will appear here in real-time.</p>
+                </div>
+                {% endfor %}
 
             </section>
 
@@ -942,6 +1046,65 @@
                 }
             }
         });
+
+        // Backend API AJAX for Delivery Status Updates
+        async function updateDeliveryStatus(deliveryId, newStatus) {
+            if (!confirm(`Confirm delivery milestone update to: ${newStatus}?`)) return;
+            try {
+                const resp = await fetch('/users/api/delivery/update-status/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        delivery_id: deliveryId,
+                        status: newStatus,
+                        location_notes: "Location updated via Delivery Staff Dashboard"
+                    })
+                });
+                const res = await resp.json();
+                if (res.status === 'success') {
+                    alert(res.message || "Delivery status updated successfully!");
+                    window.location.reload();
+                } else {
+                    alert("Failed to update status: " + (res.message || "Unauthorized or invalid delivery ID"));
+                }
+            } catch(e) {
+                alert("Server error communicating with delivery status endpoint: " + e.message);
+            }
+        }
+
+        // Open Proof Upload Modal / Form
+        function openProofUploadModal(deliveryId) {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/*';
+            input.onchange = async function() {
+                if (!input.files || input.files.length === 0) return;
+                const file = input.files[0];
+                const formData = new FormData();
+                formData.append('delivery_id', deliveryId);
+                formData.append('proof_photo', file);
+                formData.append('notes', 'Doorstep pet handover verification photo');
+
+                try {
+                    const resp = await fetch('/users/api/delivery/upload-proof/', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    const res = await resp.json();
+                    if (res.status === 'success') {
+                        alert(res.message || "Delivery proof uploaded successfully!");
+                        window.location.reload();
+                    } else {
+                        alert("Proof upload error: " + (res.message || "Could not save photo"));
+                    }
+                } catch(e) {
+                    alert("Server error uploading proof photo: " + e.message);
+                }
+            };
+            input.click();
+        }
 
         // Theme Toggle (Compatible with KindHeart Profile system)
         function toggleTheme() {

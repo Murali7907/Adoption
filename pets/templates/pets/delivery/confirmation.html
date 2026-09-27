@@ -592,23 +592,24 @@
                 </div>
 
             <!-- ORDER SUMMARY CARD -->
+            {% with order=deliv_requests|first %}
             <div class="dash-card p-6 sm:p-7 rounded-3xl mb-8 space-y-4">
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/10 light:border-slate-200">
                     <div class="flex items-center gap-4">
                         <div class="w-16 h-16 rounded-2xl overflow-hidden border border-white/10 light:border-slate-300 shrink-0 relative bg-black/40 shadow-md">
-                            <img src="{% static 'pets/images/bruno_landscape.jpg' %}" 
-                                 alt="Bruno - Golden Retriever" 
+                            <img src="{{ order.petImage|default:'/static/kindheart_bruno.jpg' }}" 
+                                 alt="{{ order.petName|default:'Companion Pet' }}" 
                                  class="w-full h-full object-cover pet-photo-zoom"
-                                 onerror="this.src='/static/kindheart_bruno.jpg'; this.onerror=function(){this.src='https://images.unsplash.com/photo-1552053831-71594a27632d?auto=format&fit=crop&w=800&q=80'};">
+                                 onerror="this.src='/static/kindheart_bruno.jpg';">
                         </div>
                         <div>
                             <div class="flex items-center gap-2">
-                                <span class="text-xs font-mono font-bold text-[#FF8F1C]">Delivery #DEL-1024</span>
+                                <span class="text-xs font-mono font-bold text-[#FF8F1C]">Delivery {{ order.id|default:"#DEL-1024" }}</span>
                                 <span class="text-slate-400 text-xs">&bull;</span>
                                 <span class="text-[11px] font-mono text-emerald-400">Ready for Sign-Off</span>
                             </div>
-                            <h3 class="text-xl font-bold font-heading text-white mt-0.5">Pet: Bruno <span class="text-sm font-normal text-slate-400">(Golden Retriever)</span></h3>
-                            <p class="text-xs text-slate-300 mt-1">Delivered to: <span class="text-white font-semibold">Rahul Sharma</span> &bull; 124 Palm St, Indiranagar</p>
+                            <h3 class="text-xl font-bold font-heading text-white mt-0.5">Pet: {{ order.petName|default:"Bruno" }} <span class="text-sm font-normal text-slate-400">({{ order.petBreed|default:"Golden Retriever" }})</span></h3>
+                            <p class="text-xs text-slate-300 mt-1">Delivered to: <span class="text-white font-semibold">{{ order.customerName|default:"Adopter" }}</span> &bull; {{ order.dropAddress|default:"Indiranagar" }}</p>
                         </div>
                     </div>
 
@@ -621,15 +622,15 @@
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
                     <div class="p-3 rounded-xl bg-white/[0.02] light:bg-slate-50 border border-white/10 light:border-slate-200">
                         <span class="text-[10px] font-mono text-slate-400 uppercase block">Shelter Origin</span>
-                        <span class="font-bold text-white mt-0.5 block">ABC Animal Shelter</span>
+                        <span class="font-bold text-white mt-0.5 block">{{ order.shelterName|default:"Happy Paws Shelter" }}</span>
                     </div>
                     <div class="p-3 rounded-xl bg-white/[0.02] light:bg-slate-50 border border-white/10 light:border-slate-200">
-                        <span class="text-[10px] font-mono text-slate-400 uppercase block">Adoption Fee</span>
-                        <span class="font-bold text-emerald-400 mt-0.5 block">Settled in Escrow</span>
+                        <span class="text-[10px] font-mono text-slate-400 uppercase block">Delivery Fee</span>
+                        <span class="font-bold text-emerald-400 mt-0.5 block">₹{{ order.totalFee|default:"1100" }}</span>
                     </div>
                     <div class="p-3 rounded-xl bg-white/[0.02] light:bg-slate-50 border border-white/10 light:border-slate-200">
-                        <span class="text-[10px] font-mono text-slate-400 uppercase block">Handover Timestamp</span>
-                        <span class="font-bold text-white mt-0.5 block">17 Aug 2026 &bull; Live</span>
+                        <span class="text-[10px] font-mono text-slate-400 uppercase block">Handover Date</span>
+                        <span class="font-bold text-white mt-0.5 block">{{ order.preferredDate|default:"Today" }}</span>
                     </div>
                 </div>
             </div>
@@ -638,10 +639,10 @@
             <div class="dash-card p-6 sm:p-8 rounded-3xl shadow-xl space-y-6">
                 <div>
                     <h3 class="text-lg font-bold font-heading text-white">Upload Handover Photo Proof</h3>
-                    <p class="text-xs text-slate-400 mt-0.5">Please capture or attach photo proof showing companion Bruno with adopter Rahul Sharma.</p>
+                    <p class="text-xs text-slate-400 mt-0.5">Please attach photo proof showing companion {{ order.petName|default:"Pet" }} with adopter {{ order.customerName|default:"Adopter" }}.</p>
                 </div>
 
-                <form action="{% url 'delivery_dashboard' %}" method="GET" class="space-y-6">
+                <form id="confirmation-upload-form" onsubmit="submitProofForm(event, '{{ order.db_id }}')" class="space-y-6">
                     
                     <!-- UPLOAD DROPZONE -->
                     <div>
@@ -688,7 +689,7 @@
                         <label class="flex items-start gap-3 cursor-pointer">
                             <input type="checkbox" required checked class="mt-1 rounded border-slate-700 text-[#FF8F1C] focus:ring-[#FF8F1C] w-4 h-4">
                             <span class="text-xs text-slate-300 leading-relaxed">
-                                I confirm that recipient <strong class="text-white">Rahul Sharma</strong> has physically accepted custody of pet <strong class="text-white">Bruno</strong>, verified companion health condition, and received the shelter medical vaccination passport.
+                                I confirm that recipient <strong class="text-white">{{ order.customerName|default:"Adopter" }}</strong> has physically accepted custody of pet <strong class="text-white">{{ order.petName|default:"Companion Pet" }}</strong>, verified companion health condition, and completed handover.
                             </span>
                         </label>
                     </div>
@@ -697,16 +698,17 @@
                     <div class="pt-2 flex flex-col sm:flex-row gap-3 items-center">
                         <button type="submit" class="btn-apple-primary w-full sm:flex-1 py-4 text-center cursor-pointer shadow-lg">
                             <i data-lucide="check-circle" class="w-4 h-4"></i>
-                            <span>Complete Delivery &amp; Release Custody</span>
+                            <span>Complete Delivery &amp; Upload Proof</span>
                         </button>
-                        <a href="{% url 'delivery_tracking' %}" class="btn-apple-secondary w-full sm:w-auto py-4 text-center">
+                        <a href="{% url 'delivery_dashboard' %}" class="btn-apple-secondary w-full sm:w-auto py-4 text-center">
                             <i data-lucide="arrow-left" class="w-4 h-4"></i>
-                            <span>Back to Tracking</span>
+                            <span>Back to Dashboard</span>
                         </a>
                     </div>
 
                 </form>
             </div>
+            {% endwith %}
 
             <!-- REGULATORY FOOTER -->
             <footer class="mt-10 p-5 rounded-2xl bg-white/[0.02] light:bg-slate-100 border border-white/10 light:border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-400">
@@ -840,6 +842,35 @@
                 localStorage.setItem('kindheart_theme', 'light');
                 localStorage.setItem('theme', 'light');
                 updateThemeUI(true);
+            }
+        }
+
+        async function submitProofForm(e, deliveryId) {
+            e.preventDefault();
+            const fileInput = document.getElementById('proof-file-input');
+            if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
+                alert("Please select a handover photo proof file to upload.");
+                return;
+            }
+            const formData = new FormData();
+            formData.append('delivery_id', deliveryId);
+            formData.append('proof_photo', fileInput.files[0]);
+            formData.append('notes', 'Doorstep pet handover verification photo from confirmation page');
+
+            try {
+                const resp = await fetch('/users/api/delivery/upload-proof/', {
+                    method: 'POST',
+                    body: formData
+                });
+                const res = await resp.json();
+                if (res.status === 'success') {
+                    alert(res.message || "Delivery proof uploaded successfully!");
+                    window.location.href = "{% url 'delivery_dashboard' %}";
+                } else {
+                    alert("Proof upload error: " + (res.message || "Could not save photo"));
+                }
+            } catch(err) {
+                alert("Server error uploading proof: " + err.message);
             }
         }
 

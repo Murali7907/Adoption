@@ -587,30 +587,31 @@
             <main class="flex-1 p-6 sm:p-8 lg:p-10 overflow-y-auto max-w-5xl mx-auto w-full">
 
             <!-- ORDER SUMMARY CONTEXT STRIP -->
+            {% with order=deliv_requests|first %}
             <div class="dash-card p-5 sm:p-6 rounded-3xl mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div class="flex items-center gap-4">
                     <div class="w-16 h-16 rounded-2xl overflow-hidden border border-white/10 light:border-slate-300 shrink-0 relative bg-black/40 shadow-md">
-                        <img src="{% static 'pets/images/bruno_landscape.jpg' %}" 
-                             alt="Bruno - Golden Retriever" 
+                        <img src="{{ order.petImage|default:'/static/kindheart_bruno.jpg' }}" 
+                             alt="{{ order.petName|default:'Companion Pet' }}" 
                              class="w-full h-full object-cover pet-photo-zoom"
-                             onerror="this.src='/static/kindheart_bruno.jpg'; this.onerror=function(){this.src='https://images.unsplash.com/photo-1552053831-71594a27632d?auto=format&fit=crop&w=800&q=80'};">
+                             onerror="this.src='/static/kindheart_bruno.jpg';">
                     </div>
                     <div>
                         <div class="flex items-center gap-2">
-                            <span class="text-xs font-mono font-bold text-[#FF8F1C]">Delivery #DEL-1024</span>
+                            <span class="text-xs font-mono font-bold text-[#FF8F1C]">Delivery {{ order.id|default:"#DEL-1024" }}</span>
                             <span class="text-slate-400 text-xs">&bull;</span>
-                            <span class="text-[11px] font-mono text-slate-400">Bruno (Golden Retriever)</span>
+                            <span class="text-[11px] font-mono text-slate-400">{{ order.petName|default:"Bruno" }} ({{ order.petBreed|default:"Golden Retriever" }})</span>
                         </div>
                         <div class="text-xs text-slate-300 mt-1">
-                            Destination: <span class="font-semibold text-white">Rahul Sharma &bull; 124 Palm St</span>
+                            Destination: <span class="font-semibold text-white">{{ order.customerName|default:"Adopter" }} &bull; {{ order.dropAddress|default:"Indiranagar, Bangalore" }}</span>
                         </div>
                     </div>
                 </div>
 
                 <div class="flex items-center gap-3">
                     <span class="px-3 py-1.5 rounded-xl bg-emerald-500/15 text-emerald-400 font-mono font-bold text-xs flex items-center gap-1.5 border border-emerald-500/20">
-                        <i data-lucide="thermometer" class="w-3.5 h-3.5"></i>
-                        <span>Crate Temp: 21.8°C (Optimal)</span>
+                        <i data-lucide="shield-check" class="w-3.5 h-3.5"></i>
+                        <span>Status: {{ order.statusDisplay|default:"In Transit" }}</span>
                     </span>
                     <a href="{% url 'delivery_dashboard' %}" class="btn-apple-secondary text-xs !py-2 !px-3">
                         <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
@@ -627,13 +628,13 @@
                         <p class="text-xs text-slate-400">Advance the delivery lifecycle as checkpoints are reached.</p>
                     </div>
                     <span class="px-2.5 py-1 rounded-full text-[10px] font-mono font-bold bg-blue-500/15 text-blue-400 border border-blue-500/30">
-                        Phase 3 of 5
+                        Status: {{ order.status|default:"ASSIGNED" }}
                     </span>
                 </div>
                 
                 <div class="space-y-3.5">
                     
-                    <!-- Milestone 1: Completed -->
+                    <!-- Milestone 1: Assigned -->
                     <div class="w-full py-4 px-5 rounded-2xl bg-emerald-500/10 border border-emerald-500/25 flex items-center justify-between transition-all">
                         <div class="flex items-center gap-3">
                             <div class="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
@@ -641,65 +642,87 @@
                             </div>
                             <div>
                                 <span class="text-xs font-bold text-white block">1. Accept Delivery Assignment</span>
-                                <span class="text-[11px] font-mono text-emerald-400">Confirmed by John Driver &bull; 08:30 AM</span>
+                                <span class="text-[11px] font-mono text-emerald-400">Assigned Driver: {{ request.user.get_full_name|default:request.user.username }}</span>
                             </div>
                         </div>
                         <span class="px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center gap-1">
                             <i data-lucide="check-circle-2" class="w-3 h-3"></i>
-                            <span>Completed</span>
+                            <span>Assigned</span>
                         </span>
                     </div>
 
-                    <!-- Milestone 2: Completed -->
-                    <div class="w-full py-4 px-5 rounded-2xl bg-emerald-500/10 border border-emerald-500/25 flex items-center justify-between transition-all">
+                    <!-- Milestone 2: Pickup -->
+                    <div class="w-full py-4 px-5 rounded-2xl border flex items-center justify-between transition-all {% if order.status == 'READY_FOR_PICKUP' or order.status == 'PICKED_UP' or order.status == 'IN_TRANSIT' or order.status == 'ARRIVED_AT_CUSTOMER' or order.status == 'HANDOVER_CONFIRMED' or order.status == 'DELIVERED' or order.status == 'COMPLETED' %}bg-emerald-500/10 border-emerald-500/25{% else %}bg-white/[0.02] border-white/10{% endif %}">
                         <div class="flex items-center gap-3">
                             <div class="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
-                                <i data-lucide="check" class="w-4 h-4"></i>
+                                <i data-lucide="building" class="w-4 h-4"></i>
                             </div>
                             <div>
                                 <span class="text-xs font-bold text-white block">2. Pet Picked Up from Shelter</span>
-                                <span class="text-[11px] font-mono text-emerald-400">ABC Animal Shelter &bull; Dr. Ananya Roy Cleared &bull; 09:15 AM</span>
+                                <span class="text-[11px] font-mono text-slate-400">{{ order.shelterName|default:"Happy Paws Shelter" }}</span>
                             </div>
                         </div>
-                        <span class="px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center gap-1">
-                            <i data-lucide="check-circle-2" class="w-3 h-3"></i>
-                            <span>Completed</span>
+                        {% if order.status == 'ASSIGNED' %}
+                        <button onclick="updateDeliveryStatus('{{ order.db_id }}', 'READY_FOR_PICKUP')" class="btn-apple-primary text-xs !py-1.5 !px-3">
+                            <span>Mark Ready</span>
+                        </button>
+                        {% elif order.status == 'READY_FOR_PICKUP' %}
+                        <button onclick="updateDeliveryStatus('{{ order.db_id }}', 'PICKED_UP')" class="btn-apple-primary text-xs !py-1.5 !px-3">
+                            <span>Confirm Pickup</span>
+                        </button>
+                        {% else %}
+                        <span class="px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                            Picked Up
                         </span>
+                        {% endif %}
                     </div>
 
-                    <!-- Milestone 3: Active Now -->
-                    <div class="w-full py-4 px-5 rounded-2xl bg-blue-500/15 border border-blue-500/40 flex items-center justify-between shadow-lg shadow-blue-500/10">
+                    <!-- Milestone 3: Transport -->
+                    <div class="w-full py-4 px-5 rounded-2xl border flex items-center justify-between transition-all {% if order.status == 'IN_TRANSIT' or order.status == 'ARRIVED_AT_CUSTOMER' or order.status == 'HANDOVER_CONFIRMED' or order.status == 'DELIVERED' or order.status == 'COMPLETED' %}bg-blue-500/15 border-blue-500/40{% else %}bg-white/[0.02] border-white/10{% endif %}">
                         <div class="flex items-center gap-3">
-                            <div class="w-8 h-8 rounded-xl bg-blue-500 text-white flex items-center justify-center shrink-0 shadow-md animate-pulse">
+                            <div class="w-8 h-8 rounded-xl bg-blue-500 text-white flex items-center justify-center shrink-0">
                                 <i data-lucide="truck" class="w-4 h-4 keep-white"></i>
                             </div>
                             <div>
-                                <span class="text-xs font-bold text-white block">3. Start Transport / In Transit</span>
-                                <span class="text-[11px] font-mono text-blue-400">GPS Live Telematics Armed &bull; ETA 04:30 PM</span>
+                                <span class="text-xs font-bold text-white block">3. Transport / In Transit</span>
+                                <span class="text-[11px] font-mono text-blue-400">Live GPS &amp; Telematics Armed</span>
                             </div>
                         </div>
-                        <span class="px-3 py-1 rounded-full text-[10px] font-mono font-bold bg-blue-500 text-white keep-white shadow-md flex items-center gap-1.5">
-                            <span class="w-2 h-2 rounded-full bg-white animate-ping"></span>
-                            <span>Active Now</span>
+                        {% if order.status == 'PICKED_UP' %}
+                        <button onclick="updateDeliveryStatus('{{ order.db_id }}', 'IN_TRANSIT')" class="btn-apple-primary text-xs !py-1.5 !px-3">
+                            <span>Start Transport</span>
+                        </button>
+                        {% else %}
+                        <span class="px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold bg-blue-500/20 text-blue-300">
+                            {{ order.status }}
                         </span>
+                        {% endif %}
                     </div>
 
-                    <!-- Milestone 4: Pending / Actionable -->
-                    <div class="w-full py-4 px-5 rounded-2xl bg-white/[0.02] light:bg-slate-50 border border-white/10 light:border-slate-200 flex items-center justify-between">
+                    <!-- Milestone 4: Customer Arrival -->
+                    <div class="w-full py-4 px-5 rounded-2xl border flex items-center justify-between transition-all {% if order.status == 'ARRIVED_AT_CUSTOMER' or order.status == 'HANDOVER_CONFIRMED' or order.status == 'DELIVERED' or order.status == 'COMPLETED' %}bg-emerald-500/10 border-emerald-500/25{% else %}bg-white/[0.02] border-white/10{% endif %}">
                         <div class="flex items-center gap-3">
                             <div class="w-8 h-8 rounded-xl bg-white/5 text-slate-400 flex items-center justify-center shrink-0">
                                 <i data-lucide="map-pin" class="w-4 h-4"></i>
                             </div>
                             <div>
-                                <span class="text-xs font-bold text-slate-300 block">4. Reached Customer Destination</span>
-                                <span class="text-[11px] font-mono text-slate-400">124 Palm St, Indiranagar, Bangalore</span>
+                                <span class="text-xs font-bold text-white block">4. Reached Customer Destination</span>
+                                <span class="text-[11px] font-mono text-slate-400">{{ order.dropAddress|default:"Customer Location" }}</span>
                             </div>
                         </div>
-                        <button type="button" onclick="markReachedDestination(this)" class="btn-apple-secondary text-xs !py-1.5 !px-3 cursor-pointer">
+                        {% if order.status == 'IN_TRANSIT' %}
+                        <button type="button" onclick="updateDeliveryStatus('{{ order.db_id }}', 'ARRIVED_AT_CUSTOMER')" class="btn-apple-primary text-xs !py-1.5 !px-3">
                             <i data-lucide="check" class="w-3.5 h-3.5"></i>
                             <span>Mark Arrived</span>
                         </button>
+                        {% else %}
+                        <span class="text-[11px] font-mono text-slate-400">{{ order.status }}</span>
+                        {% endif %}
                     </div>
+
+                </div>
+            </div>
+            {% endwith %}
 
                     <!-- Milestone 5: Complete Delivery & Upload Proof -->
                     <div class="pt-3">
@@ -809,11 +832,30 @@
             }
         });
 
-        function markReachedDestination(btn) {
-            btn.innerHTML = '<i data-lucide="check-circle-2" class="w-3.5 h-3.5 text-emerald-400"></i><span class="text-emerald-400 font-mono font-bold">Arrived &bull; Verified</span>';
-            btn.classList.remove('btn-apple-secondary');
-            btn.classList.add('px-3', 'py-1.5', 'rounded-xl', 'bg-emerald-500/15', 'border', 'border-emerald-500/30', 'pointer-events-none');
-            if (typeof lucide !== 'undefined') lucide.createIcons();
+        async function updateDeliveryStatus(deliveryId, newStatus) {
+            if (!confirm(`Confirm delivery milestone update to: ${newStatus}?`)) return;
+            try {
+                const resp = await fetch('/users/api/delivery/update-status/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        delivery_id: deliveryId,
+                        status: newStatus,
+                        location_notes: "Location updated via Delivery Tracking View"
+                    })
+                });
+                const res = await resp.json();
+                if (res.status === 'success') {
+                    alert(res.message || "Delivery status updated successfully!");
+                    window.location.reload();
+                } else {
+                    alert("Failed to update status: " + (res.message || "Unauthorized or invalid delivery ID"));
+                }
+            } catch(e) {
+                alert("Server error communicating with delivery status endpoint: " + e.message);
+            }
         }
 
         // Theme Toggle (Compatible with KindHeart Profile system)
