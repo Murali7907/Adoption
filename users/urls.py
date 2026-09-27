@@ -22,5 +22,9 @@ urlpatterns = [
     path('api/admin/delete-user/', views.api_admin_delete_user, name='api_admin_delete_user'),
     path('api/admin/save-settings/', views.api_admin_save_settings, name='api_admin_save_settings'),
     path('api/admin/save-permissions/', views.api_admin_save_permissions, name='api_admin_save_permissions'),
+    path('api/delivery/update-status/', views.api_delivery_update_status, name='api_delivery_update_status'),
+    path('api/delivery/upload-proof/', views.api_delivery_upload_proof, name='api_delivery_upload_proof'),
+    path('api/shelter/assign-delivery/', views.api_shelter_assign_delivery, name='api_shelter_assign_delivery'),
 ]
+
 

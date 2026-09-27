@@ -10874,7 +10874,7 @@
             },
             delivery: {
                 roleKey: 'delivery',
-                badgeText: 'DELIVERY AGENT',
+                badgeText: 'DELIVERY PARTNER',
                 badgeClass: 'bg-blue-500/20 text-blue-300',
                 iconName: 'truck',
                 iconColor: '#3B82F6',
@@ -10886,21 +10886,22 @@
                     {
                         title: 'Transit Operations',
                         links: [
-                            { id: 'dashboard', label: 'Dispatch Hub', icon: 'truck', badgeVal: 'Active', badgeClass: 'bg-blue-500/20 text-blue-300' },
-                            { id: 'applications', label: 'Assigned Deliveries', icon: 'package-check', badgeVal: '1 Transit', badgeClass: 'bg-[#FF8F1C]/20 text-[#FF9B2E]' },
-                            { id: 'my-pets', label: 'Transit Passenger (Bruno)', icon: 'dog' }
+                            { id: 'dashboard', label: 'Dispatch Hub', icon: 'truck' },
+                            { id: 'applications', label: 'Assigned Deliveries', icon: 'package-check' },
+                            { id: 'my-pets', label: 'My Assigned Pets', icon: 'dog' }
                         ]
                     },
                     {
-                        title: 'Dispatch & Verification',
+                        title: 'Dispatch & Identity',
                         links: [
-                            { id: 'payments', label: 'COD & Handover Payments', icon: 'wallet' },
-                            { id: 'documents', label: 'Transit Health Passports', icon: 'clipboard-check' },
+                            { id: 'payments', label: 'Handover Payments', icon: 'wallet' },
+                            { id: 'documents', label: 'Identity & Verification', icon: 'shield-check' },
                             { id: 'notifications', label: 'Dispatch Alerts', icon: 'bell' }
                         ]
                     }
                 ]
             },
+
             shelter: {
                 roleKey: 'shelter',
                 badgeText: 'SHELTER STAFF',

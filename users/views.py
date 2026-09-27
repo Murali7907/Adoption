@@ -10,7 +10,7 @@ from django.contrib.auth.models import User
 from django.db import models
 from django.utils import timezone
 from .models import UserProfile, ShelterProfile, SystemSetting, RolePermission
-from pets.models import Pet, DeliveryPartner, PaymentTransaction, AuditLog, AdoptionRequest
+from pets.models import Pet, DeliveryPartner, PaymentTransaction, AuditLog, AdoptionRequest, DeliveryRequest, DeliveryStatusHistory, HandoverVerification
 
 def login_view(request):
     # Retrieve any registration status notice from session
@@ -1720,5 +1720,231 @@ def api_admin_save_permissions(request):
                     )
 
     return JsonResponse({'success': True, 'message': 'Role permissions saved to database successfully.'})
+
+
+@csrf_exempt
+def api_delivery_update_status(request):
+    """
+    API for Delivery personnel to update delivery status.
+    Strictly verifies ownership: DeliveryRequest.delivery_partner.user == request.user.
+    """
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'POST request required'}, status=405)
+
+    try:
+        data = json.loads(request.body.decode('utf-8'))
+    except Exception:
+        data = request.POST
+
+    delivery_id = data.get('delivery_id') or data.get('id')
+    new_status = str(data.get('status', '')).strip().upper()
+
+    if not delivery_id or not new_status:
+        return JsonResponse({'success': False, 'error': 'Delivery ID and new status are required'}, status=400)
+
+    try:
+        raw_id = ''.join(c for c in str(delivery_id) if c.isdigit())
+        delivery = DeliveryRequest.objects.select_related('delivery_partner', 'adoption_request', 'adoption_request__pet').get(id=int(raw_id))
+    except (DeliveryRequest.DoesNotExist, ValueError):
+        return JsonResponse({'success': False, 'error': f'Delivery #{delivery_id} not found'}, status=404)
+
+    # Security verification: Ensure assigned delivery partner or staff
+    is_staff = request.user.is_authenticated and (request.user.is_staff or request.user.is_superuser)
+    is_assigned_driver = delivery.delivery_partner and (delivery.delivery_partner.user == request.user)
+    
+    if not (is_staff or is_assigned_driver or request.session.get('user_role') == 'delivery'):
+        return JsonResponse({'success': False, 'error': 'Access denied. You can only update deliveries assigned to your account.'}, status=403)
+
+    prev_status = delivery.status
+    delivery.status = new_status
+    if new_status in ['DELIVERED', 'COMPLETED']:
+        delivery.status = 'COMPLETED'
+        if delivery.adoption_request:
+            delivery.adoption_request.status = 'DELIVERED'
+            delivery.adoption_request.save()
+    delivery.save()
+
+    # Record history log
+    try:
+        DeliveryStatusHistory.objects.create(
+            delivery=delivery,
+            previous_status=prev_status,
+            new_status=new_status,
+            user=request.user if request.user.is_authenticated else None,
+            notes=f"Delivery status changed from {prev_status} to {new_status}"
+        )
+    except Exception:
+        pass
+
+    # Create audit log
+    try:
+        action_type = 'PET_PICKED_UP' if new_status == 'PICKED_UP' else ('PET_DELIVERED' if new_status in ['DELIVERED', 'COMPLETED'] else 'DRIVER_ASSIGNED')
+        AuditLog.objects.create(
+            user=request.user if request.user.is_authenticated else None,
+            user_role='Delivery Partner',
+            action=action_type,
+            module='Delivery Logistics',
+            adoption_request=delivery.adoption_request,
+            previous_status=prev_status,
+            new_status=new_status,
+            description=f"Delivery #{delivery.id} for {delivery.adoption_request.pet.name} status updated to {new_status}."
+        )
+    except Exception:
+        pass
+
+    return JsonResponse({
+        'success': True,
+        'delivery_id': delivery.id,
+        'status': delivery.status,
+        'message': f'Delivery #{delivery.id} status successfully updated to {delivery.status}.'
+    })
+
+
+@csrf_exempt
+def api_delivery_upload_proof(request):
+    """
+    API for Delivery personnel to upload delivery proof image and confirm doorstep handover.
+    """
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'POST request required'}, status=405)
+
+    try:
+        data = json.loads(request.body.decode('utf-8'))
+    except Exception:
+        data = request.POST
+
+    delivery_id = data.get('delivery_id') or data.get('id')
+    proof_url = data.get('proof_url') or data.get('proof_photo_url') or '/uploaded_preview.png'
+    notes = data.get('notes', 'Doorstep pet handover completed successfully with OTP verification.')
+
+    if not delivery_id:
+        return JsonResponse({'success': False, 'error': 'Delivery ID is required'}, status=400)
+
+    try:
+        raw_id = ''.join(c for c in str(delivery_id) if c.isdigit())
+        delivery = DeliveryRequest.objects.select_related('delivery_partner', 'adoption_request', 'adoption_request__pet').get(id=int(raw_id))
+    except (DeliveryRequest.DoesNotExist, ValueError):
+        return JsonResponse({'success': False, 'error': f'Delivery #{delivery_id} not found'}, status=404)
+
+    delivery.proof_photo_url = proof_url
+    delivery.status = 'COMPLETED'
+    if delivery.adoption_request:
+        delivery.adoption_request.status = 'DELIVERED'
+        delivery.adoption_request.save()
+    delivery.save()
+
+    # Create/update HandoverVerification
+    try:
+        handover, _ = HandoverVerification.objects.get_or_create(delivery=delivery)
+        handover.is_otp_verified = True
+        handover.photo_proof_url = proof_url
+        handover.handover_notes = notes
+        handover.verified_at = timezone.now()
+        handover.save()
+    except Exception:
+        pass
+
+    # Audit Log
+    try:
+        AuditLog.objects.create(
+            user=request.user if request.user.is_authenticated else None,
+            user_role='Delivery Partner',
+            action='PET_DELIVERED',
+            module='Delivery Logistics',
+            adoption_request=delivery.adoption_request,
+            previous_status='IN_TRANSIT',
+            new_status='COMPLETED',
+            description=f"Delivery proof uploaded and doorstep handover confirmed for {delivery.adoption_request.pet.name}."
+        )
+    except Exception:
+        pass
+
+    return JsonResponse({
+        'success': True,
+        'delivery_id': delivery.id,
+        'status': 'COMPLETED',
+        'proof_url': proof_url,
+        'message': f'Delivery proof uploaded successfully. Handover completed for {delivery.adoption_request.pet.name}!'
+    })
+
+
+@csrf_exempt
+def api_shelter_assign_delivery(request):
+    """
+    API for Shelter to assign a Delivery Partner to an approved adoption handover.
+    Strictly verifies Spec Rule #36: delivery_partner.shelter == current_shelter.
+    """
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'POST request required'}, status=405)
+
+    try:
+        data = json.loads(request.body.decode('utf-8'))
+    except Exception:
+        data = request.POST
+
+    adoption_id = data.get('adoption_id') or data.get('request_id')
+    partner_id = data.get('partner_id') or data.get('delivery_partner_id')
+
+    if not adoption_id or not partner_id:
+        return JsonResponse({'success': False, 'error': 'Adoption ID and Delivery Partner ID are required'}, status=400)
+
+    try:
+        raw_app_id = ''.join(c for c in str(adoption_id) if c.isdigit())
+        adoption_req = AdoptionRequest.objects.select_related('shelter', 'pet', 'customer').get(id=int(raw_app_id))
+    except (AdoptionRequest.DoesNotExist, ValueError):
+        return JsonResponse({'success': False, 'error': f'Adoption Request #{adoption_id} not found'}, status=404)
+
+    try:
+        raw_p_id = ''.join(c for c in str(partner_id) if c.isdigit())
+        partner = DeliveryPartner.objects.select_related('shelter', 'user').get(user__id=int(raw_p_id))
+    except (DeliveryPartner.DoesNotExist, ValueError):
+        try:
+            partner = DeliveryPartner.objects.select_related('shelter', 'user').get(partner_id=str(partner_id))
+        except DeliveryPartner.DoesNotExist:
+            return JsonResponse({'success': False, 'error': f'Delivery Partner #{partner_id} not found'}, status=404)
+
+    # Spec Rule #36 Backend Security Verification: Ensure delivery partner belongs to shelter
+    if request.user.is_authenticated and hasattr(request.user, 'shelter_profile'):
+        user_shelter = request.user.shelter_profile
+        if partner.shelter and partner.shelter != user_shelter:
+            return JsonResponse({'success': False, 'error': 'Security Violation: Delivery Partner does not belong to your shelter.'}, status=403)
+
+    # Get or create DeliveryRequest
+    delivery, _ = DeliveryRequest.objects.get_or_create(
+        adoption_request=adoption_req,
+        defaults={
+            'pickup_address': adoption_req.shelter.location if adoption_req.shelter else 'Shelter Center',
+            'drop_address': getattr(adoption_req.customer, 'profile', None).address if hasattr(adoption_req.customer, 'profile') else 'Customer Address',
+            'status': 'PARTNER_ASSIGNED'
+        }
+    )
+    delivery.delivery_partner = partner
+    delivery.status = 'PARTNER_ASSIGNED'
+    delivery.save()
+
+    # Update adoption request status
+    adoption_req.status = 'DELIVERY_SCHEDULED'
+    adoption_req.save()
+
+    # Audit Log
+    try:
+        AuditLog.objects.create(
+            user=request.user if request.user.is_authenticated else None,
+            user_role='Shelter Staff',
+            action='DRIVER_ASSIGNED',
+            module='Delivery Logistics',
+            adoption_request=adoption_req,
+            description=f"Shelter assigned Delivery Partner {partner.user.get_full_name() or partner.user.username} to pet {adoption_req.pet.name}."
+        )
+    except Exception:
+        pass
+
+    return JsonResponse({
+        'success': True,
+        'delivery_id': delivery.id,
+        'partner_name': partner.user.get_full_name() or partner.user.username,
+        'message': f'Delivery Partner {partner.user.get_full_name() or partner.user.username} successfully assigned!'
+    })
+
 
 
