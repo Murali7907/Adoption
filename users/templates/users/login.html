@@ -709,6 +709,45 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
+        /* 🔢 SPACIOUS SEGMENTED 6-DIGIT OTP BOXES */
+        .otp-boxes-grid {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin: 16px 0 18px 0;
+        }
+
+        .otp-box-digit {
+            width: 44px;
+            height: 52px;
+            border-radius: 14px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1.5px solid rgba(255, 143, 28, 0.35);
+            color: var(--amber);
+            font-family: 'JetBrains Mono', monospace, sans-serif;
+            font-size: 22px;
+            font-weight: 800;
+            text-align: center;
+            outline: none;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
+            transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
+        }
+
+        .otp-box-digit:focus {
+            background: rgba(255, 143, 28, 0.16);
+            border-color: #FFA742;
+            box-shadow: 0 0 0 3px rgba(255, 143, 28, 0.35), 0 6px 16px rgba(255, 143, 28, 0.2);
+            transform: translateY(-2px);
+            color: #FFFFFF;
+        }
+
+        .otp-box-digit.has-value {
+            border-color: #FFA742;
+            background: rgba(255, 143, 28, 0.2);
+            color: #FFFFFF;
+        }
+
         .otp-notice-pill {
             display: flex;
             align-items: center;
@@ -1306,12 +1345,16 @@
                                 <input type="hidden" name="action" value="verify_account_otp" />
                                 <input type="hidden" name="verify_user_id" value="{{ verify_user_id|default:'' }}" />
 
-                                <div class="form-group-floating">
-                                    <div class="input-container">
-                                        <label class="floating-label" for="acct-otp-input">6-Digit Code</label>
-                                        <input type="text" id="acct-otp-input" name="account_otp_code" maxlength="6" required placeholder="• • • • • •" class="form-input" style="letter-spacing: 6px; font-size: 16px; text-align: center; font-weight: 700;" />
-                                    </div>
+                                <!-- 🔢 Spacious Segmented 6-Digit OTP Boxes -->
+                                <div class="otp-boxes-grid" id="acct-otp-boxes-grid">
+                                    <input type="text" maxlength="1" class="otp-box-digit" data-target="acct-otp-input" data-idx="0" inputmode="numeric" autocomplete="one-time-code" />
+                                    <input type="text" maxlength="1" class="otp-box-digit" data-target="acct-otp-input" data-idx="1" inputmode="numeric" />
+                                    <input type="text" maxlength="1" class="otp-box-digit" data-target="acct-otp-input" data-idx="2" inputmode="numeric" />
+                                    <input type="text" maxlength="1" class="otp-box-digit" data-target="acct-otp-input" data-idx="3" inputmode="numeric" />
+                                    <input type="text" maxlength="1" class="otp-box-digit" data-target="acct-otp-input" data-idx="4" inputmode="numeric" />
+                                    <input type="text" maxlength="1" class="otp-box-digit" data-target="acct-otp-input" data-idx="5" inputmode="numeric" />
                                 </div>
+                                <input type="hidden" id="acct-otp-input" name="account_otp_code" required />
 
                                 <button type="submit" class="btn-submit">
                                     <span>Verify Account & Sign In</span>
@@ -1364,13 +1407,17 @@
                                     <button type="button" class="btn-copy-otp" onclick="autofillOTP()" title="Autofill this code">Autofill</button>
                                 </div>
 
-                                <div class="form-group-floating" style="margin-top: 14px;">
-                                    <div class="input-container">
-                                        <label class="floating-label" for="fp-otp-input">6-Digit Code</label>
-                                        <input type="text" id="fp-otp-input" maxlength="6" placeholder="• • • • • •" class="form-input" style="letter-spacing: 6px; font-size: 16px; text-align: center; font-weight: 700;" />
-                                    </div>
-                                    <div id="fp-otp-error" class="fp-error-msg" style="display: none;">Invalid OTP code. Please enter the code shown above.</div>
+                                <!-- 🔢 Spacious Segmented 6-Digit OTP Boxes -->
+                                <div class="otp-boxes-grid" id="fp-otp-boxes-grid">
+                                    <input type="text" maxlength="1" class="otp-box-digit" data-target="fp-otp-input" data-idx="0" inputmode="numeric" autocomplete="one-time-code" />
+                                    <input type="text" maxlength="1" class="otp-box-digit" data-target="fp-otp-input" data-idx="1" inputmode="numeric" />
+                                    <input type="text" maxlength="1" class="otp-box-digit" data-target="fp-otp-input" data-idx="2" inputmode="numeric" />
+                                    <input type="text" maxlength="1" class="otp-box-digit" data-target="fp-otp-input" data-idx="3" inputmode="numeric" />
+                                    <input type="text" maxlength="1" class="otp-box-digit" data-target="fp-otp-input" data-idx="4" inputmode="numeric" />
+                                    <input type="text" maxlength="1" class="otp-box-digit" data-target="fp-otp-input" data-idx="5" inputmode="numeric" />
                                 </div>
+                                <input type="hidden" id="fp-otp-input" />
+                                <div id="fp-otp-error" class="fp-error-msg" style="display: none; text-align: center;">Invalid OTP code. Please enter the code shown above.</div>
 
                                 <button type="button" class="btn-submit" onclick="verifyPasswordResetOTP()">
                                     <span>Verify OTP Code</span>
@@ -1944,21 +1991,79 @@
             }, 1000);
         }
 
+        function fillOTPGridBoxes(targetInputId, code) {
+            const hiddenInput = document.getElementById(targetInputId);
+            if (hiddenInput) hiddenInput.value = code;
+
+            const boxes = document.querySelectorAll(`.otp-box-digit[data-target="${targetInputId}"]`);
+            boxes.forEach((box, idx) => {
+                const char = code[idx] || '';
+                box.value = char;
+                if (char) box.classList.add('has-value');
+                else box.classList.remove('has-value');
+            });
+            if (boxes.length > 0) {
+                const lastIdx = Math.min(code.length, boxes.length - 1);
+                boxes[lastIdx].focus();
+            }
+        }
+
         function autofillOTP() {
-            const otpInput = document.getElementById('fp-otp-input');
-            if (otpInput && generatedOTP) {
-                otpInput.value = generatedOTP;
+            if (generatedOTP) {
+                fillOTPGridBoxes('fp-otp-input', generatedOTP);
                 const otpError = document.getElementById('fp-otp-error');
                 if (otpError) otpError.style.display = 'none';
             }
         }
 
         function autofillAccountOTP(code) {
-            const otpInput = document.getElementById('acct-otp-input');
-            if (otpInput && code) {
-                otpInput.value = code;
+            if (code) {
+                fillOTPGridBoxes('acct-otp-input', code);
             }
         }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.otp-box-digit').forEach(input => {
+                input.addEventListener('input', function() {
+                    const val = this.value;
+                    const targetId = this.getAttribute('data-target');
+                    const idx = parseInt(this.getAttribute('data-idx'), 10);
+                    const boxes = document.querySelectorAll(`.otp-box-digit[data-target="${targetId}"]`);
+
+                    if (val) this.classList.add('has-value');
+                    else this.classList.remove('has-value');
+
+                    if (val.length >= 1 && idx < boxes.length - 1) {
+                        boxes[idx + 1].focus();
+                    }
+
+                    let combined = '';
+                    boxes.forEach(b => { combined += b.value; });
+                    const hiddenInput = document.getElementById(targetId);
+                    if (hiddenInput) hiddenInput.value = combined;
+                });
+
+                input.addEventListener('keydown', function(e) {
+                    const targetId = this.getAttribute('data-target');
+                    const idx = parseInt(this.getAttribute('data-idx'), 10);
+                    const boxes = document.querySelectorAll(`.otp-box-digit[data-target="${targetId}"]`);
+
+                    if (e.key === 'Backspace' && !this.value && idx > 0) {
+                        boxes[idx - 1].focus();
+                    }
+                });
+
+                input.addEventListener('paste', function(e) {
+                    e.preventDefault();
+                    const pasted = (e.clipboardData || window.clipboardData).getData('text').trim();
+                    const digits = pasted.replace(/\D/g, '').slice(0, 6);
+                    const targetId = this.getAttribute('data-target');
+                    if (digits) {
+                        fillOTPGridBoxes(targetId, digits);
+                    }
+                });
+            });
+        });
 
         async function verifyPasswordResetOTP() {
             const otpInput = document.getElementById('fp-otp-input');
