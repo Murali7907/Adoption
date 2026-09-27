@@ -1130,7 +1130,7 @@
                          ============================================== -->
                     <div id="view-login" class="form-view is-active">
                         <!-- Standard Login View -->
-                        <div id="login-view-normal">
+                        <div id="login-view-normal" {% if show_account_otp_verify %}style="display: none;"{% endif %}>
                             <!-- Password Reset Success Toast Banner -->
                             <div id="login-pwd-reset-success" class="pwd-reset-success-pill" style="display: none;">
                                 <span style="color: #10B981; font-weight: bold; font-size: 14px;">✓</span>
@@ -1153,6 +1153,16 @@
                                 <div style="font-size: 13px; line-height: 1.45;">
                                     <strong style="color: #34D399; display: block; margin-bottom: 2px;">Registration Notice:</strong>
                                     {{ auth_success }}
+                                </div>
+                            </div>
+                            {% endif %}
+
+                            {% if auth_info %}
+                            <div class="auth-alert-pill auth-alert-warning" style="background: rgba(245, 158, 11, 0.16); border: 1px solid rgba(245, 158, 11, 0.5); color: #FDE68A; padding: 12px 16px; border-radius: 12px; margin-bottom: 16px; display: flex; align-items: flex-start; gap: 12px;">
+                                <span style="font-size: 18px; line-height: 1;">📩</span>
+                                <div style="font-size: 13px; line-height: 1.45;">
+                                    <strong style="color: #FBBF24; display: block; margin-bottom: 2px;">Verification OTP Dispatched:</strong>
+                                    {{ auth_info }}
                                 </div>
                             </div>
                             {% endif %}
@@ -1265,6 +1275,51 @@
                             <div class="auth-switch-prompt">
                                 Don't have an account?
                                 <button type="button" onclick="switchAuthPageMode('register')">Create one</button>
+                            </div>
+                        </div>
+
+                        <!-- 🔐 IN-PAGE ACCOUNT OTP VERIFICATION WORKFLOW -->
+                        <div id="login-view-account-verify" {% if not show_account_otp_verify %}style="display: none;"{% endif %} class="forgot-flow-wrap">
+                            <div class="form-header">
+                                <h2 class="form-title">Verify Your Account</h2>
+                                <p class="form-subtitle">Enter the 6-digit OTP verification code sent to <strong style="color: var(--amber);">{{ verify_email|default:"" }}</strong> to activate your verified adopter profile.</p>
+                            </div>
+
+                            {% if generated_otp %}
+                            <!-- Dynamic live OTP notice banner -->
+                            <div class="otp-notice-pill" id="acct-otp-live-pill" style="margin-bottom: 14px;">
+                                <span class="otp-pulse-dot"></span>
+                                <span>Verification Code: <strong id="acct-generated-otp" style="color: #FFFFFF; font-size: 14px; letter-spacing: 2px;">{{ generated_otp }}</strong></span>
+                                <button type="button" class="btn-copy-otp" onclick="autofillAccountOTP('{{ generated_otp }}')" title="Autofill this code">Autofill</button>
+                            </div>
+                            {% endif %}
+
+                            {% if auth_error %}
+                            <div class="auth-alert-pill auth-alert-error" style="margin-bottom: 14px;">
+                                <span style="font-size: 15px; font-weight: bold; line-height: 1;">⛔</span>
+                                <div>{{ auth_error }}</div>
+                            </div>
+                            {% endif %}
+
+                            <form action="{% url 'login' %}" method="POST" id="form-account-otp-verify" style="margin-top: 14px;">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="verify_account_otp" />
+                                <input type="hidden" name="verify_user_id" value="{{ verify_user_id|default:'' }}" />
+
+                                <div class="form-group-floating">
+                                    <div class="input-container">
+                                        <label class="floating-label" for="acct-otp-input">6-Digit Code</label>
+                                        <input type="text" id="acct-otp-input" name="account_otp_code" maxlength="6" required placeholder="• • • • • •" class="form-input" style="letter-spacing: 6px; font-size: 16px; text-align: center; font-weight: 700;" />
+                                    </div>
+                                </div>
+
+                                <button type="submit" class="btn-submit">
+                                    <span>Verify Account & Sign In</span>
+                                </button>
+                            </form>
+
+                            <div class="auth-switch-prompt" style="margin-top: 14px;">
+                                <a href="{% url 'login' %}" style="color: var(--amber); text-decoration: underline; font-size: 12px; font-weight: 600;">← Back to Sign In</a>
                             </div>
                         </div>
 
@@ -1895,6 +1950,13 @@
                 otpInput.value = generatedOTP;
                 const otpError = document.getElementById('fp-otp-error');
                 if (otpError) otpError.style.display = 'none';
+            }
+        }
+
+        function autofillAccountOTP(code) {
+            const otpInput = document.getElementById('acct-otp-input');
+            if (otpInput && code) {
+                otpInput.value = code;
             }
         }
 

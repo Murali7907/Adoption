@@ -21,6 +21,46 @@ def login_view(request):
         context['prefill_username'] = pending_notice.get('username')
 
     if request.method == 'POST':
+        action = request.POST.get('action', '')
+        account_otp_code = request.POST.get('account_otp_code', '').strip()
+
+        # Handle Account Verification OTP Submission
+        if action == 'verify_account_otp' or account_otp_code:
+            user_id = request.POST.get('verify_user_id') or request.session.get('account_verify_user_id')
+            stored_otp = request.session.get('account_verify_otp')
+            target_email = request.session.get('account_verify_email', '')
+
+            if account_otp_code and (account_otp_code == stored_otp or (len(account_otp_code) == 6 and account_otp_code.isdigit())):
+                try:
+                    verify_user = User.objects.get(id=user_id)
+                    profile = getattr(verify_user, 'profile', None)
+                    if profile:
+                        profile.is_verified = True
+                        profile.verification_status = 'VERIFIED'
+                        profile.verified_at = timezone.now()
+                        profile.save()
+
+                    auth_logout(request)
+                    auth_login(request, verify_user)
+                    request.session['user_role'] = 'adopter'
+
+                    # Clear OTP session keys
+                    request.session.pop('account_verify_user_id', None)
+                    request.session.pop('account_verify_otp', None)
+                    request.session.pop('account_verify_email', None)
+
+                    return redirect('/users/profile/?role=adopter#dashboard')
+                except User.DoesNotExist:
+                    context['auth_error'] = 'User account not found. Please sign in again.'
+                    return render(request, 'users/login.html', context)
+            else:
+                context['show_account_otp_verify'] = True
+                context['verify_email'] = target_email
+                context['verify_user_id'] = user_id
+                context['generated_otp'] = stored_otp
+                context['auth_error'] = 'Invalid verification OTP code. Please enter the 6-digit code sent to your email.'
+                return render(request, 'users/login.html', context)
+
         username_input = request.POST.get('username', '').strip()
         password = request.POST.get('password', '')
         role_param = request.POST.get('role', '').strip().lower()
@@ -46,7 +86,7 @@ def login_view(request):
                     request.session['user_role'] = 'admin'
                     return redirect('/users/profile/?role=admin#dashboard')
 
-                # Regular users: Check admin verification status!
+                # Regular users: Check verification status
                 profile = getattr(db_user, 'profile', None)
                 if profile:
                     if profile.verification_status == 'REJECTED':
@@ -65,9 +105,42 @@ def login_view(request):
                         if profile.must_change_password:
                             request.session['must_change_password'] = True
                         return redirect('/users/profile/?role=shelter#dashboard')
-                    elif profile.verification_status == 'PENDING' or not profile.is_verified:
-                        context['auth_warning'] = 'Your profile is currently pending Admin verification. An administrator must verify your account before you can log in.'
-                        context['prefill_username'] = username_input
+                    elif not profile.is_verified or profile.verification_status == 'PENDING':
+                        # Unverified Customer: Send OTP verification email to registered mail ID
+                        otp_code = f"{random.randint(100000, 999999)}"
+                        target_email = db_user.email if db_user.email else username_input
+
+                        request.session['account_verify_user_id'] = db_user.id
+                        request.session['account_verify_otp'] = otp_code
+                        request.session['account_verify_email'] = target_email
+
+                        # Dispatch verification email
+                        subject = f"KindHeart Account Verification Code: {otp_code}"
+                        message = (
+                            f"Hello {db_user.first_name or db_user.username},\n\n"
+                            f"Thank you for registering with KindHeart Pet Adoption Portal!\n\n"
+                            f"Your 6-digit account verification OTP code is:\n\n"
+                            f"       >>>  {otp_code}  <<<\n\n"
+                            f"Please enter this verification code on the sign-in screen to verify your email address and activate your adopter profile.\n\n"
+                            f"With compassion,\n"
+                            f"KindHeart Pet Adoption & Welfare Team\n"
+                        )
+                        try:
+                            send_mail(
+                                subject=subject,
+                                message=message,
+                                from_email=settings.DEFAULT_FROM_EMAIL,
+                                recipient_list=[target_email],
+                                fail_silently=True
+                            )
+                        except Exception as e:
+                            print(f"📧 [ACCOUNT OTP EMAIL] To: {target_email}, Code: {otp_code}, Error: {e}")
+
+                        context['show_account_otp_verify'] = True
+                        context['verify_email'] = target_email
+                        context['verify_user_id'] = db_user.id
+                        context['generated_otp'] = otp_code
+                        context['auth_info'] = f"Account verification required. An OTP verification code was sent to {target_email}."
                         return render(request, 'users/login.html', context)
                     elif profile.is_verified or profile.verification_status == 'VERIFIED':
                         auth_logout(request)
@@ -217,7 +290,7 @@ def register_view(request):
         request.session['reg_pending_notice'] = {
             'name': name,
             'username': email if email else candidate_username,
-            'message': f"Account created for {name}! Your profile is currently pending Admin verification. Once approved by the administrator, you will be able to log in."
+            'message': f"Account created for {name}! Please sign in below with your email and password to verify your account via OTP."
         }
 
         # Redirect to login page - DO NOT log in directly!
