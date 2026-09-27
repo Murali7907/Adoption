@@ -38,14 +38,14 @@ def send_sms_otp(phone_number, otp_code):
             req = urllib.request.Request(url, headers={'User-Agent': 'KindHeart-SMS-Gateway/1.0'})
             with urllib.request.urlopen(req, timeout=5) as response:
                 res_data = response.read().decode('utf-8')
-                print(f"📱 [FAST2SMS API RESPONSE]: {res_data}")
+                print(f"[FAST2SMS API RESPONSE]: {res_data}")
                 sms_sent = True
         except Exception as e:
-            print(f"⚠️ [SMS API GATEWAY DISPATCH NOTICE]: {e}")
+            print(f"[SMS API GATEWAY DISPATCH NOTICE]: {e}")
 
     # Fallback/Development Real-time SMS Gateway Terminal Output
     print(f"\n=======================================================")
-    print(f"📱 [KINDHEART SMS OTP DISPATCH]")
+    print(f"[KINDHEART SMS OTP DISPATCH]")
     print(f"To Mobile Number: +91 {clean_phone}")
     print(f"SMS Content: Your KindHeart verification OTP is {otp_code}. Valid for 10 minutes.")
     print(f"Status: SMS Dispatched Successfully")
@@ -175,7 +175,7 @@ def login_view(request):
                                 fail_silently=True
                             )
                         except Exception as e:
-                            print(f"📧 [ACCOUNT OTP EMAIL] To: {target_email}, Code: {otp_code}, Error: {e}")
+                            print(f"[ACCOUNT OTP EMAIL] To: {target_email}, Code: {otp_code}, Error: {e}")
 
                         # Dispatch verification SMS
                         send_sms_otp(target_phone or target_email, otp_code)
@@ -1020,7 +1020,7 @@ def api_send_otp(request):
     except Exception as e:
         # If SMTP server is not active or console backend is used, log clearly to terminal
         print(f"\n=======================================================")
-        print(f"📧 [KINDHEART OTP EMAIL DISPATCH]")
+        print(f"[KINDHEART OTP EMAIL DISPATCH]")
         print(f"To: {email}")
         print(f"Subject: {subject}")
         print(f"OTP Code: {otp_code}")
