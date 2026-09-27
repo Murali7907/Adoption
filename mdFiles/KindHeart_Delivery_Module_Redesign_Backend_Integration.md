@@ -1432,62 +1432,62 @@ Where Google Maps is enabled, show:
 
 ## Delivery Login
 
-- [ ] Delivery can log in
-- [ ] Delivery sees only their own assigned deliveries
-- [ ] Other pets are not shown
-- [ ] Other delivery personnel are not shown
-- [ ] Other Shelters are not shown unnecessarily
+- [x] Delivery can log in
+- [x] Delivery sees only their own assigned deliveries
+- [x] Other pets are not shown
+- [x] Other delivery personnel are not shown
+- [x] Other Shelters are not shown unnecessarily
 
 ## Assignment
 
-- [ ] Shelter can assign only its own Delivery Personnel
-- [ ] Assignment saves to database
-- [ ] Delivery sees assignment
-- [ ] Notification is persisted
+- [x] Shelter can assign only its own Delivery Personnel
+- [x] Assignment saves to database
+- [x] Delivery sees assignment
+- [x] Notification is persisted
 
 ## Pickup
 
-- [ ] Delivery sees Shelter pickup details
-- [ ] Ready for Pickup works
-- [ ] Confirm Pickup works
-- [ ] Pickup timestamp is persisted
-- [ ] Shelter sees updated status
+- [x] Delivery sees Shelter pickup details
+- [x] Ready for Pickup works
+- [x] Confirm Pickup works
+- [x] Pickup timestamp is persisted
+- [x] Shelter sees updated status
 
 ## Transit
 
-- [ ] In Transit works
-- [ ] Customer sees delivery progress
-- [ ] Map works if configured
-- [ ] Last location timestamp is real
+- [x] In Transit works
+- [x] Customer sees delivery progress
+- [x] Map works if configured
+- [x] Last location timestamp is real
 
 ## Delivery
 
-- [ ] Customer destination is shown
-- [ ] Proof upload works
-- [ ] Handover confirmation works
-- [ ] Delivery status becomes Delivered
-- [ ] Shelter sees Delivered
-- [ ] Customer sees Delivered
+- [x] Customer destination is shown
+- [x] Proof upload works
+- [x] Handover confirmation works
+- [x] Delivery status becomes Delivered
+- [x] Shelter sees Delivered
+- [x] Customer sees Delivered
 
 ## Profile
 
-- [ ] Delivery profile uses Delivery-specific fields
-- [ ] Health Passport removed
-- [ ] Identity/document section works
-- [ ] Vehicle information works
-- [ ] No unrelated pets appear
-- [ ] Profile reads from database
+- [x] Delivery profile uses Delivery-specific fields
+- [x] Health Passport removed
+- [x] Identity/document section works
+- [x] Vehicle information works
+- [x] No unrelated pets appear
+- [x] Profile reads from database
 
 ## Backend
 
-- [ ] Django URLs verified
-- [ ] Django views/APIs verified
-- [ ] Models verified
-- [ ] Migrations verified
-- [ ] Database verified
-- [ ] Django Admin verified
-- [ ] Permissions verified
-- [ ] Cross-user access tested
+- [x] Django URLs verified
+- [x] Django views/APIs verified
+- [x] Models verified
+- [x] Migrations verified
+- [x] Database verified
+- [x] Django Admin verified
+- [x] Permissions verified
+- [x] Cross-user access tested
 
 ---
 
