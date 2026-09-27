@@ -1423,37 +1423,8 @@
                         </div>
                     </div>
 
-                    <!-- 3. Dynamic Custom Role Selector with Floating Label -->
-                    <div class="form-group-floating custom-select-group" id="role-select-group">
-                        <input type="hidden" id="reg-role" name="role" value="CUSTOMER" required />
-                        <div class="input-container">
-                            <label class="floating-label" for="reg-role-trigger">Role</label>
-                            <button type="button" class="custom-select-trigger" id="reg-role-trigger" onclick="toggleRoleDropdown(event)" aria-haspopup="listbox" aria-expanded="false">
-                                <div class="trigger-content">
-                                    <span class="role-icon" id="role-selected-icon">🐾</span>
-                                    <div class="role-text-wrap">
-                                        <span class="role-title" id="role-selected-title">Customer</span>
-                                        <span class="role-badge" id="role-selected-badge">• Adopter</span>
-                                    </div>
-                                </div>
-                                <svg class="chevron-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                    <polyline points="6 9 12 15 18 9"></polyline>
-                                </svg>
-                            </button>
-                        </div>
-
-                        <!-- Dynamic Dropdown Menu matching UI glass aesthetic -->
-                        <div class="custom-dropdown-menu" id="role-dropdown-menu" role="listbox">
-                            <div class="custom-dropdown-item is-selected" data-value="CUSTOMER" onclick="selectRole('CUSTOMER', 'Customer', '🐾', '• Adopter', 'Adopter & Pet Parent')" role="option" aria-selected="true">
-                                <div class="item-icon">🐾</div>
-                                <div class="item-info">
-                                    <span class="item-title">Customer</span>
-                                    <span class="item-sub">Adopter & Pet Parent</span>
-                                </div>
-                                <span class="item-check">✓</span>
-                            </div>
-                        </div>
-                    </div>
+                    <!-- Role automatically locked to CUSTOMER for public self-registration -->
+                    <input type="hidden" id="reg-role" name="role" value="CUSTOMER" />
 
                     <!-- 4. Password with Floating Label & Eye View Toggle Button -->
                     <div class="form-group-floating">
