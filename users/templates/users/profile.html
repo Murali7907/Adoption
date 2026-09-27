@@ -5935,6 +5935,7 @@
     <script id="db-delivery-partners-data" type="application/json">{{ db_delivery_partners_json|default:"[]"|safe }}</script>
     <script id="db-settlements-data" type="application/json">{{ db_settlements_json|default:"[]"|safe }}</script>
     <script id="db-adoptions-data" type="application/json">{{ db_adoptions_json|default:"[]"|safe }}</script>
+    <script id="db-delivery-requests-data" type="application/json">{{ db_delivery_requests_json|default:"[]"|safe }}</script>
     <script id="db-audit-logs-data" type="application/json">{{ db_audit_logs_json|default:"[]"|safe }}</script>
     <script id="db-system-settings-data" type="application/json">{{ db_system_settings_json|default:"{}"|safe }}</script>
     <script id="db-role-permissions-data" type="application/json">{{ db_role_permissions_json|default:"{}"|safe }}</script>
@@ -8114,6 +8115,20 @@
                 }
             } catch (err) {
                 console.warn("Could not parse db audit logs data:", err);
+            }
+        }
+
+        // Inject real delivery requests from database into KindHeartData.deliveries & KindHeartData.deliveryOrders
+        const dbDeliveryReqsScriptEl = document.getElementById('db-delivery-requests-data');
+        if (dbDeliveryReqsScriptEl) {
+            try {
+                const parsedDbDeliveries = JSON.parse(dbDeliveryReqsScriptEl.textContent || '[]');
+                if (Array.isArray(parsedDbDeliveries) && parsedDbDeliveries.length > 0) {
+                    KindHeartData.deliveries = parsedDbDeliveries;
+                    KindHeartData.deliveryOrders = parsedDbDeliveries;
+                }
+            } catch (err) {
+                console.warn("Could not parse db delivery requests data:", err);
             }
         }
 

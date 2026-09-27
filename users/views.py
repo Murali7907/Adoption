@@ -538,9 +538,15 @@ def profile_view(request):
     }
 
     # Preload database pets to hydrate KindHeartData.pets
+    # Spec Rule #3 & #32: For a logged in delivery user, restrict pets_qs at Django level to assigned pets ONLY
     db_pets_list = []
     try:
-        pets_qs = Pet.objects.all().select_related('shelter').order_by('-id')
+        if role == 'delivery' and request.user.is_authenticated and not request.user.is_anonymous:
+            assigned_pet_ids = DeliveryRequest.objects.filter(delivery_partner__user=request.user).values_list('adoption_request__pet_id', flat=True)
+            pets_qs = Pet.objects.filter(id__in=assigned_pet_ids).select_related('shelter').order_by('-id')
+        else:
+            pets_qs = Pet.objects.all().select_related('shelter').order_by('-id')
+
         for p in pets_qs:
             db_pets_list.append({
                 'id': f"P{p.id}",
@@ -568,6 +574,49 @@ def profile_view(request):
         db_pets_list = []
 
     context['db_pets_json'] = json.dumps(db_pets_list)
+
+    # 3b. Query & Hydrate Real Backend Delivery Requests (Spec Section 34)
+    db_delivery_requests_list = []
+    try:
+        if role == 'delivery' and request.user.is_authenticated and not request.user.is_anonymous:
+            deliv_qs = DeliveryRequest.objects.filter(delivery_partner__user=request.user).select_related('adoption_request', 'adoption_request__pet', 'adoption_request__customer', 'adoption_request__shelter', 'delivery_partner', 'delivery_partner__user').order_by('-id')
+        else:
+            deliv_qs = DeliveryRequest.objects.all().select_related('adoption_request', 'adoption_request__pet', 'adoption_request__customer', 'adoption_request__shelter', 'delivery_partner', 'delivery_partner__user').order_by('-id')
+
+        for dr in deliv_qs:
+            pet_obj = dr.adoption_request.pet if (dr.adoption_request and dr.adoption_request.pet) else None
+            cust_user = dr.adoption_request.customer if dr.adoption_request else None
+            sh_obj = dr.adoption_request.shelter if dr.adoption_request else None
+            driver_user = dr.delivery_partner.user if dr.delivery_partner else None
+
+            db_delivery_requests_list.append({
+                'id': f"DEL-{dr.id}",
+                'db_id': dr.id,
+                'appId': f"KH102{dr.adoption_request.id:02d}" if dr.adoption_request else f"KH102{dr.id:02d}",
+                'petId': f"P{pet_obj.id}" if pet_obj else "P101",
+                'petName': pet_obj.name if pet_obj else "Companion Pet",
+                'petBreed': pet_obj.breed if pet_obj else "Mixed Breed",
+                'petSpecies': pet_obj.species if pet_obj else "Dog",
+                'petImage': pet_obj.image_url if pet_obj else "/kindheart_bruno.jpg",
+                'customerName': cust_user.get_full_name() or cust_user.username if cust_user else "Adopter",
+                'customerPhone': getattr(getattr(cust_user, 'profile', None), 'phone', '+91 98470 12345') if cust_user else "+91 98470 12345",
+                'dropAddress': dr.drop_address or "Adopter Location, Kochi, Kerala",
+                'shelterName': sh_obj.shelter_name if sh_obj else "Happy Paws Shelter",
+                'shelterLocation': sh_obj.location if sh_obj else "Kochi Center",
+                'shelterPhone': sh_obj.phone if sh_obj else "+91 98450 11223",
+                'agent': driver_user.get_full_name() or driver_user.username if driver_user else "Unassigned Driver",
+                'agentId': dr.delivery_partner.partner_id if dr.delivery_partner else "DP-101",
+                'status': dr.status,
+                'statusDisplay': dr.get_status_display() if hasattr(dr, 'get_status_display') else dr.status,
+                'preferredDate': dr.preferred_date.strftime("%d %b %Y") if dr.preferred_date else "Today",
+                'proofUrl': dr.proof_photo_url or "",
+                'totalFee': float(dr.total_fee) if dr.total_fee else 1100.0
+            })
+    except Exception as e:
+        db_delivery_requests_list = []
+
+    context['db_delivery_requests_json'] = json.dumps(db_delivery_requests_list)
+
 
     # 4. Registered Delivery Fleet & Shelter Affiliation
     db_delivery_partners = []
