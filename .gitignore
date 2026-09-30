@@ -23,6 +23,10 @@ clean_admin_links.py
 find_cross_pollution.py
 search_profile.py
 
+# Media & Static Upload Folders
+media/
+public/
+
 # Database
 db.sqlite3
 
