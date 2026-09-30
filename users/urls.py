@@ -25,6 +25,21 @@ urlpatterns = [
     path('api/delivery/update-status/', views.api_delivery_update_status, name='api_delivery_update_status'),
     path('api/delivery/upload-proof/', views.api_delivery_upload_proof, name='api_delivery_upload_proof'),
     path('api/shelter/assign-delivery/', views.api_shelter_assign_delivery, name='api_shelter_assign_delivery'),
+    path('api/shelter/update-adoption-status/', views.api_update_adoption_status, name='api_update_adoption_status'),
+    path('api/get-conversations/', views.api_get_conversations, name='api_get_conversations'),
+    path('api/get-messages/', views.api_get_messages, name='api_get_messages'),
+    path('api/send-message/', views.api_send_message, name='api_send_message'),
+    # Phase 7 & 8: Shelter document upload & storage endpoints
+    path('api/shelter/upload-document/', views.api_shelter_upload_document, name='api_shelter_upload_document'),
+    path('api/shelter/list-documents/', views.api_shelter_list_documents, name='api_shelter_list_documents'),
+    path('api/shelter/delete-document/', views.api_shelter_delete_document, name='api_shelter_delete_document'),
+    path('api/shelter/document/<int:doc_id>/download/', views.api_shelter_download_document, name='api_shelter_download_document'),
+    # Phase 18: Shelter Dossier update endpoint
+    path('api/shelter/update-profile/', views.api_shelter_update_profile, name='api_shelter_update_profile'),
+    # Phase 9: Admin document verification endpoints
+    path('api/admin/shelter-documents/', views.api_admin_list_shelter_documents, name='api_admin_list_shelter_documents'),
+    path('api/admin/verify-document/', views.api_admin_verify_document, name='api_admin_verify_document'),
+    path('api/admin/verify-all-shelter-documents/', views.api_admin_verify_all_shelter_documents, name='api_admin_verify_all_shelter_documents'),
 ]
 
 

@@ -1,6 +1,8 @@
 import json
 from django.shortcuts import render, redirect
-from users.views import profile_view
+from django.http import JsonResponse
+from users.views import profile_view, is_shelter_verified
+from users.models import ShelterProfile
 from pets.models import DeliveryRequest, DeliveryPartner, Pet
 
 # Core Public Views
@@ -14,8 +16,58 @@ def pet_detail_view(request, pet_id=None):
     return render(request, 'pets/pet_detail.html')
 
 def add_pet_view(request):
+    # Phase 10 & 13: Gate pet creation until Admin verification
+    shelter = None
+    is_admin = False
+    if request.user.is_authenticated:
+        is_admin = bool(
+            request.user.is_staff or 
+            request.user.is_superuser or 
+            (hasattr(request.user, 'profile') and str(request.user.profile.role).upper() == 'ADMIN')
+        )
+        shelter = getattr(request.user, 'shelter_profile', None) or (
+            hasattr(request.user, 'profile') and str(request.user.profile.role).upper() == 'SHELTER' and
+            ShelterProfile.objects.filter(user=request.user).first()
+        )
+        if not is_admin and shelter and not is_shelter_verified(shelter):
+            if request.method == 'POST':
+                return JsonResponse({
+                    'success': False,
+                    'error': 'Shelter verification is required before adding pets. Complete and submit your shelter documents for Admin verification before adding pets or delivery partners.'
+                }, status=403)
+            return redirect('/profile/#documents')
+    else:
+        if request.method == 'POST':
+            return JsonResponse({
+                'success': False,
+                'error': 'Shelter verification is required before adding pets.'
+            }, status=403)
+        return redirect('/users/login/?next=/pets/add/')
+
     if request.method == 'POST':
-        return redirect('shelter_pets')
+        name = request.POST.get('name') or request.POST.get('pet_name', '').strip()
+        species = request.POST.get('species', 'Dog').strip()
+        breed = request.POST.get('breed', '').strip()
+        age = request.POST.get('age', '1 year').strip()
+        description = request.POST.get('description', '').strip()
+        image_url = request.POST.get('image_url', '').strip() or '/coco_beagle.jpg'
+        
+        if name and breed:
+            pet = Pet.objects.create(
+                name=name,
+                species=species,
+                breed=breed,
+                age=age,
+                description=description or f"{name} is a healthy, loving {breed} ready for adoption.",
+                image_url=image_url,
+                shelter=shelter,
+                status='AVAILABLE',
+                approval_status='APPROVED'
+            )
+            if shelter:
+                shelter.total_pets = Pet.objects.filter(shelter=shelter).count()
+                shelter.save()
+        return redirect('/users/profile/?role=shelter#pets')
     return render(request, 'pets/add_pet.html')
 
 def adoption_form_view(request, pet_id=None):
@@ -64,24 +116,24 @@ def role_dashboard_view(request, role, page='dashboard'):
                 'id': f"DEL-{dr.id}",
                 'db_id': dr.id,
                 'appId': f"KH102{dr.adoption_request.id:02d}" if dr.adoption_request else f"KH102{dr.id:02d}",
-                'petId': f"P{pet_obj.id}" if pet_obj else "P101",
-                'petName': pet_obj.name if pet_obj else "Companion Pet",
-                'petBreed': pet_obj.breed if pet_obj else "Mixed Breed",
-                'petSpecies': pet_obj.species if pet_obj else "Dog",
-                'petImage': pet_obj.image_url if pet_obj else "/kindheart_bruno.jpg",
+                'petId': f"P{pet_obj.id}" if pet_obj else "P00",
+                'petName': pet_obj.name if pet_obj else "Pet",
+                'petBreed': pet_obj.breed if pet_obj else "N/A",
+                'petSpecies': pet_obj.species if pet_obj else "N/A",
+                'petImage': pet_obj.image_url if pet_obj else "",
                 'customerName': cust_user.get_full_name() or cust_user.username if cust_user else "Adopter",
-                'customerPhone': getattr(getattr(cust_user, 'profile', None), 'phone', '+91 98470 12345') if cust_user else "+91 98470 12345",
-                'dropAddress': dr.drop_address or "Adopter Location, Kochi, Kerala",
-                'shelterName': sh_obj.shelter_name if sh_obj else "Happy Paws Shelter",
-                'shelterLocation': sh_obj.location if sh_obj else "Kochi Center",
-                'shelterPhone': sh_obj.phone if sh_obj else "+91 98450 11223",
+                'customerPhone': getattr(getattr(cust_user, 'profile', None), 'phone', '') if cust_user else "",
+                'dropAddress': dr.drop_address or "",
+                'shelterName': sh_obj.shelter_name if sh_obj else "Shelter Facility",
+                'shelterLocation': sh_obj.location if sh_obj else "",
+                'shelterPhone': sh_obj.phone if sh_obj else "",
                 'agent': driver_user.get_full_name() or driver_user.username if driver_user else "Unassigned Driver",
-                'agentId': dr.delivery_partner.partner_id if dr.delivery_partner else "DP-101",
+                'agentId': dr.delivery_partner.partner_id if dr.delivery_partner else "DP-00",
                 'status': dr.status,
                 'statusDisplay': dr.get_status_display() if hasattr(dr, 'get_status_display') else dr.status,
-                'preferredDate': dr.preferred_date.strftime("%d %b %Y") if dr.preferred_date else "Today",
+                'preferredDate': dr.preferred_date.strftime("%d %b %Y") if dr.preferred_date else "",
                 'proofUrl': dr.proof_photo_url or "",
-                'totalFee': float(dr.total_fee) if dr.total_fee else 1100.0
+                'totalFee': float(dr.total_fee) if dr.total_fee else 0.0
             })
 
         driver_partner = DeliveryPartner.objects.filter(user=request.user).first() if request.user.is_authenticated else None

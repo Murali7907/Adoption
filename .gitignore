@@ -20,6 +20,8 @@ scratch_*.py
 scratch_*.cjs
 apply_settings_*.py
 clean_admin_links.py
+find_cross_pollution.py
+search_profile.py
 
 # Database
 db.sqlite3
@@ -28,4 +30,5 @@ db.sqlite3
 .vscode/
 .idea/
 .DS_Store
-Thumbs.db
+# Environment variables & secrets
+.env

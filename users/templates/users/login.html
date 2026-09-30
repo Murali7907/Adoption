@@ -1324,14 +1324,7 @@
                                 <p class="form-subtitle">Enter the 6-digit OTP verification code sent to <strong style="color: var(--amber);">{{ verify_email|default:"" }}</strong> to activate your verified adopter profile.</p>
                             </div>
 
-                            {% if generated_otp %}
-                            <!-- Dynamic live OTP notice banner -->
-                            <div class="otp-notice-pill" id="acct-otp-live-pill" style="margin-bottom: 14px;">
-                                <span class="otp-pulse-dot"></span>
-                                <span>Verification Code: <strong id="acct-generated-otp" style="color: #FFFFFF; font-size: 14px; letter-spacing: 2px;">{{ generated_otp }}</strong></span>
-                                <button type="button" class="btn-copy-otp" onclick="autofillAccountOTP('{{ generated_otp }}')" title="Autofill this code">Autofill</button>
-                            </div>
-                            {% endif %}
+                            <!-- Clean production view: User gets OTP code via Email/SMS -->
 
                             {% if auth_error %}
                             <div class="auth-alert-pill auth-alert-error" style="margin-bottom: 14px;">
@@ -1400,13 +1393,6 @@
                                     <p class="form-subtitle">Verification code dispatched to <strong id="fp-target-display" style="color: var(--amber);"></strong>.</p>
                                 </div>
 
-                                <!-- Dynamic live OTP notice banner -->
-                                <div class="otp-notice-pill" id="otp-live-pill">
-                                    <span class="otp-pulse-dot"></span>
-                                    <span>Your Code: <strong id="fp-generated-otp" style="color: #FFFFFF; font-size: 14px; letter-spacing: 2px;"></strong></span>
-                                    <button type="button" class="btn-copy-otp" onclick="autofillOTP()" title="Autofill this code">Autofill</button>
-                                </div>
-
                                 <!-- 🔢 Spacious Segmented 6-Digit OTP Boxes -->
                                 <div class="otp-boxes-grid" id="fp-otp-boxes-grid">
                                     <input type="text" maxlength="1" class="otp-box-digit" data-target="fp-otp-input" data-idx="0" inputmode="numeric" autocomplete="one-time-code" />
@@ -1417,7 +1403,7 @@
                                     <input type="text" maxlength="1" class="otp-box-digit" data-target="fp-otp-input" data-idx="5" inputmode="numeric" />
                                 </div>
                                 <input type="hidden" id="fp-otp-input" />
-                                <div id="fp-otp-error" class="fp-error-msg" style="display: none; text-align: center;">Invalid OTP code. Please enter the code shown above.</div>
+                                <div id="fp-otp-error" class="fp-error-msg" style="display: none; text-align: center; margin-bottom: 12px;">Invalid OTP code. Please enter the 6-digit verification code sent to your email/SMS.</div>
 
                                 <button type="button" class="btn-submit" onclick="verifyPasswordResetOTP()">
                                     <span>Verify OTP Code</span>
@@ -1946,7 +1932,11 @@
                     goToFpStep(2);
                     startOTPTimer();
                 } else {
-                    alert(res.error || 'Unable to send OTP. Please check your email.');
+                    const fpErr = document.getElementById('fp-email-error');
+                    if (fpErr) {
+                        fpErr.textContent = res.error || 'Unable to send OTP. Please check your email.';
+                        fpErr.style.display = 'block';
+                    }
                 }
             } catch (err) {
                 console.error('Error sending OTP:', err);
@@ -2013,12 +2003,15 @@
                 fillOTPGridBoxes('fp-otp-input', generatedOTP);
                 const otpError = document.getElementById('fp-otp-error');
                 if (otpError) otpError.style.display = 'none';
+                verifyPasswordResetOTP();
             }
         }
 
         function autofillAccountOTP(code) {
             if (code) {
                 fillOTPGridBoxes('acct-otp-input', code);
+                const form = document.getElementById('form-account-otp-verify');
+                if (form) form.submit();
             }
         }
 
@@ -2041,6 +2034,16 @@
                     boxes.forEach(b => { combined += b.value; });
                     const hiddenInput = document.getElementById(targetId);
                     if (hiddenInput) hiddenInput.value = combined;
+
+                    // Automatically submit as soon as all 6 digits are entered
+                    if (combined.length === 6) {
+                        if (targetId === 'acct-otp-input') {
+                            const form = document.getElementById('form-account-otp-verify');
+                            if (form) form.submit();
+                        } else if (targetId === 'fp-otp-input') {
+                            verifyPasswordResetOTP();
+                        }
+                    }
                 });
 
                 input.addEventListener('keydown', function(e) {
@@ -2060,6 +2063,14 @@
                     const targetId = this.getAttribute('data-target');
                     if (digits) {
                         fillOTPGridBoxes(targetId, digits);
+                        if (digits.length === 6) {
+                            if (targetId === 'acct-otp-input') {
+                                const form = document.getElementById('form-account-otp-verify');
+                                if (form) form.submit();
+                            } else if (targetId === 'fp-otp-input') {
+                                verifyPasswordResetOTP();
+                            }
+                        }
                     }
                 });
             });

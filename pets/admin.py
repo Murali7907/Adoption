@@ -8,26 +8,29 @@ from .models import (
 @admin.register(Pet)
 class PetAdmin(admin.ModelAdmin):
     list_display = ('name', 'species', 'breed', 'age', 'gender', 'shelter', 'status', 'approval_status', 'adoption_fee', 'created_at')
-    list_filter = ('species', 'gender', 'status', 'approval_status', 'is_vaccinated', 'is_neutered')
-    search_fields = ('name', 'breed', 'location', 'description')
+    list_filter = ('shelter', 'species', 'gender', 'status', 'approval_status', 'is_vaccinated', 'is_neutered')
+    search_fields = ('name', 'breed', 'location', 'description', 'shelter__shelter_name')
+    ordering = ('-created_at',)
 
 @admin.register(AdoptionRequest)
 class AdoptionRequestAdmin(admin.ModelAdmin):
     list_display = ('id', 'customer', 'pet', 'shelter', 'status', 'request_date')
-    list_filter = ('status', 'request_date')
-    search_fields = ('customer__username', 'pet__name', 'shelter__shelter_name')
+    list_filter = ('status', 'shelter', 'request_date')
+    search_fields = ('customer__username', 'customer__email', 'pet__name', 'shelter__shelter_name')
+    ordering = ('-request_date',)
 
 @admin.register(DeliveryPartner)
 class DeliveryPartnerAdmin(admin.ModelAdmin):
     list_display = ('partner_id', 'user', 'shelter', 'phone', 'vehicle_type', 'vehicle_number', 'rating', 'is_active')
-    list_filter = ('is_active', 'vehicle_type')
-    search_fields = ('partner_id', 'user__username', 'vehicle_number', 'phone')
+    list_filter = ('is_active', 'shelter', 'vehicle_type')
+    search_fields = ('partner_id', 'user__username', 'vehicle_number', 'phone', 'shelter__shelter_name')
 
 @admin.register(DeliveryRequest)
 class DeliveryRequestAdmin(admin.ModelAdmin):
     list_display = ('id', 'adoption_request', 'delivery_partner', 'status', 'priority', 'total_fee', 'payment_status', 'created_at')
-    list_filter = ('status', 'priority', 'payment_status')
-    search_fields = ('id', 'adoption_request__pet__name', 'delivery_partner__user__username')
+    list_filter = ('status', 'priority', 'payment_status', 'created_at')
+    search_fields = ('id', 'adoption_request__pet__name', 'adoption_request__shelter__shelter_name', 'delivery_partner__user__username')
+    ordering = ('-created_at',)
 
 @admin.register(PaymentTransaction)
 class PaymentTransactionAdmin(admin.ModelAdmin):

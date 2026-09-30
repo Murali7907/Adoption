@@ -608,7 +608,7 @@
                                 <span class="text-slate-400 text-xs">&bull;</span>
                                 <span class="text-[11px] font-mono text-emerald-400">Ready for Sign-Off</span>
                             </div>
-                            <h3 class="text-xl font-bold font-heading text-white mt-0.5">Pet: {{ order.petName|default:"Bruno" }} <span class="text-sm font-normal text-slate-400">({{ order.petBreed|default:"Golden Retriever" }})</span></h3>
+                            <h3 class="text-xl font-bold font-heading text-white mt-0.5">Pet: {{ order.petName|default:"Pet" }} <span class="text-sm font-normal text-slate-400">({{ order.petBreed|default:"N/A" }})</span></h3>
                             <p class="text-xs text-slate-300 mt-1">Delivered to: <span class="text-white font-semibold">{{ order.customerName|default:"Adopter" }}</span> &bull; {{ order.dropAddress|default:"Indiranagar" }}</p>
                         </div>
                     </div>
@@ -848,8 +848,9 @@
         async function submitProofForm(e, deliveryId) {
             e.preventDefault();
             const fileInput = document.getElementById('proof-file-input');
+            const errBanner = document.getElementById('proof-error-banner');
             if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
-                alert("Please select a handover photo proof file to upload.");
+                if (errBanner) { errBanner.textContent = "Please select a handover photo proof file to upload."; errBanner.classList.remove('hidden'); }
                 return;
             }
             const formData = new FormData();
@@ -864,13 +865,12 @@
                 });
                 const res = await resp.json();
                 if (res.status === 'success') {
-                    alert(res.message || "Delivery proof uploaded successfully!");
                     window.location.href = "{% url 'delivery_dashboard' %}";
                 } else {
-                    alert("Proof upload error: " + (res.message || "Could not save photo"));
+                    if (errBanner) { errBanner.textContent = "Proof upload error: " + (res.message || "Could not save photo"); errBanner.classList.remove('hidden'); }
                 }
             } catch(err) {
-                alert("Server error uploading proof: " + err.message);
+                if (errBanner) { errBanner.textContent = "Server error uploading proof: " + err.message; errBanner.classList.remove('hidden'); }
             }
         }
 

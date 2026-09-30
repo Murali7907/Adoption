@@ -31,15 +31,17 @@ urlpatterns = [
     path('contact_sanctuary_help.jpg', serve, {'document_root': settings.BASE_DIR / 'public', 'path': 'contact_sanctuary_help.jpg'}),
     path('styles.css', serve, {'document_root': settings.BASE_DIR, 'path': 'styles.css'}),
     path('script.js', serve, {'document_root': settings.BASE_DIR, 'path': 'script.js'}),
-    path('shelter_store.js', serve, {'document_root': settings.BASE_DIR / 'public', 'path': 'shelter_store.js'}),
     path('relaxing_birds.wav', serve, {'document_root': settings.BASE_DIR / 'public', 'path': 'relaxing_birds.wav'}),
     path('favicon.svg', serve, {'document_root': settings.BASE_DIR / 'public', 'path': 'favicon.svg'}),
+    # Phase 8: Serve uploaded media files directly from MEDIA_ROOT (before generic public asset regex)
+    re_path(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),
     re_path(r'^(?P<path>.*\.(?:jpg|jpeg|png|gif|svg|mp4|webm|wav|mp3|ogg|glb|gltf|bin|js))$', serve, {'document_root': settings.BASE_DIR / 'public'}),
     path('', include('pets.urls')),
     path('users/', include('users.urls')),
     path('profile/', profile_view, name='direct_profile'),
     path('dashboard/', profile_view, name='direct_dashboard'),
 ]
+
 
 
 

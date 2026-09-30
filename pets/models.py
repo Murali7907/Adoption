@@ -19,6 +19,7 @@ ADOPTION_STATUS_CHOICES = (
     ('PENDING', 'Pending'),
     ('UNDER_REVIEW', 'Under Review'),
     ('APPROVED', 'Approved'),
+    ('READY_FOR_HANDOVER', 'Ready for Handover'),
     ('DELIVERY_SCHEDULED', 'Delivery Scheduled'),
     ('DELIVERED', 'Delivered'),
     ('COMPLETED', 'Completed'),
@@ -26,6 +27,8 @@ ADOPTION_STATUS_CHOICES = (
 )
 
 DELIVERY_STATUS_CHOICES = (
+    ('UNASSIGNED', 'Unassigned'),
+    ('ASSIGNED', 'Assigned'),
     ('ADOPTION_APPROVED', 'Adoption Approved'),
     ('DELIVERY_REQUESTED', 'Delivery Requested'),
     ('ELIGIBILITY_CHECKED', 'Eligibility Checked'),
@@ -43,6 +46,7 @@ DELIVERY_STATUS_CHOICES = (
     ('NEAR_DESTINATION', 'Near Destination'),
     ('ARRIVED', 'Arrived at Destination'),
     ('HANDOVER_PENDING', 'Handover Verification Pending'),
+    ('DELIVERED', 'Delivered'),
     ('COMPLETED', 'Delivery Completed'),
     ('FAILED', 'Failed Delivery'),
     ('CANCELLED', 'Cancelled'),
@@ -64,6 +68,17 @@ REFUND_STATUS_CHOICES = (
     ('COMPLETED', 'Refund Completed'),
     ('FAILED', 'Refund Failed'),
 )
+
+# Phase 36: Canonical definition of Active and Completed Delivery Statuses
+ACTIVE_DELIVERY_STATUSES = [
+    'ASSIGNED', 'PARTNER_ASSIGNED', 'OUT_FOR_DELIVERY', 'IN_TRANSIT',
+    'PICKUP_SCHEDULED', 'PET_READY', 'PICKUP_CONFIRMED', 'PET_PICKED_UP',
+    'HANDOVER_PENDING', 'SCHEDULED'
+]
+
+COMPLETED_DELIVERY_STATUSES = [
+    'DELIVERED', 'COMPLETED', 'CANCELLED', 'FAILED'
+]
 
 AUDIT_ACTION_CHOICES = (
     ('ADOPTION_SUBMITTED', 'Adoption Request Submitted'),
@@ -153,6 +168,30 @@ class DeliveryPartner(models.Model):
     rating = models.DecimalField(max_digits=3, decimal_places=2, default=4.80)
     is_active = models.BooleanField(default=True)
 
+    def get_active_delivery(self):
+        """
+        Phase 36: Returns active DeliveryRequest assigned to this delivery partner using
+        canonical ACTIVE_DELIVERY_STATUSES. Historical delivered/completed orders do not
+        keep a delivery partner BUSY.
+        """
+        return self.assigned_deliveries.filter(status__in=ACTIVE_DELIVERY_STATUSES).first()
+
+    def get_availability_status(self):
+        """
+        Phase 29: Operational availability calculation:
+        - INACTIVE: is_active=False or user inactive
+        - BUSY: Has an active delivery assignment
+        - AVAILABLE: Active and no ongoing delivery assignment
+        """
+        if not self.is_active or (self.user and not self.user.is_active):
+            return 'INACTIVE'
+        if self.get_active_delivery() is not None:
+            return 'BUSY'
+        return 'AVAILABLE'
+
+    def is_available_for_assignment(self):
+        return self.get_availability_status() == 'AVAILABLE'
+
     def __str__(self):
         return f"{self.user.username} ({self.vehicle_number}) [{self.partner_id}]"
 
@@ -169,7 +208,7 @@ class DeliveryRequest(models.Model):
     estimated_arrival = models.DateTimeField(null=True, blank=True)
     
     priority = models.CharField(max_length=20, default='NORMAL') # URGENT, NORMAL, EXPRESS
-    status = models.CharField(max_length=30, choices=DELIVERY_STATUS_CHOICES, default='IN_TRANSIT')
+    status = models.CharField(max_length=30, choices=DELIVERY_STATUS_CHOICES, default='UNASSIGNED')
     
     base_fee = models.DecimalField(max_digits=10, decimal_places=2, default=500.00)
     distance_fee = models.DecimalField(max_digits=10, decimal_places=2, default=300.00)
@@ -179,6 +218,9 @@ class DeliveryRequest(models.Model):
     payment_status = models.CharField(max_length=20, choices=PAYMENT_STATUS_CHOICES, default='SUCCESSFUL')
     
     proof_photo_url = models.URLField(max_length=500, blank=True, null=True)
+    assigned_at = models.DateTimeField(null=True, blank=True)
+    started_at = models.DateTimeField(null=True, blank=True)
+    completed_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
 

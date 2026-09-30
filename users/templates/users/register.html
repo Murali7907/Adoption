@@ -1844,7 +1844,11 @@
                     goToFpStep(2);
                     startOTPTimer();
                 } else {
-                    alert(res.error || 'Unable to send OTP. Please check your email.');
+                    const fpErr = document.getElementById('fp-email-error');
+                    if (fpErr) {
+                        fpErr.textContent = res.error || 'Unable to send OTP. Please check your email.';
+                        fpErr.style.display = 'block';
+                    }
                 }
             } catch (err) {
                 console.error('Error sending OTP:', err);

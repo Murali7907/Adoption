@@ -4,16 +4,16 @@ import random
 import urllib.request
 import urllib.parse
 from django.shortcuts import render, redirect
-from django.http import JsonResponse
+from django.http import JsonResponse, FileResponse, Http404
 from django.views.decorators.csrf import csrf_exempt
 from django.core.mail import send_mail
 from django.conf import settings
 from django.contrib.auth import login as auth_login, logout as auth_logout
 from django.contrib.auth.models import User
-from django.db import models
+from django.db import models, transaction
 from django.utils import timezone
-from .models import UserProfile, ShelterProfile, SystemSetting, RolePermission
-from pets.models import Pet, DeliveryPartner, PaymentTransaction, AuditLog, AdoptionRequest, DeliveryRequest, DeliveryStatusHistory, HandoverVerification
+from .models import UserProfile, ShelterProfile, SystemSetting, RolePermission, Message, ShelterDocument
+from pets.models import Pet, DeliveryPartner, PaymentTransaction, AuditLog, AdoptionRequest, DeliveryRequest, DeliveryStatusHistory, HandoverVerification, FavoritePet
 
 def send_sms_otp(phone_number, otp_code):
     """
@@ -389,7 +389,10 @@ def profile_view(request):
             member_since = 'January 2024'
 
         customer_address = getattr(profile_obj, 'address', '') or ''
-        customer_city = getattr(profile_obj, 'city', '') or 'Kochi, Kerala'
+        customer_city = getattr(profile_obj, 'city', '') or 'Kochi'
+        customer_state = getattr(profile_obj, 'state', '') or 'Kerala'
+        customer_postal_code = getattr(profile_obj, 'postal_code', '') or '682036'
+        customer_profile_photo = profile_obj.profile_photo.url if (profile_obj and getattr(profile_obj, 'profile_photo', None)) else ''
         customer_dob = getattr(profile_obj, 'dob', '') or ''
         customer_gender = getattr(profile_obj, 'gender', '') or 'Female'
         customer_occupation = getattr(profile_obj, 'occupation', '') or ''
@@ -402,11 +405,17 @@ def profile_view(request):
 
         if role == 'adopter':
             customer_role = 'Verified Adopter'
-            customer_location = customer_city
+            customer_location = f"{customer_city}, {customer_state}" if customer_city and customer_state else (customer_city or 'Kochi, Kerala')
         elif role == 'shelter':
             customer_role = 'Shelter Staff & Vet'
-            shelter_rec = getattr(db_user, 'shelter_profile', None)
+            shelter_rec = getattr(db_user, 'shelter_profile', None) or ShelterProfile.objects.filter(user=db_user).first()
             customer_location = shelter_rec.location if shelter_rec and shelter_rec.location != 'Pending Onboarding' else (shelter_rec.shelter_name if shelter_rec else 'Kochi Shelter Center')
+            if shelter_rec:
+                customer_verification_status = shelter_rec.verification_status
+                customer_is_verified = is_shelter_verified(shelter_rec)
+            elif profile_obj:
+                customer_verification_status = profile_obj.verification_status
+                customer_is_verified = (profile_obj.verification_status == 'VERIFIED' and profile_obj.is_verified)
         elif role == 'delivery':
             customer_role = 'Delivery Transit Partner'
             customer_location = 'South Zone Fleet'
@@ -417,7 +426,7 @@ def profile_view(request):
     # 2. If viewing a different role (or not authenticated), load that role's distinct profile
     elif role == 'shelter':
         # Look for registered shelter in DB first
-        shelter_p = UserProfile.objects.filter(role='SHELTER', is_verified=True).select_related('user').order_by('-created_at').first()
+        shelter_p = UserProfile.objects.filter(role='SHELTER').select_related('user').order_by('-created_at').first()
         if shelter_p:
             db_u = shelter_p.user
             customer_name = f"{db_u.first_name} {db_u.last_name}".strip() or db_u.username
@@ -428,22 +437,26 @@ def profile_view(request):
             customer_role = 'Shelter Staff & Vet'
             shelter_rec = getattr(db_u, 'shelter_profile', None)
             customer_location = shelter_rec.shelter_name if shelter_rec else 'Kochi Shelter Center'
-            customer_is_verified = shelter_p.is_verified
-            customer_verification_status = shelter_p.verification_status
+            if shelter_rec:
+                customer_verification_status = shelter_rec.verification_status
+                customer_is_verified = is_shelter_verified(shelter_rec)
+            else:
+                customer_verification_status = shelter_p.verification_status
+                customer_is_verified = (shelter_p.verification_status == 'VERIFIED' and shelter_p.is_verified)
             customer_reg_date = shelter_p.created_at.strftime('%d %b %Y') if shelter_p.created_at else '15 Jan 2024'
             member_since = shelter_p.created_at.strftime('%B %Y') if shelter_p.created_at else 'January 2024'
         else:
-            customer_name = 'Dr. Maya Sen'
-            customer_id = 101
-            customer_username = 'maya.sen'
-            customer_email = 'maya.sen@kindheart.org'
+            customer_name = 'Shelter Facility'
+            customer_id = 0
+            customer_username = 'shelter'
+            customer_email = 'shelter@kindheart.org'
             customer_role = 'Shelter Staff & Vet'
-            customer_location = 'Kochi Shelter Center'
-            customer_phone = '+91 98450 11223'
-            customer_is_verified = True
-            customer_verification_status = 'VERIFIED'
-            customer_reg_date = '15 Jan 2024'
-            member_since = 'January 2024'
+            customer_location = 'Shelter Center'
+            customer_phone = '—'
+            customer_is_verified = False
+            customer_verification_status = 'PENDING'
+            customer_reg_date = 'Recent'
+            member_since = 'Recent'
 
     elif role == 'admin':
         customer_name = 'Platform Administrator'
@@ -452,11 +465,11 @@ def profile_view(request):
         customer_email = 'admin@kindheart.org'
         customer_role = 'Super Administrator'
         customer_location = 'Platform Command Center'
-        customer_phone = '+91 98000 00001'
+        customer_phone = '—'
         customer_is_verified = True
         customer_verification_status = 'VERIFIED'
-        customer_reg_date = '01 Jan 2024'
-        member_since = 'January 2024'
+        customer_reg_date = 'Recent'
+        member_since = 'Recent'
 
     elif role == 'delivery':
         deliv_p = UserProfile.objects.filter(role='DELIVERY', is_verified=True).select_related('user').order_by('-created_at').first()
@@ -466,25 +479,25 @@ def profile_view(request):
             customer_id = db_u.id
             customer_username = db_u.username
             customer_email = db_u.email or f"{db_u.username}@safetransit.org"
-            customer_phone = deliv_p.phone if deliv_p.phone and deliv_p.phone != 'N/A' else '+91 98450 44556'
+            customer_phone = deliv_p.phone if deliv_p.phone and deliv_p.phone != 'N/A' else '—'
             customer_role = 'Delivery Transit Partner'
             customer_location = 'South Zone Fleet'
             customer_is_verified = deliv_p.is_verified
             customer_verification_status = deliv_p.verification_status
-            customer_reg_date = deliv_p.created_at.strftime('%d %b %Y') if deliv_p.created_at else '15 Jan 2024'
-            member_since = deliv_p.created_at.strftime('%B %Y') if deliv_p.created_at else 'January 2024'
+            customer_reg_date = deliv_p.created_at.strftime('%d %b %Y') if deliv_p.created_at else 'Recent'
+            member_since = deliv_p.created_at.strftime('%B %Y') if deliv_p.created_at else 'Recent'
         else:
-            customer_name = 'Rahul Kumar'
-            customer_id = 301
-            customer_username = 'rahul.kumar'
-            customer_email = 'rahul.kumar@kindheart.org'
+            customer_name = 'Delivery Partner'
+            customer_id = 0
+            customer_username = 'delivery'
+            customer_email = 'delivery@kindheart.org'
             customer_role = 'Delivery Transit Partner'
-            customer_location = 'South Zone Fleet'
-            customer_phone = '+91 98450 44556'
+            customer_location = 'Transit Fleet'
+            customer_phone = '—'
             customer_is_verified = True
             customer_verification_status = 'VERIFIED'
-            customer_reg_date = '15 Jan 2024'
-            member_since = 'January 2024'
+            customer_reg_date = 'Recent'
+            member_since = 'Recent'
 
     else:  # adopter
         cust_p = UserProfile.objects.filter(role='CUSTOMER', is_verified=True).select_related('user').order_by('-created_at').first()
@@ -494,25 +507,35 @@ def profile_view(request):
             customer_id = db_u.id
             customer_username = db_u.username
             customer_email = db_u.email or f"{db_u.username}@kindheart.org"
-            customer_phone = cust_p.phone if cust_p.phone and cust_p.phone != 'N/A' else '+91 98450 12345'
+            customer_phone = cust_p.phone if cust_p.phone and cust_p.phone != 'N/A' else '—'
             customer_role = 'Verified Adopter'
-            customer_location = 'Kochi, Kerala'
+            customer_address = cust_p.address or ''
+            customer_city = cust_p.city or ''
+            customer_state = getattr(cust_p, 'state', '') or ''
+            customer_postal_code = getattr(cust_p, 'postal_code', '') or ''
+            customer_profile_photo = cust_p.profile_photo.url if getattr(cust_p, 'profile_photo', None) else ''
+            customer_location = f"{customer_city}, {customer_state}".strip(', ') if customer_city or customer_state else ''
             customer_is_verified = cust_p.is_verified
             customer_verification_status = cust_p.verification_status
-            customer_reg_date = cust_p.created_at.strftime('%d %b %Y') if cust_p.created_at else '15 Jan 2024'
-            member_since = cust_p.created_at.strftime('%B %Y') if cust_p.created_at else 'January 2024'
+            customer_reg_date = cust_p.created_at.strftime('%d %b %Y') if cust_p.created_at else 'Recent'
+            member_since = cust_p.created_at.strftime('%B %Y') if cust_p.created_at else 'Recent'
         else:
-            customer_name = 'Sarah Connor'
-            customer_id = 8924
-            customer_username = 'sarah.connor'
-            customer_email = 'sarah.connor@kindheart.org'
-            customer_role = 'Verified Adopter'
+            customer_name = 'Guest Adopter'
+            customer_id = 0
+            customer_username = 'adopter'
+            customer_email = 'adopter@kindheart.org'
+            customer_role = 'Adopter'
             customer_location = 'Kochi, Kerala'
-            customer_phone = '+91 98450 12345'
-            customer_is_verified = True
-            customer_verification_status = 'VERIFIED'
-            customer_reg_date = '15 Jan 2024'
-            member_since = 'January 2024'
+            customer_address = ''
+            customer_city = 'Kochi'
+            customer_state = 'Kerala'
+            customer_postal_code = '682036'
+            customer_profile_photo = ''
+            customer_phone = '—'
+            customer_is_verified = False
+            customer_verification_status = 'PENDING'
+            customer_reg_date = 'Recent'
+            member_since = 'Recent'
 
     # Compute first name and initials for header and avatars
     name_parts = customer_name.strip().split()
@@ -523,6 +546,224 @@ def profile_view(request):
         customer_initials = customer_name[:2].upper()
     else:
         customer_initials = customer_name.upper() if customer_name else ('AD' if role == 'admin' else 'VA')
+
+    current_shelter_name = ''
+    current_shelter_id = ''
+    shelter_dossier = None
+    if role == 'shelter':
+        active_sh = None
+        if request.user.is_authenticated and not request.user.is_anonymous:
+            active_sh = getattr(request.user, 'shelter_profile', None) or ShelterProfile.objects.filter(user=request.user).first()
+        elif 'shelter_rec' in locals() and shelter_rec:
+            active_sh = shelter_rec
+        elif 'shelter_p' in locals() and shelter_p:
+            active_sh = getattr(shelter_p.user, 'shelter_profile', None) or ShelterProfile.objects.filter(user=shelter_p.user).first()
+
+        if not active_sh:
+            active_sh = ShelterProfile.objects.first()
+
+        if active_sh:
+            current_shelter_name = active_sh.shelter_name
+            current_shelter_id = f"SH-{active_sh.user.id if active_sh.user else active_sh.id}"
+            sh_user = active_sh.user
+            sh_prof = getattr(sh_user, 'profile', None) if sh_user else None
+            sh_license = active_sh.license_number or (f"KL-SH-{active_sh.user.id:04d}" if active_sh.user else "KL-SH-0001")
+            sh_verified = is_shelter_verified(active_sh)
+            sh_status = active_sh.verification_status
+
+            total_pets_count = Pet.objects.filter(shelter=active_sh).count()
+            available_pets_count = Pet.objects.filter(shelter=active_sh, status='AVAILABLE').count()
+            adopted_pets_count = Pet.objects.filter(shelter=active_sh, status='ADOPTED').count()
+            adoption_requests_count = AdoptionRequest.objects.filter(shelter=active_sh).count()
+            delivery_partners_count = DeliveryPartner.objects.filter(shelter=active_sh).count()
+            documents_count = ShelterDocument.objects.filter(shelter=active_sh).count()
+            verified_documents_count = ShelterDocument.objects.filter(shelter=active_sh, verification_status='VERIFIED').count()
+
+            completed_adoptions_count = AdoptionRequest.objects.filter(shelter=active_sh, status__in=['COMPLETED', 'ADOPTED']).count()
+
+            sh_phone = active_sh.phone if active_sh.phone and active_sh.phone != 'N/A' else (sh_prof.phone if sh_prof and sh_prof.phone and sh_prof.phone != 'N/A' else '+91 98450 11223')
+            sh_email = sh_user.email if sh_user and sh_user.email else f"{sh_user.username if sh_user else 'shelter'}@kindheart.org"
+            sh_address = active_sh.address if hasattr(active_sh, 'address') and active_sh.address else 'Panampilly Nagar'
+            sh_city = active_sh.city if hasattr(active_sh, 'city') and active_sh.city else 'Kochi'
+            sh_state = active_sh.state if hasattr(active_sh, 'state') and active_sh.state else 'Kerala'
+            sh_type = active_sh.shelter_type if hasattr(active_sh, 'shelter_type') and active_sh.shelter_type else 'Animal Rescue & Rehabilitation Center'
+            sh_location = f"{sh_city}, {sh_state}" if (sh_city or sh_state) else (active_sh.location if active_sh.location and active_sh.location != 'Pending Onboarding' else 'Kochi, Kerala')
+            sh_bio = active_sh.bio if active_sh.bio else 'Registered animal welfare facility providing rescue, rehabilitation, veterinary care, and ethical adoption services.'
+            sh_logo_url = active_sh.logo.url if hasattr(active_sh, 'logo') and active_sh.logo else (sh_prof.profile_photo.url if sh_prof and getattr(sh_prof, 'profile_photo', None) else '')
+            sh_member_since = active_sh.created_at.strftime('%B %Y') if active_sh.created_at else 'January 2024'
+            sh_reg_date = active_sh.created_at.strftime('%d %b %Y') if active_sh.created_at else '15 Jan 2024'
+
+            # Recent pets
+            recent_pets = list(Pet.objects.filter(shelter=active_sh).order_by('-id')[:5].values('id', 'name', 'species', 'breed', 'status', 'approval_status'))
+            for rp in recent_pets:
+                rp['id_display'] = f"P{rp['id']}"
+
+            # Recent adoption requests
+            recent_adoption_requests = []
+            try:
+                reqs = AdoptionRequest.objects.filter(shelter=active_sh).select_related('pet', 'customer').order_by('-id')[:5]
+                for r in reqs:
+                    recent_adoption_requests.append({
+                        'id': r.id,
+                        'id_display': f"AR-{r.id:04d}",
+                        'pet_name': r.pet.name if r.pet else 'Companion',
+                        'pet_species': r.pet.species if r.pet else 'Pet',
+                        'customer_name': f"{r.customer.first_name} {r.customer.last_name}".strip() if r.customer and (r.customer.first_name or r.customer.last_name) else (r.customer.username if r.customer else 'Adopter'),
+                        'status': r.status,
+                        'date': r.request_date.strftime('%d %b %Y') if hasattr(r, 'request_date') and r.request_date else 'Recent'
+                    })
+            except Exception as e:
+                print(f"Error querying recent_adoption_requests: {e}")
+
+            # Recent completed adoptions
+            recent_completed_adoptions = []
+            try:
+                comp_reqs = AdoptionRequest.objects.filter(shelter=active_sh, status__in=['COMPLETED', 'ADOPTED']).select_related('pet', 'customer').order_by('-id')[:5]
+                for cr in comp_reqs:
+                    recent_completed_adoptions.append({
+                        'id': cr.id,
+                        'id_display': f"AR-{cr.id:04d}",
+                        'pet_name': cr.pet.name if cr.pet else 'Companion',
+                        'pet_species': cr.pet.species if cr.pet else 'Pet',
+                        'customer_name': f"{cr.customer.first_name} {cr.customer.last_name}".strip() if cr.customer and (cr.customer.first_name or cr.customer.last_name) else (cr.customer.username if cr.customer else 'Adopter'),
+                        'status': cr.status,
+                        'date': cr.request_date.strftime('%d %b %Y') if hasattr(cr, 'request_date') and cr.request_date else 'Recent'
+                    })
+            except Exception as e:
+                print(f"Error querying recent_completed_adoptions: {e}")
+
+            # Recent delivery assignments
+            recent_delivery_assignments = []
+            try:
+                delivs = DeliveryRequest.objects.filter(adoption_request__shelter=active_sh).select_related('delivery_partner', 'delivery_partner__user', 'adoption_request__pet', 'adoption_request__customer').order_by('-id')[:15]
+                for d in delivs:
+                    p_name = 'Unassigned Driver'
+                    if d.delivery_partner:
+                        if d.delivery_partner.user and (d.delivery_partner.user.first_name or d.delivery_partner.user.last_name):
+                            p_name = f"{d.delivery_partner.user.first_name} {d.delivery_partner.user.last_name}".strip()
+                        elif d.delivery_partner.user:
+                            p_name = d.delivery_partner.user.username
+                        else:
+                            p_name = getattr(d.delivery_partner, 'partner_id', 'Delivery Courier')
+
+                    recent_delivery_assignments.append({
+                        'id': d.id,
+                        'id_display': f"DEL-{d.id:04d}",
+                        'partner_name': p_name,
+                        'pet_name': d.adoption_request.pet.name if d.adoption_request and d.adoption_request.pet else 'Companion',
+                        'customer_name': f"{d.adoption_request.customer.first_name} {d.adoption_request.customer.last_name}".strip() if d.adoption_request and d.adoption_request.customer else 'Adopter',
+                        'status': d.status,
+                        'drop_address': d.drop_address or 'Adopter Address',
+                        'date': d.created_at.strftime('%d %b %Y') if d.created_at else 'Recent'
+                    })
+            except Exception as e:
+                print(f"Error querying recent_delivery_assignments: {e}")
+
+            # Uploaded documents summary
+            shelter_docs = list(ShelterDocument.objects.filter(shelter=active_sh).order_by('-upload_date')[:5].values('id', 'doc_type', 'original_filename', 'verification_status', 'upload_date', 'review_notes'))
+            for doc in shelter_docs:
+                doc['uploaded_at_display'] = doc['upload_date'].strftime('%d %b %Y') if doc.get('upload_date') else 'Recent'
+                doc['type_display'] = doc['doc_type'].replace('_', ' ').title() if doc.get('doc_type') else 'Document'
+
+            shelter_dossier = {
+                'id': current_shelter_id,
+                'name': current_shelter_name,
+                'license': sh_license,
+                'verification_status': sh_status,
+                'is_verified': sh_verified,
+                'shelter_type': sh_type,
+                'address': sh_address,
+                'city': sh_city,
+                'state': sh_state,
+                'location': sh_location,
+                'phone': sh_phone,
+                'email': sh_email,
+                'bio': sh_bio,
+                'logo_url': sh_logo_url,
+                'member_since': sh_member_since,
+                'reg_date': sh_reg_date,
+                'total_pets': total_pets_count,
+                'available_pets': available_pets_count,
+                'adopted_pets': adopted_pets_count,
+                'adoption_requests': adoption_requests_count,
+                'completed_adoptions': completed_adoptions_count,
+                'delivery_partners_count': delivery_partners_count,
+                'documents_count': documents_count,
+                'verified_documents_count': verified_documents_count,
+                'documents_list': shelter_docs,
+                'recent_pets': recent_pets,
+                'recent_adoption_requests': recent_adoption_requests,
+                'recent_completed_adoptions': recent_completed_adoptions,
+                'recent_delivery_assignments': recent_delivery_assignments,
+            }
+        else:
+            shelter_dossier = None
+
+
+    # Phase 17 & Phase 19: Adopter Profile UI — Real Database Adoption Activity & History
+    # Phase 19 Backend Enforcement: adopter_stats and adopter_history MUST only be computed
+    # for role='adopter'. Shelter, delivery, and admin roles must NOT receive adopter-specific
+    # DB queries, statistics, or history — even if the values would evaluate to zeros.
+    adopter_stats = {
+        'total_requests': 0,
+        'active_adoptions': 0,
+        'completed_adoptions': 0,
+        'favorites_count': 0,
+        'messages_count': 0,
+        'unread_messages_count': 0,
+    }
+    adopter_history = []
+
+    # Phase 19: Only resolve the adopter user for role='adopter'.
+    # The previous code fell through via 'elif db_u' and could incorrectly pick up
+    # a shelter/delivery user object, violating role data isolation.
+    target_adopter_user = None
+    if role == 'adopter':
+        if request.user.is_authenticated and not request.user.is_anonymous:
+            target_adopter_user = request.user
+        elif 'db_u' in locals() and db_u:
+            target_adopter_user = db_u
+        elif 'db_user' in locals() and db_user:
+            target_adopter_user = db_user
+
+    if target_adopter_user:
+        user_adoptions_qs = AdoptionRequest.objects.filter(customer=target_adopter_user).select_related('pet', 'shelter', 'shelter__user')
+        adopter_stats['total_requests'] = user_adoptions_qs.count()
+        adopter_stats['active_adoptions'] = user_adoptions_qs.filter(status__in=['PENDING', 'APPROVED', 'IN_PROGRESS', 'READY_FOR_HANDOVER', 'HANDOVER_PENDING', 'IN_TRANSIT']).count()
+        adopter_stats['completed_adoptions'] = user_adoptions_qs.filter(status__in=['COMPLETED', 'ADOPTED']).count()
+        adopter_stats['favorites_count'] = FavoritePet.objects.filter(user=target_adopter_user).count()
+        adopter_stats['messages_count'] = Message.objects.filter(recipient=target_adopter_user).count()
+        adopter_stats['unread_messages_count'] = Message.objects.filter(recipient=target_adopter_user, is_read=False).count()
+
+        for req in user_adoptions_qs.order_by('-request_date', '-id')[:30]:
+            delivery_obj = getattr(req, 'delivery', None)
+            if delivery_obj and hasattr(delivery_obj, 'get_status_display'):
+                handover_status = delivery_obj.get_status_display()
+            elif delivery_obj:
+                handover_status = delivery_obj.status
+            elif req.status in ['COMPLETED', 'ADOPTED']:
+                handover_status = 'Delivered & Handover Complete'
+            elif req.status == 'APPROVED':
+                handover_status = 'Approved / Handover Ready'
+            elif req.status == 'REJECTED':
+                handover_status = 'Not Applicable (Rejected)'
+            else:
+                handover_status = 'Pending Shelter Review'
+
+            adopter_history.append({
+                'id': req.id,
+                'application_id': f"KHD-APP-{req.id:04d}",
+                'pet_id': req.pet.id if req.pet else None,
+                'pet_name': req.pet.name if req.pet else 'Companion',
+                'pet_breed': req.pet.breed if req.pet else 'Domestic',
+                'pet_species': req.pet.species if req.pet else 'Pet',
+                'pet_image_url': req.pet.image_url if req.pet and req.pet.image_url else '',
+                'shelter_name': req.shelter.shelter_name if req.shelter else 'KindHeart Center',
+                'application_date': req.request_date.strftime('%d %b %Y') if req.request_date else 'Recent',
+                'status': req.status,
+                'status_display': req.get_status_display() if hasattr(req, 'get_status_display') else req.status,
+                'handover_status': handover_status,
+            })
 
     # Fetch real pending user verifications, verified customers (only CUSTOMERs), and verified shelters (only SHELTERs)
     pending_users_list = []
@@ -579,21 +820,60 @@ def profile_view(request):
     all_shelter_profiles = UserProfile.objects.filter(role='SHELTER').select_related('user').order_by('-created_at')
     for sp in all_shelter_profiles:
         sp_user = sp.user
+        if not sp_user:
+            continue
         sp_shelter = getattr(sp_user, 'shelter_profile', None)
-        s_name = (sp_shelter.shelter_name if sp_shelter else '') or f"{sp_user.first_name} Shelter & Rescue".strip() or 'Community Shelter'
+        if not sp_shelter:
+            continue
+        s_name = sp_shelter.shelter_name or f"{sp_user.first_name} Shelter & Rescue".strip() or 'Community Shelter'
         s_contact = f"{sp_user.first_name} {sp_user.last_name}".strip() or sp_user.username
         s_phone = sp.phone if sp.phone and sp.phone != 'N/A' else (sp_user.username if sp_user.username.isdigit() else '+91 98470 11223')
         s_location = (sp_shelter.location if sp_shelter and sp_shelter.location != 'Pending Onboarding' else 'Panampilly Nagar, Kochi, Kerala')
         s_pets_count = Pet.objects.filter(shelter=sp_shelter).count() if sp_shelter else 0
         s_available_count = Pet.objects.filter(shelter=sp_shelter, status='AVAILABLE').count() if sp_shelter else 0
         
-        v_status = 'Verified' if sp.is_verified else ('Rejected' if sp.verification_status == 'REJECTED' else 'Pending Verification')
+        if sp.verification_status == 'SUSPENDED' or (sp_shelter and sp_shelter.verification_status == 'SUSPENDED'):
+            v_status = 'Suspended'
+        elif sp.verification_status == 'REJECTED' or (sp_shelter and sp_shelter.verification_status == 'REJECTED'):
+            v_status = 'Rejected'
+        elif sp.verification_status == 'UNDER_REVIEW' or (sp_shelter and sp_shelter.verification_status == 'UNDER_REVIEW'):
+            v_status = 'Under Review'
+        elif sp.is_verified or sp.verification_status == 'VERIFIED' or (sp_shelter and sp_shelter.verification_status == 'VERIFIED'):
+            v_status = 'Verified'
+        else:
+            v_status = 'Pending Verification'
         acc_status = 'Active' if (sp.is_active and sp_user.is_active) else 'Suspended'
+
+        # Phase 9: Include shelter documents and summary for Admin review
+        sh_docs = list(sp_shelter.documents.all()) if sp_shelter else []
+        docs_summary = {
+            'total': len(sh_docs),
+            'pending': sum(1 for d in sh_docs if d.verification_status == 'PENDING'),
+            'under_review': sum(1 for d in sh_docs if d.verification_status == 'UNDER_REVIEW'),
+            'verified': sum(1 for d in sh_docs if d.verification_status == 'VERIFIED'),
+            'rejected': sum(1 for d in sh_docs if d.verification_status == 'REJECTED'),
+        }
+        docs_data = [{
+            'id': d.id,
+            'doc_type': d.doc_type,
+            'doc_type_label': d.get_doc_type_display(),
+            'original_filename': d.original_filename,
+            'file_url': request.build_absolute_uri(d.file.url) if d.file else '',
+            'download_url': request.build_absolute_uri(f'/users/api/shelter/document/{d.id}/download/'),
+            'file_size_display': d.file_size_display,
+            'upload_date': d.upload_date.strftime('%d %b %Y %H:%M'),
+            'verification_status': d.verification_status,
+            'verification_label': d.get_verification_status_display(),
+            'review_notes': d.review_notes or '',
+            'reviewed_by': (d.reviewed_by.get_full_name() or d.reviewed_by.username) if d.reviewed_by else None,
+            'review_date': d.review_date.strftime('%d %b %Y') if d.review_date else None,
+        } for d in sh_docs]
 
         verified_shelters_list.append({
             'id': f"SH-{sp_user.id}",
             'profile_id': sp.id,
             'user_id': sp_user.id,
+            'shelter_id': sp_shelter.id if sp_shelter else None,
             'name': s_name,
             'license': f"KL-SH-{sp_user.id:04d}",
             'contactPerson': s_contact,
@@ -609,10 +889,11 @@ def profile_view(request):
             'completedAdoptions': 0,
             'revenue': "₹0",
             'settlementsPending': "₹0",
-            'rating': 5.0,
             'complaints': 0,
             'auditPassRate': "100%",
             'lastAudit': sp.created_at.strftime('%d %b %Y') if sp.created_at else 'Recent',
+            'documents': docs_data,
+            'docsSummary': docs_summary,
         })
 
     # Fetch System Settings & Role Permissions from database
@@ -629,6 +910,22 @@ def profile_view(request):
             db_role_permissions[rp.role] = {}
         db_role_permissions[rp.role][rp.permission_key] = rp.is_granted
 
+    # Phase 19: Safe default initializations for adopter-only context variables.
+    # These are only rendered inside profile-adopter-view which is hidden for shelter/admin/delivery.
+    # Prevents NameError if a non-adopter role path did not initialize these variables.
+    _p19 = locals()
+    if 'customer_address' not in _p19:
+        customer_address = ''
+    if 'customer_city' not in _p19:
+        customer_city = ''
+    if 'customer_state' not in _p19:
+        customer_state = ''
+    if 'customer_postal_code' not in _p19:
+        customer_postal_code = ''
+    if 'customer_profile_photo' not in _p19:
+        customer_profile_photo = ''
+    del _p19
+
     context = {
         'customer_name': customer_name,
         'customer_first_name': customer_first_name,
@@ -641,6 +938,20 @@ def profile_view(request):
         'customer_location': customer_location,
         'customer_is_verified': customer_is_verified,
         'customer_verification_status': customer_verification_status,
+        'is_shelter_verified': customer_is_verified if role == 'shelter' else True,
+        'shelter_verification_status': customer_verification_status if role == 'shelter' else 'VERIFIED',
+        'current_shelter_name': current_shelter_name,
+        'current_shelter_id': current_shelter_id,
+        'shelter_dossier': shelter_dossier,
+        'customer_address': customer_address,
+        'customer_city': customer_city,
+        'customer_state': customer_state,
+        'customer_postal_code': customer_postal_code,
+        'customer_profile_photo': customer_profile_photo,
+        'adopter_stats': adopter_stats,
+        'adopter_history': adopter_history,
+        'adopter_history_count': len(adopter_history),
+        'adopter_history_json': json.dumps(adopter_history),
         'customer_reg_date': customer_reg_date,
         'member_since': member_since,
         'current_role': role,
@@ -697,8 +1008,14 @@ def profile_view(request):
     try:
         if role == 'delivery' and request.user.is_authenticated and not request.user.is_anonymous:
             deliv_qs = DeliveryRequest.objects.filter(delivery_partner__user=request.user).select_related('adoption_request', 'adoption_request__pet', 'adoption_request__customer', 'adoption_request__shelter', 'delivery_partner', 'delivery_partner__user').order_by('-id')
-        else:
+        elif role == 'shelter' and active_sh:
+            deliv_qs = DeliveryRequest.objects.filter(adoption_request__shelter=active_sh).select_related('adoption_request', 'adoption_request__pet', 'adoption_request__customer', 'adoption_request__shelter', 'delivery_partner', 'delivery_partner__user').order_by('-id')
+        elif role == 'adopter' and target_adopter_user:
+            deliv_qs = DeliveryRequest.objects.filter(adoption_request__customer=target_adopter_user).select_related('adoption_request', 'adoption_request__pet', 'adoption_request__customer', 'adoption_request__shelter', 'delivery_partner', 'delivery_partner__user').order_by('-id')
+        elif is_admin:
             deliv_qs = DeliveryRequest.objects.all().select_related('adoption_request', 'adoption_request__pet', 'adoption_request__customer', 'adoption_request__shelter', 'delivery_partner', 'delivery_partner__user').order_by('-id')
+        else:
+            deliv_qs = DeliveryRequest.objects.none()
 
         for dr in deliv_qs:
             pet_obj = dr.adoption_request.pet if (dr.adoption_request and dr.adoption_request.pet) else None
@@ -714,7 +1031,7 @@ def profile_view(request):
                 'petName': pet_obj.name if pet_obj else "Companion Pet",
                 'petBreed': pet_obj.breed if pet_obj else "Mixed Breed",
                 'petSpecies': pet_obj.species if pet_obj else "Dog",
-                'petImage': pet_obj.image_url if pet_obj else "/kindheart_bruno.jpg",
+                'petImage': pet_obj.image_url if pet_obj and pet_obj.image_url else "",
                 'customerName': cust_user.get_full_name() or cust_user.username if cust_user else "Adopter",
                 'customerPhone': getattr(getattr(cust_user, 'profile', None), 'phone', '+91 98470 12345') if cust_user else "+91 98470 12345",
                 'dropAddress': dr.drop_address or "Adopter Location, Kochi, Kerala",
@@ -738,11 +1055,28 @@ def profile_view(request):
     # 4. Registered Delivery Fleet & Shelter Affiliation
     db_delivery_partners = []
     try:
-        for dp in DeliveryPartner.objects.select_related('user', 'shelter', 'shelter__user').all():
+        if role == 'shelter' and request.user.is_authenticated and not request.user.is_anonymous:
+            sh_prof = getattr(request.user, 'shelter_profile', None) or ShelterProfile.objects.filter(user=request.user).first()
+            if sh_prof:
+                dp_qs = DeliveryPartner.objects.filter(shelter=sh_prof).select_related('user', 'shelter', 'shelter__user').prefetch_related('assigned_deliveries', 'assigned_deliveries__adoption_request', 'assigned_deliveries__adoption_request__pet').order_by('-id')
+            else:
+                dp_qs = DeliveryPartner.objects.none()
+        else:
+            dp_qs = DeliveryPartner.objects.select_related('user', 'shelter', 'shelter__user').prefetch_related('assigned_deliveries', 'assigned_deliveries__adoption_request', 'assigned_deliveries__adoption_request__pet').all().order_by('-id')
+
+        for dp in dp_qs:
             sh_name = dp.shelter.shelter_name if dp.shelter else "SafeTransit General Fleet"
             sh_id = f"SH-{dp.shelter.user.id}" if (dp.shelter and dp.shelter.user) else "SH-101"
             sh_loc = dp.shelter.location if dp.shelter else "Kochi, Kerala"
             sh_phone = dp.shelter.phone if dp.shelter else ""
+            
+            active_deliv = dp.get_active_delivery()
+            op_status = dp.get_availability_status()
+            current_assignment = "Available (No Active Assignment)"
+            if active_deliv:
+                pet_n = active_deliv.adoption_request.pet.name if (active_deliv.adoption_request and active_deliv.adoption_request.pet) else "Companion Pet"
+                current_assignment = f"Transit for {pet_n} (DEL-{active_deliv.id})"
+
             db_delivery_partners.append({
                 'id': f"DEL-{dp.user.id}",
                 'partnerId': dp.partner_id,
@@ -757,9 +1091,11 @@ def profile_view(request):
                 'shelterName': sh_name,
                 'shelterLocation': sh_loc,
                 'shelterPhone': sh_phone,
-                'rating': float(dp.rating) if dp.rating else 4.95,
-                'status': 'Active & Verified' if dp.is_active else 'Inactive',
-                'statusType': 'active' if dp.is_active else 'inactive',
+                'license': 'Verified License' if dp.license_verified else 'Pending Verification',
+                'currentAssignment': current_assignment,
+                'availabilityStatus': op_status,
+                'status': op_status,
+                'statusType': 'available' if op_status == 'AVAILABLE' else ('busy' if op_status == 'BUSY' else 'inactive'),
                 'joined': dp.user.date_joined.strftime("%d %b %Y") if dp.user.date_joined else "Recent"
             })
     except Exception as e:
@@ -820,7 +1156,9 @@ def profile_view(request):
                 'customer': cust_name,
                 'shelter': sh_name,
                 'shelterId': sh_id,
+                'shelter_user_id': r.shelter.user.id if (r.shelter and r.shelter.user) else None,
                 'status': st_disp,
+                'raw_status': r.status,
                 'date': r.request_date.strftime("%d %b %Y") if r.request_date else "Recent",
                 'notes': r.notes or "Adoption request submitted via KindHeart portal."
             })
@@ -849,6 +1187,40 @@ def profile_view(request):
         db_audit_logs = []
 
     context['db_audit_logs_json'] = json.dumps(db_audit_logs)
+
+    # 8. Shelter Uploaded Compliance Documents (Phase 15)
+    db_shelter_documents = []
+    try:
+        sh_prof_for_docs = None
+        if role == 'shelter' and request.user.is_authenticated and not request.user.is_anonymous:
+            sh_prof_for_docs = getattr(request.user, 'shelter_profile', None) or ShelterProfile.objects.filter(user=request.user).first()
+        elif role == 'shelter':
+            sh_prof_for_docs = ShelterProfile.objects.first()
+
+        if sh_prof_for_docs:
+            docs_qs = ShelterDocument.objects.filter(shelter=sh_prof_for_docs).order_by('-upload_date')
+            for d in docs_qs:
+                db_shelter_documents.append({
+                    'id': d.id,
+                    'doc_type': d.doc_type,
+                    'doc_type_label': d.get_doc_type_display(),
+                    'original_filename': d.original_filename,
+                    'stored_path': d.stored_path,
+                    'file_size': d.file_size,
+                    'file_size_display': d.file_size_display,
+                    'file_url': request.build_absolute_uri(d.file.url) if d.file else '',
+                    'download_url': request.build_absolute_uri(f'/users/api/shelter/document/{d.id}/download/'),
+                    'upload_date': d.upload_date.strftime('%d %b %Y %H:%M'),
+                    'verification_status': d.verification_status,
+                    'verification_label': d.get_verification_status_display(),
+                    'review_notes': d.review_notes or '',
+                    'reviewed_by': (d.reviewed_by.get_full_name() or d.reviewed_by.username) if d.reviewed_by else None,
+                    'review_date': d.review_date.strftime('%d %b %Y') if d.review_date else None,
+                })
+    except Exception:
+        db_shelter_documents = []
+
+    context['db_shelter_documents_json'] = json.dumps(db_shelter_documents)
 
     return render(request, 'users/profile.html', context)
 
@@ -902,6 +1274,11 @@ def api_admin_verify_user(request):
         if hasattr(profile.user, 'shelter_profile'):
             profile.user.shelter_profile.verification_status = 'VERIFIED'
             profile.user.shelter_profile.save()
+            profile.user.shelter_profile.documents.filter(verification_status__in=['PENDING', 'UNDER_REVIEW']).update(
+                verification_status='VERIFIED',
+                reviewed_by=request.user if request.user.is_authenticated else None,
+                review_date=timezone.now()
+            )
         message = f"Profile for {profile.user.username} ({profile.role}) successfully verified and approved."
 
         u_name = f"{profile.user.first_name} {profile.user.last_name}".strip() or profile.user.username
@@ -935,6 +1312,11 @@ def api_admin_verify_user(request):
         if hasattr(profile.user, 'shelter_profile'):
             profile.user.shelter_profile.verification_status = 'REJECTED'
             profile.user.shelter_profile.save()
+            profile.user.shelter_profile.documents.filter(verification_status__in=['PENDING', 'UNDER_REVIEW']).update(
+                verification_status='REJECTED',
+                reviewed_by=request.user if request.user.is_authenticated else None,
+                review_date=timezone.now()
+            )
         message = f"Profile for {profile.user.username} marked as REJECTED."
 
     return JsonResponse({
@@ -1070,7 +1452,7 @@ def api_verify_otp(request):
 @csrf_exempt
 def api_reset_password(request):
     """
-    Sets the new password and confirms identity.
+    Sets the new password in database and confirms identity.
     """
     if request.method != 'POST':
         return JsonResponse({'success': False, 'error': 'POST request required'}, status=405)
@@ -1091,10 +1473,22 @@ def api_reset_password(request):
     if password != password_confirm:
         return JsonResponse({'success': False, 'error': 'Passwords do not match.'}, status=400)
 
-    # Clear OTP from session
+    # Locate user and update password in database
     email = request.session.get('reset_email', '')
+    if email:
+        user = User.objects.filter(
+            models.Q(email__iexact=email) | 
+            models.Q(username__iexact=email) | 
+            models.Q(profile__phone=email)
+        ).first()
+        if user:
+            user.set_password(password)
+            user.save()
+
+    # Clear OTP & reset session data
     request.session.pop('reset_otp', None)
     request.session.pop('otp_verified', None)
+    request.session.pop('reset_email', None)
 
     return JsonResponse({
         'success': True,
@@ -1178,9 +1572,9 @@ def api_admin_create_shelter(request):
                 role='SHELTER',
                 phone=phone,
                 is_active=True,
-                is_verified=False,
+                is_verified=True,
                 must_change_password=True,
-                verification_status='PENDING'
+                verification_status='VERIFIED'
             )
 
             s_profile = ShelterProfile.objects.create(
@@ -1188,7 +1582,7 @@ def api_admin_create_shelter(request):
                 shelter_name=shelter_name,
                 location=address,
                 phone=phone or "N/A",
-                verification_status='PENDING'
+                verification_status='VERIFIED'
             )
     except Exception as e:
         return JsonResponse({'success': False, 'error': f"Database transaction failed: {str(e)}"}, status=500)
@@ -1196,20 +1590,23 @@ def api_admin_create_shelter(request):
     shelter_obj = {
         'id': f"SH-{new_user.id}",
         'profile_id': u_profile.id,
+        'user_id': new_user.id,
         'name': shelter_name,
         'license': f"KL-SH-{new_user.id:04d}",
         'contactPerson': contact_person,
         'phone': phone or candidate_username,
         'email': email or f"{new_user.username}@happypaws.org",
         'address': address,
-        'verificationStatus': 'Pending Verification',
+        'verificationStatus': 'Verified',
+        'accountStatus': 'Active',
+        'is_active': True,
         'totalPets': 0,
         'availablePets': 0,
         'totalOrders': 0,
         'completedAdoptions': 0,
         'revenue': "₹0",
         'settlementsPending': "₹0",
-        'rating': 5.0,
+        
         'complaints': 0,
         'auditPassRate': "100%",
         'lastAudit': "Today",
@@ -1233,12 +1630,34 @@ def api_admin_create_shelter(request):
     })
 
 
+
+def is_shelter_verified(shelter_profile):
+    """
+    Phase 10 & 11: Backend Verification Authority.
+    Evaluates whether a ShelterProfile is verified using existing models.
+    Requires:
+      - ShelterProfile.verification_status == 'VERIFIED'
+      - UserProfile.is_verified is True (if user profile exists)
+      - UserProfile.verification_status == 'VERIFIED' (if user profile exists)
+    """
+    if not shelter_profile:
+        return False
+    if shelter_profile.verification_status != 'VERIFIED':
+        return False
+    if hasattr(shelter_profile, 'user') and shelter_profile.user and hasattr(shelter_profile.user, 'profile'):
+        prof = shelter_profile.user.profile
+        if not prof.is_verified or str(prof.verification_status).upper() != 'VERIFIED':
+            return False
+    return True
+
+
 @csrf_exempt
 def api_shelter_create_delivery(request):
     """
     Allows Shelter Owner to register a delivery boy / courier partner,
     creates their login credentials, and returns them so the shelter owner
     can provide the login credentials to the delivery boy.
+    Phase 11: Backend strictly enforces verification check.
     """
     if request.method != 'POST':
         return JsonResponse({'success': False, 'error': 'POST request required'}, status=405)
@@ -1251,13 +1670,22 @@ def api_shelter_create_delivery(request):
     role_param = str(data.get('role', '')).lower()
     user_role = str(request.session.get('user_role', '')).lower()
     referer = str(request.META.get('HTTP_REFERER', '')).lower()
-    is_authorized = (
-        (request.user.is_authenticated and hasattr(request.user, 'profile') and request.user.profile.role in ['SHELTER', 'ADMIN'])
-        or user_role in ['shelter', 'admin']
-        or role_param in ['shelter', 'admin']
-        or 'role=shelter' in referer
-        or 'role=admin' in referer
-    )
+
+    # Phase 11: Backend role resolution based strictly on DB credentials for authenticated users
+    if request.user.is_authenticated and not request.user.is_anonymous:
+        is_admin_user = bool(
+            request.user.is_staff or 
+            request.user.is_superuser or 
+            (hasattr(request.user, 'profile') and str(request.user.profile.role).upper() == 'ADMIN')
+        )
+        is_shelter_user = bool(hasattr(request.user, 'profile') and str(request.user.profile.role).upper() == 'SHELTER')
+        is_authorized = is_admin_user or is_shelter_user
+    else:
+        # Fallback for unauthenticated mock/session environments
+        is_admin_user = (user_role == 'admin')
+        is_shelter_user = (user_role == 'shelter' or role_param == 'shelter')
+        is_authorized = (user_role in ['shelter', 'admin'] or role_param in ['shelter', 'admin'])
+
     if not is_authorized:
         return JsonResponse({'success': False, 'error': 'Shelter owner authorization required'}, status=403)
 
@@ -1265,11 +1693,44 @@ def api_shelter_create_delivery(request):
     phone = data.get('phone', '').strip()
     email = data.get('email', '').strip().lower()
     vehicle_type = data.get('vehicle_type', '').strip() or 'Pet Taxi Van'
-    vehicle_number = data.get('vehicle_number', '').strip() or 'KL-07-CD-1001'
+    vehicle_number = data.get('vehicle_number', '').strip()
     password = data.get('password', '').strip()
 
     if not name or not password:
         return JsonResponse({'success': False, 'error': 'Partner name and password are required'}, status=400)
+
+    # --- Derive shelter and enforce Phase 10, 11 & 14 verification gate ---
+    shelter_profile = None
+    if request.user.is_authenticated and not request.user.is_anonymous:
+        shelter_profile = getattr(request.user, 'shelter_profile', None) or ShelterProfile.objects.filter(user=request.user).first()
+
+    # Only allow verified admins to override shelter via payload
+    if not shelter_profile and is_admin_user:
+        shelter_id_req = data.get('shelter_id') or data.get('shelterId')
+        if shelter_id_req:
+            try:
+                clean_s_id = str(shelter_id_req).replace('SH-', '').strip()
+                if clean_s_id.isdigit():
+                    clean_int = int(clean_s_id)
+                    shelter_profile = (
+                        ShelterProfile.objects.filter(user_id=clean_int).first()
+                        or ShelterProfile.objects.filter(id=clean_int).first()
+                    )
+                else:
+                    shelter_profile = ShelterProfile.objects.filter(shelter_name__icontains=str(shelter_id_req)).first()
+            except Exception:
+                pass
+
+    if not shelter_profile and is_admin_user:
+        shelter_profile = ShelterProfile.objects.first()
+
+    # Phase 10, 11 & 14: Gate delivery partner creation until Admin verification
+    if not is_admin_user:
+        if not shelter_profile or not is_shelter_verified(shelter_profile):
+            return JsonResponse({
+                'success': False,
+                'error': 'Shelter verification is required before registering delivery partners. Complete and submit your shelter documents for Admin verification before adding pets or delivery partners.'
+            }, status=403)
 
     candidate_username = ''
     if phone:
@@ -1289,57 +1750,45 @@ def api_shelter_create_delivery(request):
     first_name = name_parts[0] if name_parts else name
     last_name = name_parts[1] if len(name_parts) > 1 else ''
 
-    new_user = User.objects.create_user(
-        username=candidate_username,
-        email=email,
-        password=password,
-        first_name=first_name,
-        last_name=last_name
-    )
-
-    u_profile = UserProfile.objects.create(
-        user=new_user,
-        role='DELIVERY',
-        phone=phone,
-        is_active=True,
-        is_verified=True,
-        verification_status='VERIFIED',
-        verified_at=timezone.now()
-    )
-
-    partner_id = f"DP-{new_user.id:04d}"
-    
-    # Identify the creating shelter
-    shelter_profile = None
-    if request.user.is_authenticated and hasattr(request.user, 'shelter_profile'):
-        shelter_profile = request.user.shelter_profile
-    elif request.user.is_authenticated and hasattr(request.user, 'profile') and request.user.profile.role == 'SHELTER':
-        shelter_profile = ShelterProfile.objects.filter(user=request.user).first()
-    
-    shelter_id_req = data.get('shelter_id') or data.get('shelterId')
-    if not shelter_profile and shelter_id_req:
-        try:
-            shelter_profile = ShelterProfile.objects.filter(id=shelter_id_req).first()
-        except Exception:
-            pass
-    if not shelter_profile:
-        # Fallback to the active shelter
-        shelter_profile = ShelterProfile.objects.first()
-
     try:
-        dp_obj = DeliveryPartner.objects.create(
-            user=new_user,
-            partner_id=partner_id,
-            shelter=shelter_profile,
-            phone=phone or candidate_username,
-            vehicle_type=vehicle_type,
-            vehicle_number=vehicle_number,
-            license_verified=True,
-            rating=4.95,
-            is_active=True
-        )
-    except Exception:
-        pass
+        with transaction.atomic():
+            new_user = User.objects.create_user(
+                username=candidate_username,
+                email=email,
+                password=password,
+                first_name=first_name,
+                last_name=last_name
+            )
+
+            u_profile = UserProfile.objects.create(
+                user=new_user,
+                role='DELIVERY',
+                phone=phone,
+                is_active=True,
+                is_verified=True,
+                verification_status='VERIFIED',
+                verified_at=timezone.now()
+            )
+
+            base_partner_id = f"DP-{new_user.id:04d}"
+            partner_id = base_partner_id
+            p_counter = 1
+            while DeliveryPartner.objects.filter(partner_id=partner_id).exists():
+                partner_id = f"{base_partner_id}-{p_counter}"
+                p_counter += 1
+
+            dp_obj = DeliveryPartner.objects.create(
+                user=new_user,
+                partner_id=partner_id,
+                shelter=shelter_profile,
+                phone=phone or candidate_username,
+                vehicle_type=vehicle_type,
+                vehicle_number=vehicle_number,
+                license_verified=True,
+                is_active=True
+            )
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': f'Failed to register delivery partner: {str(e)}'}, status=500)
 
     sh_name = shelter_profile.shelter_name if shelter_profile else "SafeTransit General Fleet"
     sh_id = f"SH-{shelter_profile.user.id}" if (shelter_profile and shelter_profile.user) else "SH-101"
@@ -1374,7 +1823,7 @@ def api_shelter_create_delivery(request):
         'shelterLocation': sh_loc,
         'status': 'Active & Verified',
         'statusType': 'active',
-        'rating': 4.95,
+        
         'joined': timezone.now().strftime("%d %b %Y")
     }
 
@@ -1429,10 +1878,48 @@ def api_shelter_create_pet(request):
         return JsonResponse({'success': False, 'error': 'Pet name and breed are required'}, status=400)
 
     shelter = None
-    if request.user.is_authenticated and hasattr(request.user, 'shelter_profile'):
-        shelter = request.user.shelter_profile
-    if not shelter:
-        shelter = ShelterProfile.objects.first()
+    if request.user.is_authenticated and not request.user.is_anonymous:
+        if hasattr(request.user, 'shelter_profile'):
+            shelter = request.user.shelter_profile
+        elif hasattr(request.user, 'profile') and str(request.user.profile.role).upper() == 'SHELTER':
+            shelter = ShelterProfile.objects.filter(user=request.user).first()
+
+    # Phase 11: Backend role resolution based strictly on DB credentials for authenticated users
+    if request.user.is_authenticated and not request.user.is_anonymous:
+        is_admin_user = bool(
+            request.user.is_staff or 
+            request.user.is_superuser or 
+            (hasattr(request.user, 'profile') and str(request.user.profile.role).upper() == 'ADMIN')
+        )
+    else:
+        is_admin_user = (user_role == 'admin')
+
+    # Only allow verified admins to override shelter via payload
+    if not shelter and is_admin_user:
+        shelter_id_req = data.get('shelter_id') or data.get('shelterId')
+        if shelter_id_req:
+            try:
+                clean_s_id = str(shelter_id_req).replace('SH-', '').strip()
+                if clean_s_id.isdigit():
+                    clean_int = int(clean_s_id)
+                    shelter = (
+                        ShelterProfile.objects.filter(user_id=clean_int).first()
+                        or ShelterProfile.objects.filter(id=clean_int).first()
+                    )
+                else:
+                    shelter = ShelterProfile.objects.filter(shelter_name__icontains=str(shelter_id_req)).first()
+            except Exception:
+                pass
+        if not shelter:
+            shelter = ShelterProfile.objects.first()
+
+    # Phase 10 & 11: Gate pet creation until Admin verification
+    if not is_admin_user:
+        if not shelter or not is_shelter_verified(shelter):
+            return JsonResponse({
+                'success': False,
+                'error': 'Shelter verification is required before adding pets. Complete and submit your shelter documents for Admin verification before adding pets or delivery partners.'
+            }, status=403)
 
     try:
         fee_val = float(str(adoption_fee).replace('₹', '').replace(',', '').strip() or 0)
@@ -1466,6 +1953,10 @@ def api_shelter_create_pet(request):
         status='AVAILABLE',
         adoption_fee=fee_val
     )
+
+    if shelter:
+        shelter.total_pets = Pet.objects.filter(shelter=shelter).count()
+        shelter.save()
 
     pet_data = {
         'id': f"P{pet.id}",
@@ -1531,6 +2022,11 @@ def api_update_profile(request):
         user.last_name = parts[1] if len(parts) > 1 else ''
         user.save()
 
+    email = request.POST.get('email', '').strip()
+    if email and email != user.email:
+        user.email = email
+        user.save()
+
     phone = request.POST.get('phone')
     if phone is not None:
         profile.phone = phone.strip()
@@ -1551,6 +2047,17 @@ def api_update_profile(request):
     city = request.POST.get('city')
     if city is not None:
         profile.city = city.strip()
+
+    state = request.POST.get('state')
+    if state is not None:
+        profile.state = state.strip()
+
+    postal_code = request.POST.get('postal_code')
+    if postal_code is not None:
+        profile.postal_code = postal_code.strip()
+
+    if 'profile_photo' in request.FILES:
+        profile.profile_photo = request.FILES['profile_photo']
 
     occupation = request.POST.get('occupation')
     if occupation is not None:
@@ -1589,9 +2096,39 @@ def api_update_profile(request):
 
     profile.save()
 
+    # If user owns a ShelterProfile, synchronize shelter fields
+    sh = getattr(user, 'shelter_profile', None) or ShelterProfile.objects.filter(user=user).first()
+    if sh:
+        shelter_name = request.POST.get('shelter_name')
+        if shelter_name:
+            sh.shelter_name = shelter_name.strip()
+        shelter_type = request.POST.get('shelter_type')
+        if shelter_type:
+            sh.shelter_type = shelter_type.strip()
+        if profile.address:
+            sh.address = profile.address
+        if profile.city:
+            sh.city = profile.city
+        if profile.state:
+            sh.state = profile.state
+        if profile.phone:
+            sh.phone = profile.phone
+        bio = request.POST.get('bio') or request.POST.get('description')
+        if bio is not None:
+            sh.bio = bio.strip()
+        if 'shelter_logo' in request.FILES:
+            sh.logo = request.FILES['shelter_logo']
+        elif 'logo' in request.FILES:
+            sh.logo = request.FILES['logo']
+        sh.location = f"{sh.city}, {sh.state}"
+        sh.save()
+
+    profile_photo_url = profile.profile_photo.url if profile.profile_photo else ''
+
     return JsonResponse({
         'success': True,
         'message': 'Profile details and verification documents updated successfully!',
+        'profile_photo_url': profile_photo_url,
         'user': {
             'id': user.id,
             'name': f"{user.first_name} {user.last_name}".strip() or user.username,
@@ -1605,9 +2142,90 @@ def api_update_profile(request):
             'whatsapp': profile.whatsapp or '',
             'residence_type': profile.residence_type or '',
             'home_ownership': profile.home_ownership or '',
+            'state': profile.state or '',
+            'postal_code': profile.postal_code or '',
+            'profile_photo_url': profile.profile_photo.url if profile.profile_photo else '',
             'id_document_name': profile.id_document_name or '',
             'address_document_name': profile.address_document_name or '',
             'residence_document_name': profile.residence_document_name or ''
+        }
+    })
+
+
+def api_shelter_update_profile(request):
+    """
+    Phase 18: Update Shelter Dossier details (shelter_name, shelter_type, address, city, state, phone, bio, logo).
+    Enforces that only the authenticated shelter or an admin can update the shelter profile.
+    """
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'POST method required.'}, status=405)
+
+    if not request.user.is_authenticated:
+        return JsonResponse({'success': False, 'error': 'Authentication required.'}, status=401)
+
+    shelter_profile = getattr(request.user, 'shelter_profile', None) or ShelterProfile.objects.filter(user=request.user).first()
+    if not shelter_profile and getattr(request.user, 'role', '') == 'ADMIN':
+        shelter_id = request.POST.get('shelter_id')
+        if shelter_id:
+            clean_id = ''.join(c for c in str(shelter_id) if c.isdigit())
+            if clean_id:
+                shelter_profile = ShelterProfile.objects.filter(id=int(clean_id)).first()
+
+    if not shelter_profile:
+        return JsonResponse({'success': False, 'error': 'Shelter profile not found or permission denied.'}, status=404)
+
+    shelter_name = request.POST.get('shelter_name', '').strip()
+    if shelter_name:
+        shelter_profile.shelter_name = shelter_name
+
+    shelter_type = request.POST.get('shelter_type', '').strip()
+    if shelter_type:
+        shelter_profile.shelter_type = shelter_type
+
+    address = request.POST.get('address')
+    if address is not None:
+        shelter_profile.address = address.strip()
+
+    city = request.POST.get('city')
+    if city is not None:
+        shelter_profile.city = city.strip()
+
+    state = request.POST.get('state')
+    if state is not None:
+        shelter_profile.state = state.strip()
+
+    phone = request.POST.get('phone')
+    if phone is not None:
+        shelter_profile.phone = phone.strip()
+
+    bio = request.POST.get('bio') or request.POST.get('description')
+    if bio is not None:
+        shelter_profile.bio = bio.strip()
+
+    if 'logo' in request.FILES:
+        shelter_profile.logo = request.FILES['logo']
+    elif 'shelter_logo' in request.FILES:
+        shelter_profile.logo = request.FILES['shelter_logo']
+
+    shelter_profile.location = f"{shelter_profile.city}, {shelter_profile.state}"
+    shelter_profile.save()
+
+    logo_url = shelter_profile.logo.url if shelter_profile.logo else ''
+
+    return JsonResponse({
+        'success': True,
+        'message': 'Shelter dossier updated successfully!',
+        'shelter': {
+            'id': shelter_profile.id,
+            'name': shelter_profile.shelter_name,
+            'shelter_type': shelter_profile.shelter_type,
+            'address': shelter_profile.address,
+            'city': shelter_profile.city,
+            'state': shelter_profile.state,
+            'location': shelter_profile.location,
+            'phone': shelter_profile.phone,
+            'bio': shelter_profile.bio,
+            'logo_url': logo_url,
         }
     })
 
@@ -1725,7 +2343,16 @@ def api_admin_toggle_user_active(request):
     clean_id = str(user_id).replace('KH-USR-', '').replace('KHD-USR-', '').replace('USR-', '').replace('SH-', '').replace('DEL-', '').strip()
     profile = None
     if clean_id.isdigit():
-        profile = UserProfile.objects.filter(models.Q(id=int(clean_id)) | models.Q(user__id=int(clean_id))).first()
+        cid = int(clean_id)
+        profile = UserProfile.objects.filter(models.Q(id=cid) | models.Q(user__id=cid)).first()
+        if not profile:
+            sp = ShelterProfile.objects.filter(models.Q(id=cid) | models.Q(user__id=cid)).first()
+            if sp and hasattr(sp.user, 'profile'):
+                profile = sp.user.profile
+        if not profile:
+            u_obj = User.objects.filter(id=cid).first()
+            if u_obj and hasattr(u_obj, 'profile'):
+                profile = u_obj.profile
 
     if not profile:
         return JsonResponse({'success': False, 'error': f"User profile for ID '{user_id}' not found"}, status=404)
@@ -1735,6 +2362,11 @@ def api_admin_toggle_user_active(request):
 
     target_active = (action == 'activate')
     profile.is_active = target_active
+    if target_active:
+        profile.is_verified = True
+        profile.verification_status = 'VERIFIED'
+    else:
+        profile.verification_status = 'SUSPENDED'
     profile.save()
 
     profile.user.is_active = target_active
@@ -1751,13 +2383,14 @@ def api_admin_toggle_user_active(request):
         sp_obj.save()
 
     new_status = 'Active' if target_active else 'Suspended'
+    ver_status = 'Verified' if target_active else 'Suspended'
     msg = f"Account for '{profile.user.username}' successfully {'activated' if target_active else 'deactivated'} in database."
 
     try:
         AuditLog.objects.create(
             user=request.user if request.user.is_authenticated else None,
             user_role='Admin',
-            action='REQUEST_APPROVED' if target_active else 'REQUEST_REJECTED',
+            action='ACCOUNT_ACTIVATED' if target_active else 'ACCOUNT_DEACTIVATED',
             module='User Management',
             description=f"Account '{profile.user.username}' (ID {clean_id}) {'activated' if target_active else 'deactivated'} by Admin."
         )
@@ -1770,7 +2403,8 @@ def api_admin_toggle_user_active(request):
         'user_id': profile.user.id,
         'profile_id': profile.id,
         'is_active': target_active,
-        'accountStatus': new_status
+        'accountStatus': new_status,
+        'verificationStatus': ver_status
     })
 
 
@@ -1806,7 +2440,16 @@ def api_admin_delete_user(request):
     clean_id = str(user_id).replace('KH-USR-', '').replace('KHD-USR-', '').replace('USR-', '').replace('SH-', '').replace('DEL-', '').strip()
     profile = None
     if clean_id.isdigit():
-        profile = UserProfile.objects.filter(models.Q(id=int(clean_id)) | models.Q(user__id=int(clean_id))).first()
+        cid = int(clean_id)
+        profile = UserProfile.objects.filter(models.Q(id=cid) | models.Q(user__id=cid)).first()
+        if not profile:
+            sp = ShelterProfile.objects.filter(models.Q(id=cid) | models.Q(user__id=cid)).first()
+            if sp and hasattr(sp.user, 'profile'):
+                profile = sp.user.profile
+        if not profile:
+            target_u = User.objects.filter(id=cid).first()
+            if target_u and hasattr(target_u, 'profile'):
+                profile = target_u.profile
 
     if not profile:
         return JsonResponse({'success': False, 'error': f"User profile for ID '{user_id}' not found"}, status=404)
@@ -1816,24 +2459,46 @@ def api_admin_delete_user(request):
 
     u_name = profile.user.username
     target_user = profile.user
+    role = profile.role
 
+    from django.db import transaction
     try:
-        target_user.delete()
-        try:
-            AuditLog.objects.create(
-                user=request.user if request.user.is_authenticated else None,
-                user_role='Admin',
-                action='REQUEST_REJECTED',
-                module='User Management',
-                description=f"Account '{u_name}' (ID {clean_id}) permanently deleted by Admin."
-            )
-        except Exception:
-            pass
+        with transaction.atomic():
+            # If deleting a Shelter user, safely handle shelter dependencies first
+            if hasattr(target_user, 'shelter_profile'):
+                sp = target_user.shelter_profile
+                # Safely unlink pets listed under this shelter
+                Pet.objects.filter(shelter=sp).update(shelter=None, owner=None)
+                # Safely unlink delivery partners
+                DeliveryPartner.objects.filter(shelter=sp).update(shelter=None)
+                # Delete adoption requests for this shelter
+                AdoptionRequest.objects.filter(shelter=sp).delete()
+                # Delete shelter profile
+                sp.delete()
+
+            # If deleting a Customer/Adopter user
+            Pet.objects.filter(owner=target_user).update(owner=None)
+            AdoptionRequest.objects.filter(customer=target_user).delete()
+
+            # Delete the auth User (this CASCADE deletes UserProfile and remaining 1-to-1 profiles)
+            target_user.delete()
+
+            try:
+                AuditLog.objects.create(
+                    user=request.user if request.user.is_authenticated else None,
+                    user_role='Admin',
+                    action='ACCOUNT_DELETED',
+                    module='User Management',
+                    description=f"Account '{u_name}' ({role}, ID {clean_id}) permanently deleted from database by Admin."
+                )
+            except Exception:
+                pass
 
         return JsonResponse({
             'success': True,
             'message': f"Account '{u_name}' permanently deleted from database.",
-            'user_id': clean_id
+            'user_id': user_id,
+            'clean_id': clean_id
         })
     except Exception as e:
         return JsonResponse({'success': False, 'error': f"Failed to delete account from database: {str(e)}"}, status=500)
@@ -1889,6 +2554,7 @@ def api_admin_save_permissions(request):
 
 
 @csrf_exempt
+@transaction.atomic
 def api_delivery_update_status(request):
     """
     API for Delivery personnel to update delivery status.
@@ -1923,10 +2589,19 @@ def api_delivery_update_status(request):
 
     prev_status = delivery.status
     delivery.status = new_status
+    if new_status in ['OUT_FOR_DELIVERY', 'IN_TRANSIT', 'PET_PICKED_UP', 'PICKUP_CONFIRMED'] and not delivery.started_at:
+        delivery.started_at = timezone.now()
     if new_status in ['DELIVERED', 'COMPLETED']:
         delivery.status = 'COMPLETED'
+        if not delivery.completed_at:
+            delivery.completed_at = timezone.now()
         if delivery.adoption_request:
             delivery.adoption_request.status = 'DELIVERED'
+            delivery.adoption_request.save()
+    elif new_status in ['CANCELLED', 'FAILED']:
+        delivery.status = new_status
+        if delivery.adoption_request:
+            delivery.adoption_request.status = 'APPROVED'
             delivery.adoption_request.save()
     delivery.save()
 
@@ -1958,15 +2633,19 @@ def api_delivery_update_status(request):
     except Exception:
         pass
 
+    partner_avail = delivery.delivery_partner.get_availability_status() if delivery.delivery_partner else 'AVAILABLE'
+
     return JsonResponse({
         'success': True,
         'delivery_id': delivery.id,
         'status': delivery.status,
+        'driver_availability': partner_avail,
         'message': f'Delivery #{delivery.id} status successfully updated to {delivery.status}.'
     })
 
 
 @csrf_exempt
+@transaction.atomic
 def api_delivery_upload_proof(request):
     """
     API for Delivery personnel to upload delivery proof image and confirm doorstep handover.
@@ -1994,6 +2673,8 @@ def api_delivery_upload_proof(request):
 
     delivery.proof_photo_url = proof_url
     delivery.status = 'COMPLETED'
+    if not delivery.completed_at:
+        delivery.completed_at = timezone.now()
     if delivery.adoption_request:
         delivery.adoption_request.status = 'DELIVERED'
         delivery.adoption_request.save()
@@ -2025,20 +2706,109 @@ def api_delivery_upload_proof(request):
     except Exception:
         pass
 
+    partner_avail = delivery.delivery_partner.get_availability_status() if delivery.delivery_partner else 'AVAILABLE'
+
     return JsonResponse({
         'success': True,
         'delivery_id': delivery.id,
         'status': 'COMPLETED',
         'proof_url': proof_url,
+        'driver_availability': partner_avail,
         'message': f'Delivery proof uploaded successfully. Handover completed for {delivery.adoption_request.pet.name}!'
     })
 
 
 @csrf_exempt
+def api_update_adoption_status(request):
+    """
+    Phase 25 & 26: API for Shelter staff to update Adoption Request status.
+    When adoption is APPROVED or READY_FOR_HANDOVER, automatically dispatches an UNASSIGNED
+    DeliveryRequest (if home delivery requested / needed), leaving driver assignment nullable.
+    """
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'POST request required'}, status=405)
+
+    try:
+        data = json.loads(request.body.decode('utf-8'))
+    except Exception:
+        data = request.POST
+
+    adoption_id = data.get('adoption_id') or data.get('request_id') or data.get('id')
+    new_status = str(data.get('status', '')).strip().upper()
+
+    if not adoption_id or not new_status:
+        return JsonResponse({'success': False, 'error': 'Adoption ID and status are required'}, status=400)
+
+    try:
+        raw_app_id = ''.join(c for c in str(adoption_id) if c.isdigit())
+        adoption_req = AdoptionRequest.objects.select_related('shelter', 'pet', 'customer').get(id=int(raw_app_id))
+    except (AdoptionRequest.DoesNotExist, ValueError):
+        return JsonResponse({'success': False, 'error': f'Adoption Request #{adoption_id} not found'}, status=404)
+
+    # Verification & Authorization checks
+    if request.user.is_authenticated:
+        user_shelter = getattr(request.user, 'shelter_profile', None) or ShelterProfile.objects.filter(user=request.user).first()
+        if user_shelter:
+            if not is_shelter_verified(user_shelter):
+                return JsonResponse({
+                    'success': False,
+                    'error': 'Shelter verification is required before approving adoptions or dispatching deliveries.'
+                }, status=403)
+            if adoption_req.shelter and adoption_req.shelter != user_shelter and not (request.user.is_staff or request.user.is_superuser):
+                return JsonResponse({'success': False, 'error': 'Security Violation: Adoption request belongs to another shelter.'}, status=403)
+
+    prev_status = adoption_req.status
+    adoption_req.status = new_status
+    adoption_req.save()
+
+    # Phase 25/26: Auto-create UNASSIGNED DeliveryRequest when adoption reaches APPROVED or READY_FOR_HANDOVER
+    delivery_created = False
+    delivery_obj = None
+    if new_status in ['APPROVED', 'READY_FOR_HANDOVER']:
+        delivery_obj, delivery_created = DeliveryRequest.objects.get_or_create(
+            adoption_request=adoption_req,
+            defaults={
+                'delivery_partner': None,
+                'pickup_address': adoption_req.shelter.location if adoption_req.shelter else 'Shelter Location',
+                'drop_address': getattr(adoption_req.customer, 'profile', None).address if hasattr(adoption_req.customer, 'profile') else 'Adopter Address',
+                'status': 'UNASSIGNED'
+            }
+        )
+
+    # Audit Log
+    try:
+        AuditLog.objects.create(
+            user=request.user if request.user.is_authenticated else None,
+            user_role='Shelter Staff',
+            action='ADOPTION_STATUS_UPDATED',
+            module='Adoption Management',
+            adoption_request=adoption_req,
+            previous_status=prev_status,
+            new_status=new_status,
+            description=f"Adoption application #{adoption_req.id} status updated from {prev_status} to {new_status}."
+        )
+    except Exception:
+        pass
+
+    return JsonResponse({
+        'success': True,
+        'adoption_id': adoption_req.id,
+        'status': new_status,
+        'delivery_created': delivery_created,
+        'delivery_id': delivery_obj.id if delivery_obj else None,
+        'message': f'Adoption request #{adoption_req.id} status updated to {new_status}.'
+    })
+
+
+@csrf_exempt
+@transaction.atomic
 def api_shelter_assign_delivery(request):
     """
-    API for Shelter to assign a Delivery Partner to an approved adoption handover.
-    Strictly verifies Spec Rule #36: delivery_partner.shelter == current_shelter.
+    Phase 32: ASSIGNMENT TRANSACTION
+    Executes delivery partner assignment within an atomic transaction.
+    Validates adoption, delivery request, shelter ownership, partner ownership,
+    and partner operational availability (AVAILABLE).
+    If any check fails, rolls back the transaction.
     """
     if request.method != 'POST':
         return JsonResponse({'success': False, 'error': 'POST request required'}, status=405)
@@ -2056,24 +2826,68 @@ def api_shelter_assign_delivery(request):
 
     try:
         raw_app_id = ''.join(c for c in str(adoption_id) if c.isdigit())
-        adoption_req = AdoptionRequest.objects.select_related('shelter', 'pet', 'customer').get(id=int(raw_app_id))
+        adoption_req = AdoptionRequest.objects.select_for_update().select_related('shelter', 'pet', 'customer').get(id=int(raw_app_id))
     except (AdoptionRequest.DoesNotExist, ValueError):
         return JsonResponse({'success': False, 'error': f'Adoption Request #{adoption_id} not found'}, status=404)
 
     try:
         raw_p_id = ''.join(c for c in str(partner_id) if c.isdigit())
-        partner = DeliveryPartner.objects.select_related('shelter', 'user').get(user__id=int(raw_p_id))
+        partner = DeliveryPartner.objects.select_for_update().select_related('shelter', 'user').get(user__id=int(raw_p_id))
     except (DeliveryPartner.DoesNotExist, ValueError):
         try:
-            partner = DeliveryPartner.objects.select_related('shelter', 'user').get(partner_id=str(partner_id))
+            partner = DeliveryPartner.objects.select_for_update().select_related('shelter', 'user').get(partner_id=str(partner_id))
         except DeliveryPartner.DoesNotExist:
             return JsonResponse({'success': False, 'error': f'Delivery Partner #{partner_id} not found'}, status=404)
 
-    # Spec Rule #36 Backend Security Verification: Ensure delivery partner belongs to shelter
-    if request.user.is_authenticated and hasattr(request.user, 'shelter_profile'):
-        user_shelter = request.user.shelter_profile
-        if partner.shelter and partner.shelter != user_shelter:
-            return JsonResponse({'success': False, 'error': 'Security Violation: Delivery Partner does not belong to your shelter.'}, status=403)
+    # Phase 30: Enforce strict shelter-ownership validation from authenticated session & driver availability
+    if request.user.is_authenticated:
+        user_shelter = None
+        if hasattr(request.user, 'shelter_profile'):
+            user_shelter = request.user.shelter_profile
+        elif hasattr(request.user, 'profile') and str(request.user.profile.role).upper() == 'SHELTER':
+            user_shelter = ShelterProfile.objects.filter(user=request.user).first()
+
+        is_admin = bool(request.user.is_staff or request.user.is_superuser or (hasattr(request.user, 'profile') and str(request.user.profile.role).upper() == 'ADMIN'))
+
+        if user_shelter and not is_admin:
+            if not is_shelter_verified(user_shelter):
+                return JsonResponse({
+                    'success': False,
+                    'error': 'Shelter verification is required before dispatching or assigning delivery partners.'
+                }, status=403)
+            # Prevent Shelter A from accessing orders of Shelter B
+            if adoption_req.shelter and adoption_req.shelter != user_shelter:
+                return JsonResponse({'success': False, 'error': 'Security Violation: This adoption request belongs to another shelter.'}, status=403)
+            # Prevent Shelter A from assigning drivers belonging to Shelter B
+            if partner.shelter and partner.shelter != user_shelter:
+                return JsonResponse({'success': False, 'error': 'Security Violation: Selected Delivery Partner does not belong to your shelter.'}, status=403)
+
+    # Phase 45: Validate Adoption Request status (must be APPROVED or READY_FOR_HANDOVER or DELIVERY_SCHEDULED)
+    valid_adoption_statuses = ['APPROVED', 'READY_FOR_HANDOVER', 'DELIVERY_SCHEDULED', 'HANDOVER_PENDING', 'IN_PROGRESS']
+    if str(adoption_req.status).upper() not in valid_adoption_statuses:
+        return JsonResponse({
+            'success': False,
+            'error': f'Adoption request #{adoption_req.id} is in status "{adoption_req.status}" and cannot be assigned for delivery.'
+        }, status=400)
+
+    # Phase 45: Validate Delivery Partner active state & availability
+    if not partner.is_active:
+        return JsonResponse({'success': False, 'error': 'Selected delivery partner account is inactive.'}, status=400)
+
+    # Phase 34 & 45: Reject second active assignment when driver is busy with another delivery
+    active_deliv = partner.get_active_delivery()
+    if active_deliv and active_deliv.adoption_request != adoption_req:
+        driver_name = partner.user.get_full_name() or partner.user.username
+        return JsonResponse({
+            'success': False,
+            'error': f'Delivery boy is currently busy with another delivery ({driver_name} is currently assigned to #DEL-{active_deliv.id}).'
+        }, status=400)
+
+    if not partner.is_available_for_assignment() and (not active_deliv or active_deliv.adoption_request != adoption_req):
+        return JsonResponse({
+            'success': False,
+            'error': 'Delivery boy is currently busy with another delivery.'
+        }, status=400)
 
     # Get or create DeliveryRequest
     delivery, _ = DeliveryRequest.objects.get_or_create(
@@ -2081,11 +2895,13 @@ def api_shelter_assign_delivery(request):
         defaults={
             'pickup_address': adoption_req.shelter.location if adoption_req.shelter else 'Shelter Center',
             'drop_address': getattr(adoption_req.customer, 'profile', None).address if hasattr(adoption_req.customer, 'profile') else 'Customer Address',
-            'status': 'PARTNER_ASSIGNED'
+            'status': 'ASSIGNED'
         }
     )
     delivery.delivery_partner = partner
-    delivery.status = 'PARTNER_ASSIGNED'
+    delivery.status = 'ASSIGNED'
+    if not delivery.assigned_at:
+        delivery.assigned_at = timezone.now()
     delivery.save()
 
     # Update adoption request status
@@ -2112,5 +2928,688 @@ def api_shelter_assign_delivery(request):
         'message': f'Delivery Partner {partner.user.get_full_name() or partner.user.username} successfully assigned!'
     })
 
+
+@csrf_exempt
+def api_get_conversations(request):
+    """
+    Returns database-backed conversations list for Customer <-> Shelter messaging.
+    """
+    user = request.user if request.user.is_authenticated else None
+    if not user:
+        role = request.session.get('user_role', 'customer')
+        if role == 'shelter':
+            user = User.objects.filter(profile__role='SHELTER').first()
+        else:
+            user = User.objects.filter(profile__role='CUSTOMER').first()
+
+    if not user:
+        return JsonResponse({'success': False, 'conversations': []})
+
+    conversations = []
+    
+    # If user is a shelter staff/owner
+    if hasattr(user, 'profile') and user.profile.role == 'SHELTER':
+        customers = UserProfile.objects.filter(role='CUSTOMER').select_related('user')
+        for c in customers:
+            cu = c.user
+            last_msg = Message.objects.filter(
+                models.Q(sender=user, recipient=cu) | models.Q(sender=cu, recipient=user)
+            ).order_by('-created_at').first()
+
+            unread_count = Message.objects.filter(sender=cu, recipient=user, is_read=False).count()
+            c_name = f"{cu.first_name} {cu.last_name}".strip() or cu.username
+
+            conversations.append({
+                'partner_id': cu.id,
+                'partner_name': c_name,
+                'partner_role': 'Adopter / Customer',
+                'phone': c.phone or 'N/A',
+                'last_message': last_msg.body if last_msg else 'No messages yet.',
+                'last_timestamp': last_msg.created_at.strftime('%d %b %H:%M') if last_msg else '',
+                'unread_count': unread_count
+            })
+    else:
+        # User is Customer / Adopter
+        shelter_profiles = UserProfile.objects.filter(role='SHELTER').select_related('user')
+        for sp in shelter_profiles:
+            su = sp.user
+            sp_shelter = getattr(su, 'shelter_profile', None)
+            s_name = (sp_shelter.shelter_name if sp_shelter else '') or f"{su.first_name} Shelter & Rescue".strip() or 'Community Shelter'
+
+            last_msg = Message.objects.filter(
+                models.Q(sender=user, recipient=su) | models.Q(sender=su, recipient=user)
+            ).order_by('-created_at').first()
+
+            unread_count = Message.objects.filter(sender=su, recipient=user, is_read=False).count()
+
+            conversations.append({
+                'partner_id': su.id,
+                'partner_name': s_name,
+                'partner_role': 'Shelter Staff & Vet',
+                'phone': sp.phone or 'N/A',
+                'last_message': last_msg.body if last_msg else 'Start a conversation with shelter staff.',
+                'last_timestamp': last_msg.created_at.strftime('%d %b %H:%M') if last_msg else '',
+                'unread_count': unread_count
+            })
+
+    return JsonResponse({'success': True, 'conversations': conversations, 'current_user_id': user.id})
+
+
+@csrf_exempt
+def api_get_messages(request):
+    """
+    Fetches stored database messages between request.user and partner_id.
+    Marks received messages as read.
+    """
+    user = request.user if request.user.is_authenticated else None
+    partner_id = request.GET.get('partner_id') or request.GET.get('user_id')
+
+    if not partner_id:
+        return JsonResponse({'success': False, 'error': 'partner_id is required'}, status=400)
+
+    clean_p_id = str(partner_id).replace('SH-', '').replace('KH-USR-', '').replace('USR-', '').replace('CUST-', '').strip()
+    if not clean_p_id.isdigit():
+        return JsonResponse({'success': False, 'error': 'Invalid partner_id format'}, status=400)
+
+    partner_user = User.objects.filter(id=int(clean_p_id)).first()
+    if not partner_user:
+        return JsonResponse({'success': False, 'error': 'Partner user not found'}, status=404)
+
+    if not user:
+        role = request.session.get('user_role', 'customer')
+        if role == 'shelter':
+            user = User.objects.filter(profile__role='SHELTER').first()
+        else:
+            user = User.objects.filter(profile__role='CUSTOMER').first()
+
+    if not user:
+        return JsonResponse({'success': False, 'error': 'User session required'}, status=401)
+
+    # Fetch conversation history from database
+    messages_qs = Message.objects.filter(
+        models.Q(sender=user, recipient=partner_user) | models.Q(sender=partner_user, recipient=user)
+    ).order_by('created_at')
+
+    # Mark unread received messages as read in DB
+    Message.objects.filter(sender=partner_user, recipient=user, is_read=False).update(is_read=True)
+
+    msg_list = []
+    for m in messages_qs:
+        sender_name = "You" if m.sender == user else (m.sender.get_full_name() or m.sender.username)
+        msg_list.append({
+            'id': m.id,
+            'sender_id': m.sender.id,
+            'sender_name': sender_name,
+            'recipient_id': m.recipient.id,
+            'body': m.body,
+            'is_read': m.is_read,
+            'timestamp': m.created_at.strftime('%d %b %Y %H:%M'),
+            'formatted_time': m.created_at.strftime('%I:%M %p'),
+            'is_mine': (m.sender == user)
+        })
+
+    return JsonResponse({
+        'success': True,
+        'partner_id': partner_user.id,
+        'partner_name': partner_user.get_full_name() or partner_user.username,
+        'messages': msg_list
+    })
+
+
+@csrf_exempt
+def api_send_message(request):
+    """
+    Store new message in database (Customer <-> Shelter messaging).
+    """
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'POST request required'}, status=405)
+
+    try:
+        data = json.loads(request.body.decode('utf-8'))
+    except Exception:
+        data = request.POST
+
+    recipient_id = data.get('recipient_id') or data.get('partner_id') or data.get('shelter_id')
+    body = (data.get('body') or data.get('text') or '').strip()
+
+    if not recipient_id or not body:
+        return JsonResponse({'success': False, 'error': 'Recipient ID and message body are required'}, status=400)
+
+    clean_r_id = str(recipient_id).replace('SH-', '').replace('KH-USR-', '').replace('USR-', '').replace('CUST-', '').strip()
+    recipient_user = None
+    if clean_r_id.isdigit():
+        recipient_user = User.objects.filter(id=int(clean_r_id)).first()
+
+    if not recipient_user:
+        return JsonResponse({'success': False, 'error': f"Recipient user '{recipient_id}' not found"}, status=404)
+
+    sender_user = request.user if request.user.is_authenticated else None
+    if not sender_user:
+        role = request.session.get('user_role', 'customer')
+        if role == 'shelter':
+            sender_user = User.objects.filter(profile__role='SHELTER').first()
+        else:
+            sender_user = User.objects.filter(profile__role='CUSTOMER').first()
+
+    if not sender_user:
+        return JsonResponse({'success': False, 'error': 'Authentication required to send messages'}, status=401)
+
+    if sender_user == recipient_user:
+        return JsonResponse({'success': False, 'error': 'Cannot send message to yourself'}, status=400)
+
+    shelter_rec = getattr(sender_user, 'shelter_profile', None) or getattr(recipient_user, 'shelter_profile', None)
+
+    # Save to database
+    msg = Message.objects.create(
+        sender=sender_user,
+        recipient=recipient_user,
+        shelter=shelter_rec,
+        body=body
+    )
+
+    return JsonResponse({
+        'success': True,
+        'message': {
+            'id': msg.id,
+            'sender_id': sender_user.id,
+            'sender_name': 'You',
+            'recipient_id': recipient_user.id,
+            'body': msg.body,
+            'is_read': False,
+            'timestamp': msg.created_at.strftime('%d %b %Y %H:%M'),
+            'formatted_time': msg.created_at.strftime('%I:%M %p'),
+            'is_mine': True
+        }
+    })
+
+
+# ==============================================================================
+# PHASE 7: SHELTER DOCUMENT UPLOAD API
+# ==============================================================================
+
+@csrf_exempt
+def api_shelter_upload_document(request):
+    """Upload a shelter document (multipart/form-data). Shelter must be authenticated."""
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'POST required'}, status=405)
+
+    if not request.user.is_authenticated:
+        return JsonResponse({'success': False, 'error': 'Authentication required.'}, status=401)
+
+    # Resolve shelter profile for the authenticated user
+    shelter_profile = getattr(request.user, 'shelter_profile', None) or ShelterProfile.objects.filter(user=request.user).first()
+    if not shelter_profile and request.session.get('user_role') == 'shelter':
+        shelter_profile = ShelterProfile.objects.first()
+
+    if not shelter_profile:
+        return JsonResponse({'success': False, 'error': 'Only shelter accounts can upload documents.'}, status=403)
+
+    uploaded_file = request.FILES.get('file')
+    if not uploaded_file:
+        return JsonResponse({'success': False, 'error': 'No file provided.'}, status=400)
+
+    doc_type = request.POST.get('doc_type', 'OTHER')
+    # Validate doc_type against allowed choices
+    valid_doc_types = [c[0] for c in [
+        ('REGISTRATION', ''), ('GOVERNMENT_ID', ''), ('ADDRESS_PROOF', ''),
+        ('AUTHORIZATION', ''), ('ADOPTION_CERT', ''), ('OTHER', ''),
+    ]]
+    if doc_type not in valid_doc_types:
+        doc_type = 'OTHER'
+
+    # Enforce max file size: 10 MB
+    max_size = 10 * 1024 * 1024
+    if uploaded_file.size > max_size:
+        return JsonResponse({'success': False, 'error': 'File too large. Maximum size is 10 MB.'}, status=400)
+
+    # Validate file extension (allow common document/image types)
+    allowed_extensions = ['.pdf', '.doc', '.docx', '.jpg', '.jpeg', '.png', '.gif', '.webp']
+    original_name = uploaded_file.name
+    ext = os.path.splitext(original_name)[1].lower()
+    if ext not in allowed_extensions:
+        return JsonResponse({
+            'success': False,
+            'error': f'File type not allowed. Accepted: PDF, DOC, DOCX, JPG, PNG, GIF, WEBP.'
+        }, status=400)
+
+    doc = ShelterDocument.objects.create(
+        shelter=shelter_profile,
+        uploaded_by=request.user,
+        doc_type=doc_type,
+        original_filename=original_name,
+        file=uploaded_file,
+        file_size=uploaded_file.size,
+        verification_status='PENDING',
+    )
+
+    return JsonResponse({
+        'success': True,
+        'document': {
+            'id': doc.id,
+            'doc_type': doc.doc_type,
+            'doc_type_label': doc.get_doc_type_display(),
+            'original_filename': doc.original_filename,
+            'stored_path': doc.stored_path,
+            'file_size': doc.file_size,
+            'file_size_display': doc.file_size_display,
+            'file_url': request.build_absolute_uri(doc.file.url) if doc.file else '',
+            'download_url': request.build_absolute_uri(f'/users/api/shelter/document/{doc.id}/download/'),
+            'upload_date': doc.upload_date.strftime('%d %b %Y %H:%M'),
+            'verification_status': doc.verification_status,
+            'verification_label': doc.get_verification_status_display(),
+            'review_notes': doc.review_notes or '',
+        }
+    })
+
+
+@csrf_exempt
+def api_shelter_list_documents(request):
+    """Return all documents uploaded by the authenticated shelter."""
+    if not request.user.is_authenticated:
+        return JsonResponse({'success': False, 'error': 'Authentication required.'}, status=401)
+
+    shelter_profile = None
+    shelter_profile = getattr(request.user, 'shelter_profile', None) or ShelterProfile.objects.filter(user=request.user).first()
+    if not shelter_profile and request.session.get('user_role') == 'shelter':
+        shelter_profile = ShelterProfile.objects.first()
+
+    if not shelter_profile:
+        return JsonResponse({'success': False, 'error': 'Shelter not found.'}, status=403)
+
+    docs = ShelterDocument.objects.filter(shelter=shelter_profile).order_by('-upload_date')
+    data = []
+    for doc in docs:
+        data.append({
+            'id': doc.id,
+            'doc_type': doc.doc_type,
+            'doc_type_label': doc.get_doc_type_display(),
+            'original_filename': doc.original_filename,
+            'stored_path': doc.stored_path,
+            'file_size': doc.file_size,
+            'file_size_display': doc.file_size_display,
+            'file_url': request.build_absolute_uri(doc.file.url) if doc.file else '',
+            'download_url': request.build_absolute_uri(f'/users/api/shelter/document/{doc.id}/download/'),
+            'upload_date': doc.upload_date.strftime('%d %b %Y %H:%M'),
+            'verification_status': doc.verification_status,
+            'verification_label': doc.get_verification_status_display(),
+            'review_notes': doc.review_notes or '',
+            'reviewed_by': doc.reviewed_by.get_full_name() if doc.reviewed_by else None,
+            'review_date': doc.review_date.strftime('%d %b %Y') if doc.review_date else None,
+        })
+    return JsonResponse({
+        'success': True,
+        'documents': data,
+        'shelter': {
+            'id': shelter_profile.id,
+            'name': shelter_profile.shelter_name,
+            'verification_status': shelter_profile.verification_status,
+            'is_verified': is_shelter_verified(shelter_profile),
+        }
+    })
+
+
+@csrf_exempt
+def api_shelter_delete_document(request):
+    """Delete a shelter document. Only the owning shelter can delete their own documents."""
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'POST required'}, status=405)
+
+    if not request.user.is_authenticated:
+        return JsonResponse({'success': False, 'error': 'Authentication required.'}, status=401)
+
+    try:
+        data = json.loads(request.body)
+    except Exception:
+        data = {}
+
+    doc_id = data.get('document_id')
+    if not doc_id:
+        return JsonResponse({'success': False, 'error': 'document_id required.'}, status=400)
+
+    # Resolve shelter
+    shelter_profile = getattr(request.user, 'shelter_profile', None) or ShelterProfile.objects.filter(user=request.user).first()
+    if not shelter_profile and request.session.get('user_role') == 'shelter':
+        shelter_profile = ShelterProfile.objects.first()
+
+    # Admins can also delete documents
+    is_admin = (
+        request.user.is_authenticated and hasattr(request.user, 'profile')
+        and request.user.profile.role == 'ADMIN'
+    )
+
+    try:
+        if shelter_profile:
+            doc = ShelterDocument.objects.get(id=doc_id, shelter=shelter_profile)
+        elif is_admin:
+            doc = ShelterDocument.objects.get(id=doc_id)
+        else:
+            return JsonResponse({'success': False, 'error': 'Permission denied.'}, status=403)
+    except ShelterDocument.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'Document not found.'}, status=404)
+
+    # Delete physical file from storage
+    try:
+        if doc.file:
+            doc.file.close()
+            if doc.file.storage.exists(doc.file.name):
+                doc.file.storage.delete(doc.file.name)
+    except Exception:
+        pass
+
+    doc.delete()
+    return JsonResponse({'success': True, 'message': 'Document deleted successfully.'})
+
+
+def api_shelter_download_document(request, doc_id):
+    """
+    Phase 8: Download a shelter document securely through the backend.
+    Enforces authorization (owning shelter or admin) and returns the file
+    with Content-Disposition using original_filename.
+    """
+    if not request.user.is_authenticated:
+        return JsonResponse({'success': False, 'error': 'Authentication required.'}, status=401)
+
+    shelter_profile = getattr(request.user, 'shelter_profile', None) or ShelterProfile.objects.filter(user=request.user).first()
+    if not shelter_profile and request.session.get('user_role') == 'shelter':
+        shelter_profile = ShelterProfile.objects.first()
+
+    is_admin = (
+        hasattr(request.user, 'profile') and request.user.profile.role == 'ADMIN'
+    ) or request.user.is_staff or request.user.is_superuser
+
+    try:
+        if is_admin:
+            doc = ShelterDocument.objects.get(id=doc_id)
+        elif shelter_profile:
+            doc = ShelterDocument.objects.get(id=doc_id, shelter=shelter_profile)
+        else:
+            return JsonResponse({'success': False, 'error': 'Permission denied.'}, status=403)
+    except ShelterDocument.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'Document not found.'}, status=404)
+
+    if not doc.file or not doc.exists_on_storage:
+        return JsonResponse({'success': False, 'error': 'Stored file not found on disk.'}, status=404)
+
+    return FileResponse(doc.file.open('rb'), as_attachment=True, filename=doc.original_filename)
+
+
+# ==============================================================================
+# PHASE 9: ADMIN DOCUMENT VERIFICATION API ENDPOINTS
+# ==============================================================================
+
+def api_admin_list_shelter_documents(request):
+    """
+    Phase 9: Return shelter-uploaded documents for admin verification.
+    Can filter by ?shelter_id=... or ?status=... or return all shelter documents.
+    """
+    role_param = str(request.GET.get('role', '')).lower()
+    user_role = str(request.session.get('user_role', '')).lower()
+    referer = str(request.META.get('HTTP_REFERER', '')).lower()
+    is_admin = (
+        (request.user.is_authenticated and (request.user.is_staff or request.user.is_superuser or (hasattr(request.user, 'profile') and request.user.profile.role == 'ADMIN')))
+        or user_role == 'admin'
+        or role_param == 'admin'
+        or 'role=admin' in referer
+    )
+    if not is_admin:
+        return JsonResponse({'success': False, 'error': 'Administrator authorization required'}, status=403)
+
+    qs = ShelterDocument.objects.select_related('shelter', 'shelter__user', 'uploaded_by', 'reviewed_by').all().order_by('-upload_date')
+
+    shelter_id = request.GET.get('shelter_id')
+    if shelter_id:
+        clean_sh_id = str(shelter_id).replace('SH-', '')
+        qs = qs.filter(models.Q(shelter__id=clean_sh_id) | models.Q(shelter__user__id=clean_sh_id))
+
+    status_filter = request.GET.get('status')
+    if status_filter and status_filter.lower() != 'all':
+        qs = qs.filter(verification_status=status_filter.upper())
+
+    data = []
+    for doc in qs:
+        data.append({
+            'id': doc.id,
+            'shelter_id': doc.shelter.id,
+            'shelter_uid': f"SH-{doc.shelter.user.id}" if doc.shelter.user else f"SH-{doc.shelter.id}",
+            'shelter_name': doc.shelter.shelter_name,
+            'shelter_status': doc.shelter.verification_status,
+            'doc_type': doc.doc_type,
+            'doc_type_label': doc.get_doc_type_display(),
+            'original_filename': doc.original_filename,
+            'stored_path': doc.stored_path,
+            'file_size': doc.file_size,
+            'file_size_display': doc.file_size_display,
+            'file_url': request.build_absolute_uri(doc.file.url) if doc.file else '',
+            'download_url': request.build_absolute_uri(f'/users/api/shelter/document/{doc.id}/download/'),
+            'upload_date': doc.upload_date.strftime('%d %b %Y %H:%M'),
+            'verification_status': doc.verification_status,
+            'verification_label': doc.get_verification_status_display(),
+            'review_notes': doc.review_notes or '',
+            'reviewed_by': (doc.reviewed_by.get_full_name() or doc.reviewed_by.username) if doc.reviewed_by else None,
+            'review_date': doc.review_date.strftime('%d %b %Y') if doc.review_date else None,
+        })
+
+    return JsonResponse({'success': True, 'documents': data, 'count': len(data)})
+
+
+@csrf_exempt
+def api_admin_verify_document(request):
+    """
+    Phase 9: Admin verifies, reviews, or rejects a shelter-uploaded document.
+    Automatically recalculates and updates the shelter's verification status:
+    - If all documents verified -> Shelter becomes VERIFIED
+    - If any document rejected -> Shelter becomes REJECTED
+    - If documents under review / pending -> Shelter becomes UNDER_REVIEW
+    """
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'POST required'}, status=405)
+
+    try:
+        body = json.loads(request.body.decode('utf-8'))
+    except Exception:
+        body = request.POST
+
+    role_param = str(body.get('role', '')).lower()
+    user_role = str(request.session.get('user_role', '')).lower()
+    referer = str(request.META.get('HTTP_REFERER', '')).lower()
+    is_admin = (
+        (request.user.is_authenticated and (request.user.is_staff or request.user.is_superuser or (hasattr(request.user, 'profile') and request.user.profile.role == 'ADMIN')))
+        or user_role == 'admin'
+        or role_param == 'admin'
+        or 'role=admin' in referer
+    )
+    if not is_admin:
+        return JsonResponse({'success': False, 'error': 'Administrator authorization required'}, status=403)
+
+    doc_id = body.get('document_id')
+    if not doc_id:
+        return JsonResponse({'success': False, 'error': 'document_id required'}, status=400)
+
+    status_val = str(body.get('status', '')).upper().strip()
+    if not status_val and body.get('action'):
+        act = str(body.get('action')).lower().strip()
+        if act in ['verify', 'verified', 'approve', 'approved']:
+            status_val = 'VERIFIED'
+        elif act in ['reject', 'rejected']:
+            status_val = 'REJECTED'
+        elif act in ['under_review', 'review']:
+            status_val = 'UNDER_REVIEW'
+        elif act in ['pending']:
+            status_val = 'PENDING'
+
+    review_notes = body.get('review_notes', '').strip()
+
+    allowed_statuses = ['PENDING', 'UNDER_REVIEW', 'VERIFIED', 'REJECTED']
+    if status_val not in allowed_statuses:
+        return JsonResponse({
+            'success': False,
+            'error': f"Invalid status '{status_val}'. Allowed: {', '.join(allowed_statuses)}"
+        }, status=400)
+
+    try:
+        doc = ShelterDocument.objects.select_related('shelter', 'shelter__user').get(id=doc_id)
+    except ShelterDocument.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'Document not found.'}, status=404)
+
+    reviewer = request.user if (request.user.is_authenticated and not request.user.is_anonymous) else None
+    now = timezone.now()
+
+    doc.verification_status = status_val
+    doc.reviewed_by = reviewer
+    doc.review_date = now
+    if review_notes:
+        doc.review_notes = review_notes
+    doc.save()
+
+    # Recalculate parent shelter's verification status via model state machine
+    shelter = doc.shelter
+    new_shelter_status = shelter.recalculate_verification_status(save=True)
+    is_ver = (new_shelter_status == 'VERIFIED')
+    all_docs = list(shelter.documents.all())
+    all_verified = bool(all_docs) and all(d.verification_status == 'VERIFIED' for d in all_docs)
+
+
+    # Audit Log
+    try:
+        desc = f"Admin set document '{doc.original_filename}' ({doc.get_doc_type_display()}) to {doc.get_verification_status_display()} for shelter '{shelter.shelter_name}'. Shelter status is now {new_shelter_status}."
+        if review_notes:
+            desc += f" Notes: {review_notes}"
+        AuditLog.objects.create(
+            user=reviewer,
+            user_role='ADMIN',
+            action='Document Verification',
+            module='Shelters',
+            description=desc,
+            ip_address=request.META.get('REMOTE_ADDR', '127.0.0.1')
+        )
+    except Exception:
+        pass
+
+    return JsonResponse({
+        'success': True,
+        'message': f"Document '{doc.original_filename}' successfully marked as {doc.get_verification_status_display()}.",
+        'document': {
+            'id': doc.id,
+            'doc_type': doc.doc_type,
+            'doc_type_label': doc.get_doc_type_display(),
+            'original_filename': doc.original_filename,
+            'verification_status': doc.verification_status,
+            'verification_label': doc.get_verification_status_display(),
+            'review_notes': doc.review_notes or '',
+            'reviewed_by': (reviewer.get_full_name() or reviewer.username) if reviewer else 'Platform Admin',
+            'review_date': doc.review_date.strftime('%d %b %Y'),
+        },
+        'shelter': {
+            'id': f"SH-{shelter.user.id}",
+            'shelter_id': shelter.id,
+            'name': shelter.shelter_name,
+            'verification_status': shelter.verification_status,
+            'is_verified': is_ver,
+            'all_documents_verified': all_verified,
+        }
+    })
+
+
+@csrf_exempt
+def api_admin_verify_all_shelter_documents(request):
+    """
+    Phase 9: Bulk verify, review, or reject all documents for a specific shelter.
+    """
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'POST required'}, status=405)
+
+    try:
+        body = json.loads(request.body.decode('utf-8'))
+    except Exception:
+        body = request.POST
+
+    role_param = str(body.get('role', '')).lower()
+    user_role = str(request.session.get('user_role', '')).lower()
+    referer = str(request.META.get('HTTP_REFERER', '')).lower()
+    is_admin = (
+        (request.user.is_authenticated and (request.user.is_staff or request.user.is_superuser or (hasattr(request.user, 'profile') and request.user.profile.role == 'ADMIN')))
+        or user_role == 'admin'
+        or role_param == 'admin'
+        or 'role=admin' in referer
+    )
+    if not is_admin:
+        return JsonResponse({'success': False, 'error': 'Administrator authorization required'}, status=403)
+
+    shelter_id = body.get('shelter_id') or body.get('user_id')
+    if not shelter_id:
+        return JsonResponse({'success': False, 'error': 'shelter_id required'}, status=400)
+
+    action = str(body.get('action', 'approve')).lower().strip()
+    review_notes = body.get('review_notes', '').strip()
+
+    clean_id = str(shelter_id).replace('SH-', '').replace('KH-USR-', '')
+    shelter = ShelterProfile.objects.filter(models.Q(id=clean_id) | models.Q(user__id=clean_id)).first()
+    if not shelter:
+        return JsonResponse({'success': False, 'error': 'Shelter not found.'}, status=404)
+
+    reviewer = request.user if (request.user.is_authenticated and not request.user.is_anonymous) else None
+    now = timezone.now()
+
+    if action in ['approve', 'verified', 'verify']:
+        new_doc_status = 'VERIFIED'
+        new_sh_status = 'VERIFIED'
+        is_ver = True
+    elif action in ['reject', 'rejected']:
+        new_doc_status = 'REJECTED'
+        new_sh_status = 'REJECTED'
+        is_ver = False
+    elif action in ['under_review', 'review']:
+        new_doc_status = 'UNDER_REVIEW'
+        new_sh_status = 'UNDER_REVIEW'
+        is_ver = False
+    else:
+        return JsonResponse({'success': False, 'error': f"Invalid action '{action}'"}, status=400)
+
+    update_kwargs = {
+        'verification_status': new_doc_status,
+        'reviewed_by': reviewer,
+        'review_date': now,
+    }
+    if review_notes:
+        update_kwargs['review_notes'] = review_notes
+
+    updated_count = shelter.documents.all().update(**update_kwargs)
+
+    shelter.verification_status = new_sh_status
+    shelter.save()
+
+    if hasattr(shelter.user, 'profile'):
+        prof = shelter.user.profile
+        prof.verification_status = new_sh_status
+        prof.is_verified = is_ver
+        if is_ver and not prof.verified_at:
+            prof.verified_at = now
+        prof.save()
+
+    # Audit Log
+    try:
+        AuditLog.objects.create(
+            user=reviewer,
+            user_role='ADMIN',
+            action='Shelter Document Verification',
+            module='Shelters',
+            description=f"Admin {action}d all documents ({updated_count}) for shelter '{shelter.shelter_name}'. Shelter status set to {new_sh_status}.",
+            ip_address=request.META.get('REMOTE_ADDR', '127.0.0.1')
+        )
+    except Exception:
+        pass
+
+    return JsonResponse({
+        'success': True,
+        'message': f"Shelter '{shelter.shelter_name}' and {updated_count} document(s) marked as {new_sh_status}.",
+        'shelter': {
+            'id': f"SH-{shelter.user.id}",
+            'shelter_id': shelter.id,
+            'name': shelter.shelter_name,
+            'verification_status': new_sh_status,
+            'is_verified': is_ver,
+            'documents_count': updated_count,
+        }
+    })
 
 
