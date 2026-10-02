@@ -186,9 +186,9 @@
             <nav class="hidden lg:flex nav-rail-pill" aria-label="Primary">
                 <a href="{% url 'home' %}">Home</a>
                 <a href="{% url 'pet_list' %}" class="is-active">Browse Pets</a>
-                <a href="{% url 'admin_shelters' %}">Shelter Network</a>
-                <a href="{% url 'admin_deliveries' %}">Track Delivery</a>
-                <a href="{% url 'admin_dashboard' %}">Admin Suite</a>
+                <a href="{% url 'profile' %}?role=shelter">Shelter Network</a>
+                <a href="{% url 'profile' %}?role=delivery">Track Delivery</a>
+                <a href="{% url 'profile' %}?role=admin">Admin Suite</a>
             </nav>
 
             <!-- ACTION CONTROLS -->
@@ -325,7 +325,7 @@
             </div>
             <div class="flex gap-4">
                 <a href="{% url 'home' %}" class="name-hover-link">Home</a>
-                <a href="{% url 'admin_dashboard' %}" class="name-hover-link">Admin Suite</a>
+                <a href="{% url 'profile' %}?role=admin" class="name-hover-link">Admin Suite</a>
                 <a href="{% url 'login' %}" class="name-hover-link">Sign In</a>
             </div>
         </div>

@@ -989,7 +989,7 @@ def profile_view(request):
                 'shelterId': f"SH-{p.shelter.user.id}" if p.shelter and p.shelter.user else "SH-101",
                 'shelterName': p.shelter.shelter_name if p.shelter else "Happy Paws Shelter & Rescue",
                 'image': p.image_url or "/kindheart_bruno.jpg",
-                'status': p.status.capitalize() if p.status else "Available",
+                'status': {'AVAILABLE': 'Available', 'PENDING_ADOPTION': 'Pending Adoption', 'ADOPTED': 'Adopted'}.get(p.status, p.status.replace('_', ' ').title() if p.status else 'Available'),
                 'health': "Vaccinated & Health Checked" if p.is_vaccinated else "Under Observation",
                 'microchip': f"CHIP-{p.id:05d}-KL",
                 'energy': "Active & Friendly",
@@ -1023,9 +1023,13 @@ def profile_view(request):
             sh_obj = dr.adoption_request.shelter if dr.adoption_request else None
             driver_user = dr.delivery_partner.user if dr.delivery_partner else None
 
+            dp_prof = getattr(dr.delivery_partner, 'user', None) if dr.delivery_partner else None
+            agent_phone = getattr(getattr(dp_prof, 'profile', None), 'phone', '') if dp_prof else (dp_prof.username if dp_prof and dp_prof.username.isdigit() else '')
+
             db_delivery_requests_list.append({
                 'id': f"DEL-{dr.id}",
                 'db_id': dr.id,
+                'orderId': f"KH102{dr.adoption_request.id:02d}" if dr.adoption_request else f"KH102{dr.id:02d}",
                 'appId': f"KH102{dr.adoption_request.id:02d}" if dr.adoption_request else f"KH102{dr.id:02d}",
                 'petId': f"P{pet_obj.id}" if pet_obj else "P101",
                 'petName': pet_obj.name if pet_obj else "Companion Pet",
@@ -1033,16 +1037,21 @@ def profile_view(request):
                 'petSpecies': pet_obj.species if pet_obj else "Dog",
                 'petImage': pet_obj.image_url if pet_obj and pet_obj.image_url else "",
                 'customerName': cust_user.get_full_name() or cust_user.username if cust_user else "Adopter",
-                'customerPhone': getattr(getattr(cust_user, 'profile', None), 'phone', '+91 98470 12345') if cust_user else "+91 98470 12345",
+                'customerPhone': (getattr(getattr(cust_user, 'profile', None), 'phone', '') or (cust_user.username if cust_user and cust_user.username.isdigit() else '')) if cust_user else '',
+                'customerEmail': cust_user.email if cust_user else '',
+                'customerCity': getattr(getattr(cust_user, 'profile', None), 'city', 'Kochi') if cust_user else 'Kochi',
+                'pickupAddress': dr.pickup_address or (sh_obj.location if sh_obj else "Shelter Location"),
                 'dropAddress': dr.drop_address or "Adopter Location, Kochi, Kerala",
-                'shelterName': sh_obj.shelter_name if sh_obj else "Happy Paws Shelter",
+                'shelterName': sh_obj.shelter_name if sh_obj else "Shelter",
                 'shelterLocation': sh_obj.location if sh_obj else "Kochi Center",
-                'shelterPhone': sh_obj.phone if sh_obj else "+91 98450 11223",
-                'agent': driver_user.get_full_name() or driver_user.username if driver_user else "Unassigned Driver",
+                'shelterPhone': sh_obj.phone if (sh_obj and sh_obj.phone) else "",
+                'agent': (driver_user.get_full_name() or driver_user.username) if driver_user else "Unassigned Driver",
                 'agentId': dr.delivery_partner.partner_id if dr.delivery_partner else "DP-101",
+                'agentPhone': agent_phone,
                 'status': dr.status,
                 'statusDisplay': dr.get_status_display() if hasattr(dr, 'get_status_display') else dr.status,
                 'preferredDate': dr.preferred_date.strftime("%d %b %Y") if dr.preferred_date else "Today",
+                'reachingTime': dr.preferred_date.strftime("%d %b %Y, 5:00 PM") if dr.preferred_date else "Today, 5:00 PM",
                 'proofUrl': dr.proof_photo_url or "",
                 'totalFee': float(dr.total_fee) if dr.total_fee else 1100.0
             })
@@ -1058,9 +1067,11 @@ def profile_view(request):
         if role == 'shelter' and request.user.is_authenticated and not request.user.is_anonymous:
             sh_prof = getattr(request.user, 'shelter_profile', None) or ShelterProfile.objects.filter(user=request.user).first()
             if sh_prof:
-                dp_qs = DeliveryPartner.objects.filter(shelter=sh_prof).select_related('user', 'shelter', 'shelter__user').prefetch_related('assigned_deliveries', 'assigned_deliveries__adoption_request', 'assigned_deliveries__adoption_request__pet').order_by('-id')
+                dp_qs = DeliveryPartner.objects.filter(Q(shelter=sh_prof) | Q(shelter__isnull=True)).select_related('user', 'shelter', 'shelter__user').prefetch_related('assigned_deliveries', 'assigned_deliveries__adoption_request', 'assigned_deliveries__adoption_request__pet').order_by('-id')
+                if not dp_qs.exists():
+                    dp_qs = DeliveryPartner.objects.select_related('user', 'shelter', 'shelter__user').prefetch_related('assigned_deliveries', 'assigned_deliveries__adoption_request', 'assigned_deliveries__adoption_request__pet').all().order_by('-id')
             else:
-                dp_qs = DeliveryPartner.objects.none()
+                dp_qs = DeliveryPartner.objects.select_related('user', 'shelter', 'shelter__user').prefetch_related('assigned_deliveries', 'assigned_deliveries__adoption_request', 'assigned_deliveries__adoption_request__pet').all().order_by('-id')
         else:
             dp_qs = DeliveryPartner.objects.select_related('user', 'shelter', 'shelter__user').prefetch_related('assigned_deliveries', 'assigned_deliveries__adoption_request', 'assigned_deliveries__adoption_request__pet').all().order_by('-id')
 
@@ -1141,25 +1152,51 @@ def profile_view(request):
     # 6. Database Adoption Requests
     db_adoptions = []
     try:
-        reqs = AdoptionRequest.objects.select_related('pet', 'customer', 'shelter', 'shelter__user').all().order_by('-id')
+        reqs = AdoptionRequest.objects.select_related('pet', 'customer', 'shelter', 'shelter__user', 'delivery', 'delivery__delivery_partner', 'delivery__delivery_partner__user').all().order_by('-id')
         for r in reqs:
             pet_name = r.pet.name if r.pet else "Companion Pet"
-            cust_name = r.customer.get_full_name() or r.customer.username if r.customer else "Adopter"
+            cust_name = r.customer.get_full_name().strip() if (r.customer and r.customer.get_full_name().strip()) else (r.customer.username if r.customer else "Customer")
             sh_name = r.shelter.shelter_name if r.shelter else "Happy Paws Shelter"
             sh_id = f"SH-{r.shelter.user.id}" if (r.shelter and r.shelter.user) else "SH-101"
             st_disp = r.get_status_display() if hasattr(r, 'get_status_display') else r.status
+
+            has_deliv = hasattr(r, 'delivery') and r.delivery is not None and r.delivery.delivery_partner is not None
+            driver_name = r.delivery.delivery_partner.user.get_full_name().strip() or r.delivery.delivery_partner.user.username if (has_deliv and r.delivery.delivery_partner and r.delivery.delivery_partner.user) else None
+
+            pet_img = r.pet.image.url if (r.pet and r.pet.image) else "/featured_dog.jpg"
+            pet_breed = r.pet.breed if (r.pet and hasattr(r.pet, 'breed') and r.pet.breed) else "Rescue Companion"
+            pet_species = r.pet.species if (r.pet and hasattr(r.pet, 'species') and r.pet.species) else "Companion"
+            cust_phone = getattr(r.customer, 'phone_number', None) or getattr(r.customer, 'phone', None) or (r.customer.username if r.customer else "")
+            cust_email = r.customer.email if r.customer else ""
+            cust_city = getattr(r.customer, 'city', None) or "Kerala"
+
             db_adoptions.append({
                 'id': f"KH102{r.id:02d}",
                 'db_id': r.id,
                 'petId': f"P{r.pet.id}" if r.pet else "P101",
                 'pet': pet_name,
+                'petName': pet_name,
+                'petBreed': pet_breed,
+                'petSpecies': pet_species,
+                'petImage': pet_img,
                 'customer': cust_name,
+                'customerName': cust_name,
+                'customerPhone': cust_phone,
+                'customerEmail': cust_email,
+                'customerCity': cust_city,
                 'shelter': sh_name,
+                'shelterName': sh_name,
                 'shelterId': sh_id,
                 'shelter_user_id': r.shelter.user.id if (r.shelter and r.shelter.user) else None,
+                'deliveryPersonName': driver_name or "Pending Driver Assignment",
                 'status': st_disp,
                 'raw_status': r.status,
+                'stage': st_disp,
+                'is_delivery_assigned': has_deliv,
+                'assigned_driver': driver_name,
                 'date': r.request_date.strftime("%d %b %Y") if r.request_date else "Recent",
+                'orderDate': r.request_date.strftime("%d %b %Y") if r.request_date else "Recent",
+                'amount': getattr(r.pet, 'adoption_fee', 5000) or 5000,
                 'notes': r.notes or "Adoption request submitted via KindHeart portal."
             })
     except Exception as e:
@@ -2598,6 +2635,9 @@ def api_delivery_update_status(request):
         if delivery.adoption_request:
             delivery.adoption_request.status = 'DELIVERED'
             delivery.adoption_request.save()
+            if delivery.adoption_request.pet:
+                delivery.adoption_request.pet.status = 'ADOPTED'
+                delivery.adoption_request.pet.save(update_fields=['status'])
     elif new_status in ['CANCELLED', 'FAILED']:
         delivery.status = new_status
         if delivery.adoption_request:
@@ -2678,6 +2718,9 @@ def api_delivery_upload_proof(request):
     if delivery.adoption_request:
         delivery.adoption_request.status = 'DELIVERED'
         delivery.adoption_request.save()
+        if delivery.adoption_request.pet:
+            delivery.adoption_request.pet.status = 'ADOPTED'
+            delivery.adoption_request.pet.save(update_fields=['status'])
     delivery.save()
 
     # Create/update HandoverVerification
@@ -2921,11 +2964,20 @@ def api_shelter_assign_delivery(request):
     except Exception:
         pass
 
+    # Construct delivery partner notification message
+    cust_user = adoption_req.customer
+    cust_name = cust_user.get_full_name().strip() if (cust_user and cust_user.get_full_name().strip()) else (cust_user.username if cust_user else "Customer")
+    pet_name = adoption_req.pet.name if adoption_req.pet else "Companion Pet"
+    cust_addr = getattr(cust_user, 'address', '') or getattr(getattr(cust_user, 'profile', None), 'address', '') or getattr(cust_user, 'city', '') or "Customer Destination Address"
+
+    notif_msg = f"You have been assigned for a delivery to {cust_name}'s address ({cust_addr}) for pet {pet_name}."
+
     return JsonResponse({
         'success': True,
         'delivery_id': delivery.id,
         'partner_name': partner.user.get_full_name() or partner.user.username,
-        'message': f'Delivery Partner {partner.user.get_full_name() or partner.user.username} successfully assigned!'
+        'assignment_notification': notif_msg,
+        'message': f'Delivery Partner {partner.user.get_full_name() or partner.user.username} successfully assigned! {notif_msg}'
     })
 
 
@@ -3611,5 +3663,254 @@ def api_admin_verify_all_shelter_documents(request):
             'documents_count': updated_count,
         }
     })
+
+
+@csrf_exempt
+def api_apply_adoption(request):
+    """
+    Submits an adoption application for a pet to the shelter and saves it in the database.
+    """
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'POST request required'}, status=405)
+
+    try:
+        data = json.loads(request.body.decode('utf-8'))
+    except Exception:
+        data = request.POST
+
+    pet_id = data.get('pet_id') or data.get('petId')
+    if not pet_id:
+        return JsonResponse({'success': False, 'error': 'Pet ID is required'}, status=400)
+
+    clean_pet_id = str(pet_id).replace('P', '').replace('PET-', '').strip()
+    try:
+        pet = Pet.objects.get(id=int(clean_pet_id))
+    except (Pet.DoesNotExist, ValueError):
+        return JsonResponse({'success': False, 'error': f"Pet #{pet_id} not found"}, status=404)
+
+    if request.user.is_authenticated and not request.user.is_anonymous:
+        customer = request.user
+    else:
+        customer = User.objects.filter(profile__role='CUSTOMER').first() or User.objects.filter(is_superuser=False).first()
+
+    if not customer:
+        return JsonResponse({'success': False, 'error': 'Adopter user profile required'}, status=400)
+
+    shelter = pet.shelter
+    if not shelter:
+        shelter = ShelterProfile.objects.first()
+
+    if not shelter:
+        return JsonResponse({'success': False, 'error': 'No registered shelter facility found to receive request'}, status=400)
+
+    adoption_req, created = AdoptionRequest.objects.get_or_create(
+        pet=pet,
+        customer=customer,
+        shelter=shelter,
+        defaults={
+            'status': 'UNDER_REVIEW',
+            'notes': data.get('notes', 'Adoption application submitted via KindHeart portal.')
+        }
+    )
+
+    if not created and adoption_req.status in ['CANCELLED', 'REJECTED']:
+        adoption_req.status = 'UNDER_REVIEW'
+        adoption_req.save()
+
+    pet.status = 'PENDING_ADOPTION'
+    pet.save(update_fields=['status'])
+
+    try:
+        AuditLog.objects.create(
+            user=customer,
+            user_role='Adopter',
+            action='ADOPTION_REQUEST_CREATED',
+            module='Adoption Management',
+            adoption_request=adoption_req,
+            description=f"Adoption application #{adoption_req.id} submitted for pet '{pet.name}' to shelter '{shelter.shelter_name}'."
+        )
+    except Exception:
+        pass
+
+    return JsonResponse({
+        'success': True,
+        'message': f"Adoption application #{adoption_req.id} for '{pet.name}' submitted successfully to shelter!",
+        'application': {
+            'id': f"KH102{adoption_req.id:02d}",
+            'db_id': adoption_req.id,
+            'petId': f"P{pet.id}",
+            'pet': pet.name,
+            'petName': pet.name,
+            'petBreed': pet.breed,
+            'customer': customer.get_full_name() or customer.username,
+            'shelter': shelter.shelter_name,
+            'shelterId': f"SH-{shelter.user.id}" if shelter.user else "SH-101",
+            'status': 'Under Review',
+            'raw_status': 'UNDER_REVIEW',
+            'date': adoption_req.request_date.strftime("%d %b %Y") if adoption_req.request_date else "Just now",
+            'notes': adoption_req.notes or "Adoption request submitted via KindHeart portal."
+        }
+    })
+
+
+@csrf_exempt
+def api_update_pet_status(request):
+    """
+    Shelter / Admin: Update a pet's marketplace status (AVAILABLE, PENDING_ADOPTION, ADOPTED).
+    Persists the change to the Pet model in the database so it is immediately
+    reflected in the Django admin panel and the shelter dashboard.
+    """
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'POST request required'}, status=405)
+
+    try:
+        data = json.loads(request.body.decode('utf-8'))
+    except Exception:
+        data = request.POST
+
+    pet_id_raw = data.get('pet_id', '')
+    new_status = str(data.get('status', '')).strip().upper()
+
+    VALID_STATUSES = ['AVAILABLE', 'PENDING_ADOPTION', 'ADOPTED']
+    if new_status not in VALID_STATUSES:
+        return JsonResponse({'success': False, 'error': f'Invalid status. Must be one of: {", ".join(VALID_STATUSES)}'}, status=400)
+
+    # Strip non-numeric prefix (e.g. "P12" -> 12)
+    raw_id = ''.join(c for c in str(pet_id_raw) if c.isdigit())
+    if not raw_id:
+        return JsonResponse({'success': False, 'error': 'Invalid pet ID'}, status=400)
+
+    try:
+        pet = Pet.objects.get(id=int(raw_id))
+    except Pet.DoesNotExist:
+        return JsonResponse({'success': False, 'error': f'Pet #{pet_id_raw} not found'}, status=404)
+
+    # Ownership / auth check
+    if request.user.is_authenticated:
+        is_admin = request.user.is_staff or request.user.is_superuser or (
+            hasattr(request.user, 'profile') and str(request.user.profile.role).upper() == 'ADMIN'
+        )
+        if not is_admin:
+            user_shelter = getattr(request.user, 'shelter_profile', None) or \
+                           ShelterProfile.objects.filter(user=request.user).first()
+            if user_shelter and pet.shelter and pet.shelter != user_shelter:
+                return JsonResponse({
+                    'success': False,
+                    'error': 'Security Violation: This pet belongs to another shelter.'
+                }, status=403)
+
+    prev_status = pet.status
+    pet.status = new_status
+    pet.save(update_fields=['status'])
+
+    # Audit log
+    try:
+        AuditLog.objects.create(
+            user=request.user if request.user.is_authenticated else None,
+            user_role='Shelter Staff' if not (request.user.is_staff or request.user.is_superuser) else 'Admin',
+            action='PET_STATUS_UPDATED',
+            module='Pet Registry',
+            description=f"Pet '{pet.name}' (#{pet.id}) marketplace status changed from {prev_status} to {new_status}."
+        )
+    except Exception:
+        pass
+
+    STATUS_DISPLAY = {
+        'AVAILABLE': 'Available',
+        'PENDING_ADOPTION': 'Pending Adoption',
+        'ADOPTED': 'Adopted',
+    }
+    return JsonResponse({
+        'success': True,
+        'pet_id': pet.id,
+        'status': new_status,
+        'status_display': STATUS_DISPLAY.get(new_status, new_status),
+        'message': f"Pet '{pet.name}' status updated to {STATUS_DISPLAY.get(new_status, new_status)}."
+    })
+
+
+@csrf_exempt
+def api_delivery_toggle_availability(request):
+    """
+    Delivery Partner / Shelter / Admin: Toggle or set delivery partner availability status (AVAILABLE <-> BUSY).
+    Persists to DeliveryPartner.availability_status in Django backend database.
+    """
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'POST request required'}, status=405)
+
+    try:
+        data = json.loads(request.body.decode('utf-8'))
+    except Exception:
+        data = request.POST
+
+    requested_status = data.get('status', '').strip().upper()
+    partner_id_raw = data.get('partner_id', '') or data.get('partnerId', '')
+
+    dp = None
+    if partner_id_raw:
+        raw_id = ''.join(c for c in str(partner_id_raw) if c.isdigit())
+        if raw_id:
+            dp = DeliveryPartner.objects.filter(Q(id=int(raw_id)) | Q(user__id=int(raw_id)) | Q(partner_id=partner_id_raw)).first()
+
+    if not dp and request.user.is_authenticated:
+        dp = getattr(request.user, 'delivery_partner_profile', None) or \
+             DeliveryPartner.objects.filter(user=request.user).first()
+
+    if not dp:
+        return JsonResponse({'success': False, 'error': 'Delivery partner profile not found'}, status=404)
+
+    if requested_status in ['AVAILABLE', 'BUSY', 'INACTIVE']:
+        dp.availability_status = requested_status
+    else:
+        current_op = dp.get_availability_status()
+        dp.availability_status = 'BUSY' if current_op == 'AVAILABLE' else 'AVAILABLE'
+
+    dp.save(update_fields=['availability_status'])
+    new_op = dp.get_availability_status()
+
+    try:
+        AuditLog.objects.create(
+            user=request.user if request.user.is_authenticated else dp.user,
+            user_role='Delivery Partner',
+            action='DELIVERY_AVAILABILITY_TOGGLED',
+            module='Transit Operations',
+            description=f"Delivery Partner {dp.user.username} availability status set to {new_op}."
+        )
+    except Exception:
+        pass
+
+    return JsonResponse({
+        'success': True,
+        'partner_id': dp.partner_id,
+        'user_id': dp.user.id,
+        'availability_status': new_op,
+        'message': f"Delivery partner status is now {new_op}."
+    })
+
+
+@csrf_exempt
+def api_get_available_delivery_partners(request):
+    """
+    Dynamic API: Returns real-time list of available delivery partners directly from database.
+    """
+    try:
+        dps = DeliveryPartner.objects.filter(is_active=True).select_related('user', 'shelter')
+        available_list = []
+        for dp in dps:
+            op_status = dp.get_availability_status()
+            if op_status == 'AVAILABLE':
+                available_list.append({
+                    'id': dp.id,
+                    'partnerId': dp.partner_id,
+                    'name': dp.user.get_full_name().strip() or dp.user.first_name or dp.user.username,
+                    'username': dp.user.username,
+                    'vehicle': f"{dp.vehicle_type} ({dp.vehicle_number})",
+                    'shelterName': dp.shelter.shelter_name if dp.shelter else "SafeTransit General Fleet",
+                    'status': op_status
+                })
+        return JsonResponse({'success': True, 'available_partners': available_list})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
 
 

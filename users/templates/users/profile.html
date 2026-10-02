@@ -1495,6 +1495,50 @@
         }
 
     </style>
+
+<style>
+/* Assign Delivery Partner Select Dropdown Theme Matching & Styling */
+#assign-driver-select {
+    background-color: #121620 !important;
+    color: #FFFFFF !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+html.theme-light #assign-driver-select {
+    background-color: #FFFFFF !important;
+    color: #0F172A !important;
+    border: 1px solid #CBD5E1 !important;
+}
+#assign-driver-select optgroup {
+    background-color: #1E293B !important;
+    color: #F8FAFC !important;
+    font-weight: 700 !important;
+    padding: 6px 4px !important;
+}
+html.theme-light #assign-driver-select optgroup {
+    background-color: #F1F5F9 !important;
+    color: #0F172A !important;
+}
+#assign-driver-select option {
+    background-color: #0F172A !important;
+    color: #F8FAFC !important;
+    padding: 8px 12px !important;
+}
+html.theme-light #assign-driver-select option {
+    background-color: #FFFFFF !important;
+    color: #0F172A !important;
+}
+#assign-driver-select option:disabled {
+    color: #94A3B8 !important;
+    background-color: #1E293B !important;
+    opacity: 0.75 !important;
+}
+html.theme-light #assign-driver-select option:disabled {
+    color: #64748B !important;
+    background-color: #F8FAFC !important;
+    opacity: 0.75 !important;
+}
+</style>
+
 </head>
 
 <body class="min-h-screen flex flex-col antialiased selection:bg-[#FF8F1C]/30 selection:text-white overflow-x-hidden max-w-full">
@@ -1704,6 +1748,14 @@
                                     </div>
                                     <span class="text-[10px] text-slate-400 font-mono group-hover:text-white">&rarr;</span>
                                 </a>
+                                <a href="#view-pets" onclick="switchDashboardTab('pets'); toggleUserDropdown(false);"
+                                    class="flex items-center justify-between px-3 py-2 rounded-xl text-slate-300 hover:text-white hover:bg-white/5 transition-colors group">
+                                    <div class="flex items-center gap-2.5">
+                                        <i data-lucide="paw-print" class="w-4 h-4 text-purple-400"></i>
+                                        <span>Manage Pets</span>
+                                    </div>
+                                    <span class="text-[10px] text-slate-400 font-mono group-hover:text-white">&rarr;</span>
+                                </a>
                                 <a href="#view-shelters" onclick="switchDashboardTab('shelters'); toggleUserDropdown(false);"
                                     class="flex items-center justify-between px-3 py-2 rounded-xl text-slate-300 hover:text-white hover:bg-white/5 transition-colors group">
                                     <div class="flex items-center gap-2.5">
@@ -1876,8 +1928,35 @@
                             </div>
                         </div>
 
-                        <!-- Recommended Pets Section -->
-                        <div>
+                        <!-- Delivery Partner Availability Status Toggle Card -->
+                        {% if current_role == 'delivery' %}
+                        <div id="delivery-availability-card" class="dash-card p-5 bg-gradient-to-r from-blue-950/40 via-slate-900 to-indigo-950/40 border border-blue-500/30 flex flex-col sm:flex-row items-center justify-between gap-4 my-6">
+                            <div class="flex items-center gap-4">
+                                <div class="w-12 h-12 rounded-2xl bg-blue-500/20 border border-blue-500/30 text-blue-400 flex items-center justify-center shrink-0">
+                                    <i data-lucide="truck" class="w-6 h-6"></i>
+                                </div>
+                                <div>
+                                    <div class="flex items-center gap-2">
+                                        <h3 class="font-heading font-extrabold text-white text-base">Delivery Partner Availability Status</h3>
+                                        <span id="delivery-current-status-badge" class="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                                            AVAILABLE
+                                        </span>
+                                    </div>
+                                    <p class="text-xs text-slate-300 mt-0.5">Toggle your active transit status between Available and Busy for incoming adoption delivery assignments.</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-3 shrink-0">
+                                <button type="button" id="btn-toggle-delivery-availability" onclick="toggleDeliveryPartnerAvailability()" class="btn-apple-primary !bg-amber-500 hover:!bg-amber-600 text-black font-bold text-xs !py-2 !px-4 shadow-lg flex items-center gap-2 transition-all">
+                                    <i data-lucide="power" class="w-4 h-4"></i>
+                                    <span id="btn-toggle-delivery-availability-label">Toggle to BUSY</span>
+                                </button>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <!-- Recommended Pets Section (Only visible for Adopters/Customers) -->
+                        {% if current_role == 'customer' or current_role == 'adopter' %}
+                        <div id="recommended-pets-section">
                             <div class="flex items-center justify-between mb-5">
                                 <div>
                                     <h3 class="text-xl font-bold text-white font-heading">Pets waiting for a home</h3>
@@ -1895,6 +1974,7 @@
                                 <!-- Populated dynamically from KindHeart data store -->
                             </div>
                         </div>
+                        {% endif %}
 
                     </div>
 
@@ -2248,7 +2328,6 @@
                                         <th class="p-4">Pet ID &amp; Photo</th>
                                         <th class="p-4">Name &amp; Species</th>
                                         <th class="p-4">Host Shelter</th>
-                                        <th class="p-4">Microchip ID</th>
                                         <th class="p-4">Health Passport</th>
                                         <th class="p-4">Marketplace Status</th>
                                         <th class="p-4 text-right">Actions</th>
@@ -2473,7 +2552,6 @@
                                     <div class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></div>
                                     <div class="font-heading font-bold text-sm text-white">Delivery Boys Details</div>
                                 </div>
-                                <span class="text-[11px] text-slate-400 font-mono">Shows registered delivery boys and assigned shelter</span>
                             </div>
                             <div class="overflow-x-auto">
                                 <table class="w-full text-left text-xs min-w-[960px]">
@@ -2503,7 +2581,6 @@
                         <div class="dash-card overflow-hidden">
                             <div class="p-5 border-b border-white/10 flex items-center justify-between">
                                 <div class="font-heading font-bold text-sm text-white">Delivery Outgoing</div>
-                                <span class="text-xs text-slate-400 font-mono">Active Deliveries</span>
                             </div>
                             <div class="overflow-x-auto">
                                 <table class="w-full text-left text-xs min-w-[960px]">
@@ -2514,7 +2591,7 @@
                                             <th class="p-4 whitespace-nowrap">Customer</th>
                                             <th class="p-4 whitespace-nowrap">Delivery Boy</th>
                                             <th class="p-4 whitespace-nowrap min-w-[140px]">Status</th>
-                                            <th class="p-4 whitespace-nowrap">Scheduled Date</th>
+                                            <th class="p-4 whitespace-nowrap">Estimated Reaching Date & Time</th>
                                             <th class="p-4 whitespace-nowrap">Destination</th>
                                             <th class="p-4 text-right whitespace-nowrap">Actions</th>
                                         </tr>
@@ -3701,7 +3778,7 @@
                 <!-- ============================================================
                      SHELTER DOCUMENT UPLOAD MODAL (Phase 7)
                      ============================================================ -->
-                {% if current_role == 'shelter' %}
+                {% if current_role %}
                 <div id="shelter-upload-doc-modal" class="dash-modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="upload-doc-modal-title">
                     <div class="dash-modal-box max-w-md w-full">
                         <div class="flex items-center justify-between mb-5">
@@ -4722,6 +4799,47 @@
                             </div>
                         </div>
 
+                        <!-- Card: Veterinary Protocols & Clinical Care Guidelines (Integrated into Shelter Dossier Profile) -->
+                        <div class="dash-card p-6 border border-emerald-500/20 bg-gradient-to-br from-emerald-950/20 via-slate-900 to-transparent space-y-4 my-6">
+                            <div class="flex items-center justify-between pb-3 border-b border-white/10">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 flex items-center justify-center shrink-0">
+                                        <i data-lucide="shield-alert" class="w-5 h-5"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-heading font-extrabold text-white text-base">Veterinary Protocols &amp; Clinical Care Guidelines</h3>
+                                        <p class="text-xs text-slate-400 mt-0.5">Mandatory medical procedures, vaccination schedules, quarantine rules, and emergency veterinary contacts.</p>
+                                    </div>
+                                </div>
+                                <span class="px-2.5 py-1 rounded-full text-xs font-mono font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                                    ACTIVE PROTOCOLS
+                                </span>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+                                <div class="p-3.5 rounded-xl bg-white/5 border border-white/10 space-y-1">
+                                    <div class="font-bold text-white flex items-center gap-2">
+                                        <i data-lucide="syringe" class="w-4 h-4 text-emerald-400"></i>
+                                        <span>Vaccination &amp; Deworming</span>
+                                    </div>
+                                    <p class="text-slate-400 text-[11px] leading-relaxed">7-in-1 / DHPPiL core vaccines administered upon intake. Rabies booster mandatory 14 days prior to delivery dispatch.</p>
+                                </div>
+                                <div class="p-3.5 rounded-xl bg-white/5 border border-white/10 space-y-1">
+                                    <div class="font-bold text-white flex items-center gap-2">
+                                        <i data-lucide="stethoscope" class="w-4 h-4 text-cyan-400"></i>
+                                        <span>Pre-Handover Health Check</span>
+                                    </div>
+                                    <p class="text-slate-400 text-[11px] leading-relaxed">Comprehensive veterinary physical examination certificate issued within 48 hours of transit handover.</p>
+                                </div>
+                                <div class="p-3.5 rounded-xl bg-white/5 border border-white/10 space-y-1">
+                                    <div class="font-bold text-white flex items-center gap-2">
+                                        <i data-lucide="truck" class="w-4 h-4 text-[#FF8F1C]"></i>
+                                        <span>Climate-Controlled Transit</span>
+                                    </div>
+                                    <p class="text-slate-400 text-[11px] leading-relaxed">Hydration pauses every 2 hours with temperature-regulated transit crates (22°C–25°C).</p>
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- Card 2: Shelter Operational Statistics Grid (Live Database Metrics - Phase 18) -->
                         <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
                             <div class="dash-card p-4 border border-white/10 flex flex-col justify-between">
@@ -5640,16 +5758,7 @@
                 </div>
             </div>
 
-            <!-- Minimal Linear Progress Bar -->
-            <div class="p-3.5 rounded-xl bg-white/[0.02] border border-white/5 mb-5 space-y-2">
-                <div class="flex items-center justify-between text-xs">
-                    <span class="text-[10px] font-mono text-slate-400 uppercase">Fulfillment Status</span>
-                    <span class="text-[11px] font-mono text-[#FF8F1C] font-bold" id="mod-progress-label">Step 7 of 12: Ready for Pickup</span>
-                </div>
-                <div class="w-full bg-white/10 rounded-full h-2 overflow-hidden">
-                    <div id="mod-progress-bar" class="bg-gradient-to-r from-amber-500 to-[#FF8F1C] h-2 rounded-full transition-all duration-300" style="width: 58%"></div>
-                </div>
-            </div>
+
 
             <!-- Minimal Done Action -->
             <div class="pt-3 border-t border-white/10 flex items-center justify-end">
@@ -6978,6 +7087,8 @@
                                 <option value="Bird">Bird 🦜</option>
                                 <option value="Rabbit">Rabbit 🐇</option>
                                 <option value="Small Pet">Small Pet 🐾</option>
+                                <option value="Reptile">Reptile 🦎</option>
+                                <option value="Other">Other Species 🐾</option>
                             </select>
                         </div>
                     </div>
@@ -7024,17 +7135,9 @@
                     </div>
 
                     <div>
-                        <label class="block text-xs font-semibold text-slate-300 mb-1">Pet Photo (URL or Preset)</label>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">Pet Photo URL</label>
                         <div class="flex items-center gap-2">
-                            <input type="text" id="shelter-pet-image-input" placeholder="e.g. /coco_beagle.jpg or image URL" class="flex-1 px-3.5 py-2 bg-white/5 border border-white/10 rounded-xl text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-[#FF8F1C]" />
-                            <select onchange="if (this.value) document.getElementById('shelter-pet-image-input').value = this.value;" class="px-2.5 py-2 bg-[#18181B] border border-white/10 rounded-xl text-xs text-slate-300 focus:outline-none">
-                                <option value="">Presets...</option>
-                                <option value="/coco_beagle.jpg">Beagle (Coco)</option>
-                                <option value="/kindheart_bruno.jpg">Golden Retriever</option>
-                                <option value="/cozy_kitten_play.jpg">Kitten (Milo)</option>
-                                <option value="/rescued_bird.jpg">Parakeet (Pip)</option>
-                                <option value="/rescued_bunny.jpg">Lop Bunny (Clover)</option>
-                            </select>
+                            <input type="text" id="shelter-pet-image-input" placeholder="Enter image URL or path (e.g. /featured_dog.jpg)" class="w-full px-3.5 py-2.5 bg-white/5 border border-white/10 rounded-xl text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-[#FF8F1C]" />
                         </div>
                     </div>
 
@@ -7378,12 +7481,13 @@
             }
         }
 
-        // Inject real registered delivery partners from database into KindHeartData.deliveryPartners
+        // Inject real registered delivery partners from database into KindHeartData.deliveryPartners and dbDeliveryPartners
         const dbDelivScriptEl = document.getElementById('db-delivery-partners-data');
         if (dbDelivScriptEl) {
             try {
                 const parsedDbDeliv = JSON.parse(dbDelivScriptEl.textContent || '[]');
-                if (Array.isArray(parsedDbDeliv) && parsedDbDeliv.length > 0) {
+                if (Array.isArray(parsedDbDeliv)) {
+                    KindHeartData.dbDeliveryPartners = parsedDbDeliv;
                     if (!KindHeartData.deliveryPartners) KindHeartData.deliveryPartners = [];
                     parsedDbDeliv.forEach(dp => {
                         const exists = KindHeartData.deliveryPartners.some(p => String(p.partnerId) === String(dp.partnerId) || String(p.username) === String(dp.username));
@@ -7444,6 +7548,7 @@
                 if (Array.isArray(parsedDbDeliveries) && parsedDbDeliveries.length > 0) {
                     KindHeartData.deliveries = parsedDbDeliveries;
                     KindHeartData.deliveryOrders = parsedDbDeliveries;
+                    KindHeartData.logisticsDeliveries = parsedDbDeliveries;
                 }
             } catch (err) {
                 console.warn("Could not parse db delivery requests data:", err);
@@ -7619,9 +7724,8 @@
                 return;
             }
 
-            // All Pets directory is removed from Admin module
-            if ((tabId === 'pets' || tabId === 'pet-inventory') && KindHeartData && KindHeartData.currentRole === 'admin') {
-                switchDashboardTab('dashboard');
+            if (tabId === 'find-a-pet' && KindHeartData && KindHeartData.currentRole === 'shelter') {
+                switchDashboardTab('my-pets');
                 return;
             }
 
@@ -8531,6 +8635,12 @@
             if (window.lucide) lucide.createIcons();
         }
 
+        function openPetDetails(petId) {
+            if (typeof openPetDetailModal === 'function') {
+                openPetDetailModal(petId);
+            }
+        }
+
         function filterApplications(type, button) {
             document.querySelectorAll('#view-applications .filter-tab-pill').forEach(btn => btn.classList.remove('is-active'));
             if (button) button.classList.add('is-active');
@@ -8872,6 +8982,50 @@
         .btn-print { background: #ea580c; color: #ffffff; border: none; padding: 10px 20px; border-radius: 10px; font-weight: 700; font-size: 13px; cursor: pointer; }
         @media print { .no-print { display: none !important; } body { padding: 0; background: #fff; } .invoice-box { box-shadow: none; border: none; } }
     </style>
+
+<style>
+/* Assign Delivery Partner Select Dropdown Theme Matching & Styling */
+#assign-driver-select {
+    background-color: #121620 !important;
+    color: #FFFFFF !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+html.theme-light #assign-driver-select {
+    background-color: #FFFFFF !important;
+    color: #0F172A !important;
+    border: 1px solid #CBD5E1 !important;
+}
+#assign-driver-select optgroup {
+    background-color: #1E293B !important;
+    color: #F8FAFC !important;
+    font-weight: 700 !important;
+    padding: 6px 4px !important;
+}
+html.theme-light #assign-driver-select optgroup {
+    background-color: #F1F5F9 !important;
+    color: #0F172A !important;
+}
+#assign-driver-select option {
+    background-color: #0F172A !important;
+    color: #F8FAFC !important;
+    padding: 8px 12px !important;
+}
+html.theme-light #assign-driver-select option {
+    background-color: #FFFFFF !important;
+    color: #0F172A !important;
+}
+#assign-driver-select option:disabled {
+    color: #94A3B8 !important;
+    background-color: #1E293B !important;
+    opacity: 0.75 !important;
+}
+html.theme-light #assign-driver-select option:disabled {
+    color: #64748B !important;
+    background-color: #F8FAFC !important;
+    opacity: 0.75 !important;
+}
+</style>
+
 </head>
 <body>
     <div class="invoice-box">
@@ -9261,6 +9415,50 @@
         .btn-print { background: #ea580c; color: #ffffff; border: none; padding: 10px 20px; border-radius: 10px; font-weight: 700; font-size: 13px; cursor: pointer; }
         @media print { .no-print { display: none !important; } body { padding: 0; background: #fff; } .doc-box { box-shadow: none; border: none; } }
     </style>
+
+<style>
+/* Assign Delivery Partner Select Dropdown Theme Matching & Styling */
+#assign-driver-select {
+    background-color: #121620 !important;
+    color: #FFFFFF !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+html.theme-light #assign-driver-select {
+    background-color: #FFFFFF !important;
+    color: #0F172A !important;
+    border: 1px solid #CBD5E1 !important;
+}
+#assign-driver-select optgroup {
+    background-color: #1E293B !important;
+    color: #F8FAFC !important;
+    font-weight: 700 !important;
+    padding: 6px 4px !important;
+}
+html.theme-light #assign-driver-select optgroup {
+    background-color: #F1F5F9 !important;
+    color: #0F172A !important;
+}
+#assign-driver-select option {
+    background-color: #0F172A !important;
+    color: #F8FAFC !important;
+    padding: 8px 12px !important;
+}
+html.theme-light #assign-driver-select option {
+    background-color: #FFFFFF !important;
+    color: #0F172A !important;
+}
+#assign-driver-select option:disabled {
+    color: #94A3B8 !important;
+    background-color: #1E293B !important;
+    opacity: 0.75 !important;
+}
+html.theme-light #assign-driver-select option:disabled {
+    color: #64748B !important;
+    background-color: #F8FAFC !important;
+    opacity: 0.75 !important;
+}
+</style>
+
 </head>
 <body>
     <div class="doc-box">
@@ -9880,6 +10078,10 @@
                         </div>
 
                         <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs font-mono">
+                            <div class="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30">
+                                <span class="text-amber-400 block text-[10px]">Adoption Fee / Rate</span>
+                                <span class="text-amber-300 font-bold font-mono text-sm">${pet.adoptionFee || pet.fee || 'Free Adoption'}</span>
+                            </div>
                             <div class="p-2.5 rounded-xl bg-white/5 border border-white/10">
                                 <span class="text-slate-400 block text-[10px]">Sex / Gender</span>
                                 <span class="text-white font-bold flex items-center gap-1">
@@ -10728,7 +10930,7 @@
             }
         }
 
-        function startAdoptionApplication(petId) {
+        async function startAdoptionApplication(petId) {
             // Guard: Check Account Status
             if (KindHeartData.accountStatus === 'Suspended' || KindHeartData.accountStatus === 'Deactivated') {
                 showToast(`⚠️ Account Restricted: Your profile status is ${KindHeartData.accountStatus}. New adoption applications cannot be submitted.`);
@@ -10739,40 +10941,61 @@
             const pet = KindHeartData.pets.find(p => p && p.id === petId);
             const name = pet ? pet.name : 'Companion';
 
-            // Mark companion as Adopted so it is dynamically removed from available pets
-            if (pet) {
-                pet.status = 'Adopted';
+            try {
+                const response = await fetch('/users/api/adoption/apply/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': window.getCookie ? window.getCookie('csrftoken') : ''
+                    },
+                    body: JSON.stringify({ pet_id: petId })
+                });
+                const res = await response.json();
+                if (res.success && res.application) {
+                    if (pet) pet.status = 'Pending';
+                    const favIdx = KindHeartData.favorites.indexOf(petId);
+                    if (favIdx > -1) {
+                        KindHeartData.favorites.splice(favIdx, 1);
+                    }
+
+                    const newApp = {
+                        id: res.application.id,
+                        db_id: res.application.db_id,
+                        petId: petId,
+                        pet: res.application.petName || name,
+                        petName: res.application.petName || name,
+                        petBreed: res.application.petBreed || (pet ? pet.breed : 'Rescued Companion'),
+                        submittedDate: res.application.date || 'Just now',
+                        status: 'Under Review',
+                        raw_status: 'UNDER_REVIEW',
+                        statusType: 'review',
+                        shelter: res.application.shelter,
+                        shelterId: res.application.shelterId,
+                        nextStep: 'Shelter reviewing application and background verification',
+                        coordinator: (res.application.shelter || 'Shelter') + ' Team',
+                        timeline: [
+                            { label: '1. Application Submitted (Sent to Shelter)', date: res.application.date || 'Just now', status: 'completed' },
+                            { label: '2. Shelter Approval & Prep', date: 'In Progress', status: 'current' },
+                            { label: '3. Delivery Assigned', date: 'Upcoming', status: 'upcoming' },
+                            { label: '4. Doorstep Handover', date: 'To be scheduled', status: 'upcoming' },
+                            { label: '5. Payment (Online or COD)', date: 'At Handover', status: 'upcoming' }
+                        ]
+                    };
+
+                    if (!KindHeartData.applications) KindHeartData.applications = [];
+                    KindHeartData.applications.unshift(newApp);
+                    if (!KindHeartData.adoptionOrders) KindHeartData.adoptionOrders = [];
+                    KindHeartData.adoptionOrders.unshift(newApp);
+
+                    showToast(res.message);
+                } else {
+                    showToast(res.error || 'Failed to submit application to shelter server');
+                }
+            } catch (err) {
+                console.warn('Adoption application API error:', err);
+                showToast('Application sent to shelter. Refreshing state...');
             }
 
-            // Remove from saved favorites if was favorited
-            const favIdx = KindHeartData.favorites.indexOf(petId);
-            if (favIdx > -1) {
-                KindHeartData.favorites.splice(favIdx, 1);
-            }
-
-            // Add new application
-            const newAppId = 'KHD-' + Math.floor(1000 + Math.random() * 9000);
-            const shelterLocation = pet ? pet.location : 'KindHeart Kochi Shelter';
-            KindHeartData.applications.unshift({
-                id: newAppId,
-                petId: petId,
-                petName: name,
-                petBreed: pet ? pet.breed : 'Rescued Companion',
-                submittedDate: 'Just now',
-                status: 'Under Review',
-                statusType: 'review',
-                nextStep: 'Shelter reviewing application and background verification',
-                coordinator: shelterLocation + ' Team',
-                timeline: [
-                    { label: '1. Application Submitted (Sent to Shelter)', date: 'Just now', status: 'completed' },
-                    { label: '2. Shelter Approval & Prep', date: 'In Progress', status: 'current' },
-                    { label: '3. Delivery Assigned', date: 'Upcoming', status: 'upcoming' },
-                    { label: '4. Doorstep Handover', date: 'To be scheduled', status: 'upcoming' },
-                    { label: '5. Payment (Online or COD)', date: 'At Handover', status: 'upcoming' }
-                ]
-            });
-
-            // Dynamically refresh all grids so adopted pet disappears from find-a-pet and dashboard
             renderRecommendedPets();
             renderDiscoveryPets();
             renderFavorites();
@@ -10783,7 +11006,6 @@
             if (typeof updateDashboardStats === 'function') updateDashboardStats();
 
             switchDashboardTab('applications');
-            showToast('Application #' + newAppId + ' submitted for ' + name + '! Sent to Shelter for review.');
         }
 
         /* =========================================================
@@ -10812,7 +11034,7 @@
                         ]
                     },
                     {
-                        title: 'Care & Finance',
+                        title: 'Navigation Hub',
                         links: [
                             { id: 'profile', label: 'Adopter Profile', icon: 'user' },
                             { id: 'notifications', label: 'Notifications', icon: 'bell' },
@@ -10844,6 +11066,7 @@
                         title: 'OPERATIONS',
                         links: [
                             { id: 'adoption-orders', label: 'Orders', icon: 'shopping-bag' },
+                            { id: 'pets', label: 'Pets', icon: 'paw-print' },
                             { id: 'shelters', label: 'Shelters', icon: 'home' },
                             { id: 'customers', label: 'Customers', icon: 'users' },
                             { id: 'delivery-logistics', label: 'Delivery', icon: 'truck' }
@@ -10878,22 +11101,16 @@
                 badgeClass: 'bg-blue-500/20 text-blue-300',
                 iconName: 'truck',
                 iconColor: '#3B82F6',
-                userName: 'Rahul Kumar',
+                userName: 'Delivery Partner',
                 userRole: 'Delivery Transit Partner',
-                userInitials: 'RK',
+                userInitials: 'DP',
                 avatarBg: 'from-blue-600 to-cyan-700',
                 sections: [
                     {
-                        title: 'Transit Operations',
+                        title: 'Navigation Hub',
                         links: [
-                            { id: 'dashboard', label: 'Dispatch Hub', icon: 'truck' },
+                            { id: 'dashboard', label: 'Dashboard', icon: 'truck' },
                             { id: 'applications', label: 'Assigned Deliveries', icon: 'package-check' },
-                            { id: 'my-pets', label: 'My Assigned Pets', icon: 'dog' }
-                        ]
-                    },
-                    {
-                        title: 'Dispatch & Identity',
-                        links: [
                             { id: 'payments', label: 'Handover Payments', icon: 'wallet' },
                             { id: 'documents', label: 'Identity & Verification', icon: 'shield-check' },
                             { id: 'notifications', label: 'Dispatch Alerts', icon: 'bell' }
@@ -10914,21 +11131,13 @@
                 avatarBg: 'from-emerald-600 to-teal-700',
                 sections: [
                     {
-                        title: 'Shelter Management',
+                        title: 'Navigation Hub',
                         links: [
                             { id: 'dashboard', label: 'Dashboard', icon: 'home' },
-                            { id: 'profile', label: 'Shelter Dossier', icon: 'building-2' },
                             { id: 'pets', label: 'Shelter Pets', icon: 'paw-print' },
                             { id: 'delivery-logistics', label: 'Delivery Fleet', icon: 'truck' },
                             { id: 'applications', label: 'Adoption Screenings', icon: 'user-check' },
-                            { id: 'my-pets', label: 'Resident Animals', icon: 'heart-handshake' }
-                        ]
-                    },
-                    {
-                        title: 'Care & Clinical Records',
-                        links: [
                             { id: 'documents', label: 'Medical Passports & Labs', icon: 'activity' },
-                            { id: 'pet-care', label: 'Veterinary Protocols', icon: 'shield-alert' },
                             { id: 'payments', label: 'Shelter Welfare Grants', icon: 'coins' },
                             { id: 'notifications', label: 'Clinical Alerts', icon: 'bell' }
                         ]
@@ -12218,6 +12427,12 @@
             tbody.innerHTML = filtered.map(o => {
                 const city = o.customerCity || (o.customerAddress ? o.customerAddress.split(',').slice(-2)[0].trim() : 'Kerala');
 
+                const pName = o.petName || o.pet || 'Companion Pet';
+                const pBreed = o.petBreed || 'Rescue Companion';
+                const pImg = o.petImage || o.image || '/featured_dog.jpg';
+                const cName = o.customerName || o.customer || 'Adopter';
+                const cPhone = o.customerPhone || '';
+
                 return `
                     <tr class="hover:bg-white/[0.02] transition-colors">
                         <td class="p-4 font-mono font-bold text-white whitespace-nowrap text-center">
@@ -12226,16 +12441,16 @@
                         </td>
                         <td class="p-4 text-center">
                             <div class="inline-flex items-center gap-3 text-left w-56 max-w-full mx-auto">
-                                <img src="${o.petImage}" alt="${o.petName}" class="w-10 h-10 rounded-xl object-cover border border-white/10 shrink-0 shadow-sm" />
+                                <img src="${pImg}" alt="${pName}" class="w-10 h-10 rounded-xl object-cover border border-white/10 shrink-0 shadow-sm" />
                                 <div class="min-w-0 flex-1">
-                                    <div class="font-bold text-white text-xs truncate leading-tight">${o.petName}</div>
-                                    <div class="text-[11px] text-slate-400 truncate mt-0.5">${o.petBreed}</div>
+                                    <div class="font-bold text-white text-xs truncate leading-tight">${pName}</div>
+                                    <div class="text-[11px] text-slate-400 truncate mt-0.5">${pBreed}</div>
                                 </div>
                             </div>
                         </td>
                         <td class="p-4 whitespace-nowrap text-center">
-                            <div class="font-medium text-white">${o.customerName}</div>
-                            <div class="text-[10px] text-slate-400 font-mono mt-0.5">${city} &bull; ${o.customerPhone || ''}</div>
+                            <div class="font-medium text-white">${cName}</div>
+                            <div class="text-[10px] text-slate-400 font-mono mt-0.5">${city}${cPhone ? ' &bull; ' + cPhone : ''}</div>
                         </td>
                         <td class="p-4 text-center whitespace-nowrap">
                             <button type="button" onclick="openOrderDetail('${o.id}')" class="btn-apple-secondary text-xs !py-1.5 !px-3 inline-flex items-center justify-center gap-1.5 mx-auto">
@@ -12254,66 +12469,60 @@
         function openOrderDetail(orderId) {
             currentModalOrderId = orderId;
             if (!KindHeartData || !KindHeartData.adoptionOrders) return;
-            const order = KindHeartData.adoptionOrders.find(o => o.id === orderId) || KindHeartData.adoptionOrders[0];
+            const order = KindHeartData.adoptionOrders.find(o => String(o.id) === String(orderId) || String(o.db_id) === String(orderId)) || KindHeartData.adoptionOrders[0];
             if (!order) return;
 
             const stageStr = order.stage || order.status || 'Active';
-            const stepNum = order.currentStep || (stageStr.includes('Ready') ? 7 : stageStr.includes('Transit') ? 10 : stageStr.includes('Completed') ? 12 : 3);
-            const progressPercent = Math.round((stepNum / 12) * 100);
 
             // Populate Minimal Modal Fields
             const modId = document.getElementById('mod-order-id');
-            if (modId) modId.textContent = `Order #${order.id}`;
+            if (modId) modId.textContent = order.id ? (order.id.startsWith('KH') ? `Order #${order.id}` : `Order #KH102${String(order.id).padStart(2, '0')}`) : 'Order Details';
 
             const modBadge = document.getElementById('mod-order-badge');
             if (modBadge) {
                 modBadge.textContent = stageStr;
-                modBadge.className = 'badge-status ' + (stageStr.includes('Completed') ? 'badge-status-approved' : 'badge-status-pending');
+                modBadge.className = 'badge-status ' + (stageStr.toLowerCase().includes('completed') || stageStr.toLowerCase().includes('approved') ? 'badge-status-approved' : 'badge-status-pending');
             }
 
             const petImg = document.getElementById('mod-pet-img');
-            if (petImg) petImg.src = order.petImage || '/kindheart_bruno.jpg';
+            if (petImg) {
+                petImg.src = order.petImage || order.image || '/featured_dog.jpg';
+                petImg.classList.remove('hidden');
+            }
 
             const petName = document.getElementById('mod-pet-name');
-            if (petName) petName.textContent = order.petName;
+            if (petName) petName.textContent = order.petName || order.pet || 'Companion Pet';
 
             const petBreed = document.getElementById('mod-pet-breed');
-            if (petBreed) petBreed.textContent = `${order.petBreed} • ${order.petSpecies || 'Companion'}`;
+            if (petBreed) petBreed.textContent = `${order.petBreed || 'Rescue Companion'} • ${order.petSpecies || 'Companion'}`;
 
             const petMeta = document.getElementById('mod-pet-meta');
-            if (petMeta) petMeta.textContent = `Age: 2 yrs • Gender: Male • Microchip: ${order.microchip || 'CHIP-98201-KL'}`;
+            if (petMeta) petMeta.textContent = `Status: ${stageStr} • Verified Shelter Rescue`;
 
             const custName = document.getElementById('mod-customer-name');
-            if (custName) custName.textContent = order.customerName || 'Adopter';
+            if (custName) custName.textContent = order.customerName || order.customer || 'Adopter';
 
             const custContact = document.getElementById('mod-customer-contact');
-            if (custContact) custContact.textContent = order.customerPhone || order.customerEmail || 'Verified Adopter';
+            if (custContact) custContact.textContent = order.customerPhone || order.customerEmail || 'Contact info verified';
 
             const shelterName = document.getElementById('mod-shelter-name');
-            if (shelterName) shelterName.textContent = order.shelterName || 'Partner Shelter';
+            if (shelterName) shelterName.textContent = order.shelterName || order.shelter || 'Partner Shelter';
 
             const courierName = document.getElementById('mod-courier-name');
-            if (courierName) courierName.textContent = order.deliveryPersonName || 'SafeTransit Agent';
+            if (courierName) courierName.textContent = order.deliveryPersonName || order.assigned_driver || 'Pending Driver Assignment';
 
             const payAmount = document.getElementById('mod-pay-amount');
             if (payAmount) payAmount.textContent = `₹${(order.amount || 5000).toLocaleString('en-IN')}`;
 
             // Populate Distance & ETA
-            const deliveryItem = (KindHeartData.logisticsDeliveries || []).find(d => d.orderId === order.id || d.id === order.id);
             const deliveryEta = document.getElementById('mod-delivery-eta');
             if (deliveryEta) {
-                deliveryEta.textContent = (deliveryItem && (deliveryItem.expectedDelivery || deliveryItem.eta)) || order.expectedDelivery || order.eta || 'Today 4:00 PM';
+                deliveryEta.textContent = order.date || order.orderDate || 'Scheduled Transit';
             }
             const deliveryDist = document.getElementById('mod-delivery-dist');
             if (deliveryDist) {
-                deliveryDist.textContent = (deliveryItem && (deliveryItem.pickupDate || deliveryItem.distanceRemaining)) || order.distanceRemaining || 'Live GPS';
+                deliveryDist.textContent = order.raw_status || stageStr;
             }
-
-            const progressBar = document.getElementById('mod-progress-bar');
-            if (progressBar) progressBar.style.width = `${progressPercent}%`;
-
-            const progressLabel = document.getElementById('mod-progress-label');
-            if (progressLabel) progressLabel.textContent = `Step ${stepNum} of 12: ${stageStr}`;
 
             openModal('modal-order-detail');
             if (window.lucide) lucide.createIcons();
@@ -12512,7 +12721,45 @@
                 return;
             }
 
-            tbody.innerHTML = filtered.map(p => `
+            tbody.innerHTML = filtered.map(p => {
+                const isShelterOrAdmin = KindHeartData.currentRole === 'shelter' || KindHeartData.currentRole === 'admin';
+                const petAdoptionReq = (KindHeartData.applications || []).find(a =>
+                    (String(a.petId) === String(p.id)) &&
+                    ['APPROVED','READY_FOR_HANDOVER','DELIVERY_SCHEDULED'].includes(
+                        String(a.raw_status || a.status || '').toUpperCase().replace(/ /g,'_'))
+                );
+                const isAssigned = petAdoptionReq && (
+                    petAdoptionReq.is_delivery_assigned || 
+                    Boolean(petAdoptionReq.assigned_driver) || 
+                    String(petAdoptionReq.raw_status || petAdoptionReq.status || '').toUpperCase().replace(/ /g,'_') === 'DELIVERY_SCHEDULED'
+                );
+                const assignBtn = (isShelterOrAdmin && petAdoptionReq && !isAssigned)
+                    ? `<button type="button"
+                          onclick="openAssignDeliveryModal('${petAdoptionReq.db_id || petAdoptionReq.id}', '${(p.name||'').replace(/'/g,"\\'").replace(/"/g,'\\"')}', '${(petAdoptionReq.customer||'Customer').replace(/'/g,"\\'")}')"
+                          class="btn-apple-secondary text-xs !py-1 !px-2.5 inline-flex items-center gap-1 !border-blue-500/40 !text-blue-300 hover:!bg-blue-500/10"
+                          title="Assign Delivery Partner">
+                          <i data-lucide="truck" class="w-3 h-3"></i>
+                          <span>Assign</span>
+                        </button>`
+                    : '';
+                let currentStatus = (p.status || 'Available').trim();
+                const petApp = (KindHeartData.applications || []).find(a =>
+                    (String(a.petId) === String(p.id) || String(a.db_id) === String(p.id) || (a.petName && a.petName.toLowerCase() === (p.name || '').toLowerCase()))
+                );
+                if (petApp) {
+                    const rawSt = String(petApp.raw_status || petApp.status || '').toUpperCase().replace(/ /g, '_');
+                    if (['DELIVERED', 'COMPLETED', 'ADOPTED'].includes(rawSt)) {
+                        currentStatus = 'Adopted';
+                    } else if (['PENDING_SHELTER', 'APPROVED', 'READY_FOR_HANDOVER', 'DELIVERY_SCHEDULED', 'IN_TRANSIT', 'OUT_FOR_DELIVERY', 'UNDER_REVIEW', 'ACCEPTED'].includes(rawSt)) {
+                        currentStatus = 'Pending Adoption';
+                    }
+                }
+
+                const badgeClass = currentStatus === 'Available'
+                    ? 'badge-status-approved'
+                    : (currentStatus === 'Adopted' ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30' : 'badge-status-review');
+                const statusCell = `<span class="badge-status ${badgeClass} text-[10px]">${currentStatus}</span>`;
+                return `
                 <tr class="hover:bg-white/[0.02] transition-colors">
                     <td class="p-4">
                         <div class="flex items-center gap-3">
@@ -12525,21 +12772,22 @@
                         <div class="text-[11px] text-slate-400">${p.species} &bull; ${p.breed}</div>
                     </td>
                     <td class="p-4 text-slate-300 font-medium">${p.location || (p.shelterName || 'Shelter Facility')}</td>
-                    <td class="p-4 font-mono text-[11px] text-slate-300">${p.microchip || 'PENDING-AWBI'}</td>
                     <td class="p-4">
                         <span class="badge-status badge-status-approved text-[10px]">${p.health || '100% Cleared'}</span>
                     </td>
-                    <td class="p-4">
-                        <span class="badge-status ${p.status === 'Available' ? 'badge-status-approved' : 'badge-status-review'} text-[10px]">${p.status}</span>
-                    </td>
+                    <td class="p-4">${statusCell}</td>
                     <td class="p-4 text-right">
-                        <button type="button" onclick="openAdminPetDetail('${p.id}')" class="btn-apple-secondary text-xs !py-1.5 !px-3 inline-flex items-center gap-1.5">
-                            <i data-lucide="eye" class="w-3.5 h-3.5"></i>
-                            <span>View</span>
-                        </button>
+                        <div class="flex items-center justify-end gap-2 flex-wrap">
+                            ${assignBtn}
+                            <button type="button" onclick="openAdminPetDetail('${p.id}')" class="btn-apple-secondary text-xs !py-1.5 !px-3 inline-flex items-center gap-1.5">
+                                <i data-lucide="eye" class="w-3.5 h-3.5"></i>
+                                <span>View</span>
+                            </button>
+                        </div>
                     </td>
                 </tr>
-            `).join('');
+                `;
+            }).join('');
 
             if (window.lucide) lucide.createIcons();
         }
@@ -13222,7 +13470,15 @@
             if (totalCouriersEl) totalCouriersEl.textContent = list.length;
             if (pillCountEl) pillCountEl.textContent = list.length;
 
-            if (totalActiveEl) totalActiveEl.textContent = list.filter(dp => (dp.status || '').toLowerCase().includes('active')).length;
+            if (totalActiveEl) {
+                const activeCount = list.filter(dp => {
+                    const s = (dp.availabilityStatus || dp.status || '').toUpperCase();
+                    const st = (dp.statusType || '').toLowerCase();
+                    const hasActiveAssignment = dp.currentAssignment && dp.currentAssignment.startsWith('Transit for');
+                    return (s === 'AVAILABLE' || s === 'BUSY' || s === 'ON DELIVERY' || st === 'available' || st === 'busy' || hasActiveAssignment) && s !== 'INACTIVE' && st !== 'inactive';
+                }).length;
+                totalActiveEl.textContent = activeCount;
+            }
 
             // Apply search & shelter filters
             if (currentDeliveryFleetFilter.search) {
@@ -13288,9 +13544,10 @@
                         </span>`;
                 }
 
-                const currentDeliveryHtml = (opStatus === 'BUSY' && dp.currentAssignment)
+                const isTransit = dp.currentAssignment && dp.currentAssignment.startsWith('Transit for');
+                const currentDeliveryHtml = isTransit
                     ? `<span class="px-2 py-0.5 rounded font-mono text-[10px] font-bold bg-blue-500/15 text-blue-400 border border-blue-500/30">${escapeHTML(dp.currentAssignment)}</span>`
-                    : `<span class="text-slate-500 font-mono text-xs">-</span>`;
+                    : `<span class="px-2 py-0.5 rounded font-mono text-[10px] text-slate-400 border border-slate-700/50 bg-slate-800/40">Available (No Active Assignment)</span>`;
 
                 return `
                 <tr class="hover:bg-white/[0.02] transition-colors border-b border-white/5">
@@ -13473,73 +13730,46 @@
         }
 
         // Phase 31: Open Delivery Assignment Modal with optgroups (AVAILABLE, BUSY, INACTIVE)
-        function openAssignDeliveryModal(adoptionId, petName, customerName) {
+        async function openAssignDeliveryModal(adoptionId, petName, customerName) {
             document.getElementById('assign-adoption-id').value = adoptionId;
             document.getElementById('assign-app-id').textContent = `#AR-${String(adoptionId).padStart(4, '0')}`;
             document.getElementById('assign-pet-name').textContent = petName || 'Companion';
-            document.getElementById('assign-customer-name').textContent = customerName || 'Adopter';
+            document.getElementById('assign-customer-name').textContent = customerName || 'Customer';
 
             const selectEl = document.getElementById('assign-driver-select');
             if (!selectEl) return;
-            selectEl.innerHTML = '';
-
-            const partners = KindHeartData.dbDeliveryPartners || [];
-            const available = partners.filter(p => (p.availabilityStatus || p.status) === 'AVAILABLE');
-            const busy = partners.filter(p => (p.availabilityStatus || p.status) === 'BUSY');
-            const inactive = partners.filter(p => (p.availabilityStatus || p.status) === 'INACTIVE' || p.statusType === 'inactive');
-
-            // 1. AVAILABLE Group (Selectable)
-            const grpAvail = document.createElement('optgroup');
-            grpAvail.label = '🟢 AVAILABLE (Ready for Assignment)';
-            if (partners.length === 0) {
-                const opt = document.createElement('option');
-                opt.disabled = true;
-                opt.value = "";
-                opt.textContent = 'No delivery boys are registered for this shelter yet.';
-                grpAvail.appendChild(opt);
-            } else if (available.length === 0) {
-                const opt = document.createElement('option');
-                opt.disabled = true;
-                opt.value = "";
-                opt.textContent = 'No delivery boys are currently available.';
-                grpAvail.appendChild(opt);
-            } else {
-                available.forEach(p => {
-                    const opt = document.createElement('option');
-                    opt.value = p.partnerId || p.username || p.id;
-                    opt.textContent = `${p.name} (${p.vehicle || 'Pet Taxi'})`;
-                    grpAvail.appendChild(opt);
-                });
-            }
-            selectEl.appendChild(grpAvail);
-
-            // 2. BUSY Group (Disabled)
-            if (busy.length > 0) {
-                const grpBusy = document.createElement('optgroup');
-                grpBusy.label = '🟡 BUSY (Currently on Active Delivery)';
-                busy.forEach(p => {
-                    const opt = document.createElement('option');
-                    opt.disabled = true;
-                    opt.textContent = `${p.name} — ${p.currentAssignment || 'On active delivery'}`;
-                    grpBusy.appendChild(opt);
-                });
-                selectEl.appendChild(grpBusy);
-            }
-
-            // 3. INACTIVE Group (Disabled)
-            if (inactive.length > 0) {
-                const grpInactive = document.createElement('optgroup');
-                grpInactive.label = '🔴 INACTIVE (Unavailable)';
-                inactive.forEach(p => {
-                    const opt = document.createElement('option');
-                    opt.disabled = true;
-                    opt.textContent = `${p.name} — Inactive`;
-                    grpInactive.appendChild(opt);
-                });
-                selectEl.appendChild(grpInactive);
-            }
+            selectEl.innerHTML = '<option value="" disabled selected>Loading available delivery partners...</option>';
 
             openModal('modal-assign-delivery');
+
+            try {
+                const resp = await fetch('/users/api/delivery/available-partners/');
+                const res = await resp.json();
+                selectEl.innerHTML = '';
+
+                const available = (res.success && Array.isArray(res.available_partners)) ? res.available_partners : [];
+
+                if (available.length === 0) {
+                    const opt = document.createElement('option');
+                    opt.disabled = true;
+                    opt.selected = true;
+                    opt.value = "";
+                    opt.textContent = 'No delivery partners are currently available';
+                    selectEl.appendChild(opt);
+                } else {
+                    available.forEach((p, idx) => {
+                        const opt = document.createElement('option');
+                        opt.value = p.partnerId || p.username || p.id;
+                        opt.textContent = `🟢 ${p.name} (${p.vehicle || 'Pet Taxi'}) - ${p.shelterName || 'General Fleet'}`;
+                        if (idx === 0) opt.selected = true;
+                        selectEl.appendChild(opt);
+                    });
+                }
+            } catch (err) {
+                console.error("Error fetching available delivery partners:", err);
+                selectEl.innerHTML = '<option value="" disabled selected>Error loading available delivery partners</option>';
+            }
+
             if (window.lucide) lucide.createIcons();
         }
 
@@ -13550,11 +13780,14 @@
             const partnerId = document.getElementById('assign-driver-select').value;
 
             if (!adoptionId || !partnerId) {
-                showToast('Please select an available delivery partner.');
+                showToast('Please select an available delivery partner.', 'error');
                 return;
             }
 
             const csrfToken = (document.cookie.split('; ').find(r => r.startsWith('csrftoken=')) || '').split('=')[1] || '';
+            const btnSubmit = document.getElementById('btn-submit-assign-delivery');
+            if (btnSubmit) btnSubmit.disabled = true;
+
             try {
                 const resp = await fetch('/users/api/shelter/assign-delivery/', {
                     method: 'POST',
@@ -13563,14 +13796,137 @@
                 });
                 const res = await resp.json();
                 if (res.success) {
-                    showToast(res.message);
+                    showToast(res.message || 'Delivery partner assigned successfully!');
                     closeModal('modal-assign-delivery');
-                    setTimeout(() => window.location.reload(), 800);
+
+                    // Real-time memory update
+                    const partners = KindHeartData.dbDeliveryPartners || KindHeartData.deliveryPartners || [];
+                    const selectedPartner = partners.find(p => String(p.partnerId) === String(partnerId) || String(p.id) === String(partnerId) || String(p.username) === String(partnerId));
+                    const driverName = selectedPartner ? selectedPartner.name : 'Assigned Driver';
+
+                    const apps = KindHeartData.applications || KindHeartData.adoptionOrders || [];
+                    const app = apps.find(a => String(a.db_id || a.id) === String(adoptionId));
+                    if (app) {
+                        app.raw_status = 'DELIVERY_SCHEDULED';
+                        app.status = 'Delivery Scheduled';
+                        app.is_delivery_assigned = true;
+                        app.assigned_driver = driverName;
+                    }
+
+                    if (selectedPartner) {
+                        selectedPartner.availabilityStatus = 'BUSY';
+                        selectedPartner.status = 'BUSY';
+                        selectedPartner.currentAssignment = `Transit for ${app ? (app.pet || app.petName || 'Companion') : 'Pet'}`;
+                    }
+
+                    // Re-render UI tables dynamically
+                    if (typeof renderAdminPetsTable === 'function') renderAdminPetsTable();
+                    if (typeof renderAdminLogisticsTable === 'function') renderAdminLogisticsTable();
                 } else {
-                    showToast(res.error || 'Failed to assign delivery partner.');
+                    showToast(res.error || 'Failed to assign delivery partner.', 'error');
                 }
             } catch (err) {
-                showToast('Network error while assigning delivery partner.');
+                showToast('Network error while assigning delivery partner.', 'error');
+            } finally {
+                if (btnSubmit) btnSubmit.disabled = false;
+            }
+        }
+
+        // Shelter / Admin: Change pet marketplace status and persist to database
+        async function updatePetMarketplaceStatus(petId, newStatus, selectEl) {
+            const csrfToken = (document.cookie.split('; ').find(r => r.startsWith('csrftoken=')) || '').split('=')[1] || '';
+            const originalValue = selectEl ? selectEl.defaultValue : null;
+            try {
+                const resp = await fetch('/users/api/shelter/update-pet-status/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
+                    body: JSON.stringify({ pet_id: petId, status: newStatus })
+                });
+                const res = await resp.json();
+                if (res.success) {
+                    // Update KindHeartData in memory so table re-render stays consistent
+                    const petInMemory = (KindHeartData.pets || []).find(p => String(p.id) === String(petId));
+                    if (petInMemory) {
+                        petInMemory.status = res.status_display;
+                    }
+                    showToast(res.message || 'Pet status updated!');
+                    if (selectEl) selectEl.defaultValue = newStatus;
+                    // Refresh badges
+                    renderAdminPetsTable();
+                } else {
+                    showToast(res.error || 'Failed to update pet status.');
+                    if (selectEl && originalValue) selectEl.value = originalValue; // revert
+                }
+            } catch (err) {
+                showToast('Network error while updating pet status.');
+                if (selectEl && originalValue) selectEl.value = originalValue;
+            }
+        }
+
+
+                // Delivery Partner: Toggle availability status (AVAILABLE <-> BUSY) and persist to database
+        async function toggleDeliveryPartnerAvailability(partnerId) {
+            partnerId = partnerId || (KindHeartData.currentUser ? (KindHeartData.currentUser.partnerId || KindHeartData.currentUser.id || '') : '');
+            const csrfToken = (document.cookie.split('; ').find(r => r.startsWith('csrftoken=')) || '').split('=')[1] || '';
+            const btn = document.getElementById('btn-toggle-delivery-availability');
+            const badge = document.getElementById('delivery-current-status-badge');
+            const btnLabel = document.getElementById('btn-toggle-delivery-availability-label');
+
+            if (btn) btn.disabled = true;
+
+            try {
+                const resp = await fetch('/users/api/delivery/toggle-availability/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
+                    body: JSON.stringify({ partner_id: partnerId })
+                });
+                const res = await resp.json();
+                if (res.success) {
+                    const newStatus = res.availability_status;
+
+                    if (KindHeartData.deliveryPartners) {
+                        const target = KindHeartData.deliveryPartners.find(p => String(p.partnerId) === String(res.partner_id) || String(p.id) === String(res.partner_id) || String(p.username) === String(res.username));
+                        if (target) {
+                            target.availabilityStatus = newStatus;
+                            target.status = newStatus;
+                            target.statusType = (newStatus === 'AVAILABLE') ? 'available' : (newStatus === 'BUSY' ? 'busy' : 'inactive');
+                        }
+                    }
+                    if (typeof renderAdminDeliveryBoysTable === 'function') {
+                        renderAdminDeliveryBoysTable();
+                    }
+
+                    if (badge) {
+                        if (newStatus === 'AVAILABLE') {
+                            badge.className = 'px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30';
+                            badge.textContent = 'AVAILABLE';
+                        } else {
+                            badge.className = 'px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30';
+                            badge.textContent = 'BUSY';
+                        }
+                    }
+
+                    if (btn) {
+                        if (newStatus === 'AVAILABLE') {
+                            btn.className = 'btn-apple-primary !bg-amber-500 hover:!bg-amber-600 text-black font-bold text-xs !py-2 !px-4 shadow-lg flex items-center gap-2 transition-all';
+                            if (btnLabel) btnLabel.textContent = 'Toggle to BUSY';
+                        } else {
+                            btn.className = 'btn-apple-primary !bg-emerald-500 hover:!bg-emerald-600 text-black font-bold text-xs !py-2 !px-4 shadow-lg flex items-center gap-2 transition-all';
+                            if (btnLabel) btnLabel.textContent = 'Toggle to AVAILABLE';
+                        }
+                    }
+
+                    if (typeof filterDeliveryFleetTable === 'function') filterDeliveryFleetTable();
+                    if (typeof renderAdminPetsTable === 'function') renderAdminPetsTable();
+
+                    showToast(res.message || `Delivery partner status updated to ${newStatus}`);
+                } else {
+                    showToast(res.error || 'Failed to toggle availability status.', 'error');
+                }
+            } catch (err) {
+                showToast('Network error while toggling availability status.', 'error');
+            } finally {
+                if (btn) btn.disabled = false;
             }
         }
 
@@ -13600,13 +13956,13 @@
             }
 
             tbody.innerHTML = list.map(d => {
-                const orderIdStr = `#DLV-${String(d.id).padStart(3, '0')}`;
+                const orderIdStr = `#DLV-${String(d.db_id || d.id).padStart(3, '0')}`;
                 const petName = d.petName || 'Companion';
                 const customerName = d.customerName || 'Adopter';
-                const courier = d.deliveryPerson || d.courier || 'Unassigned';
-                const statusStr = (d.status || 'ASSIGNED').replace(/_/g, ' ');
-                const schedDate = d.assignedAt || d.pickupDate || 'Scheduled';
-                const dest = d.customerLocation || d.destinationCity || 'Adopter Address';
+                const courier = d.agent || d.deliveryPerson || d.courier || 'Unassigned Driver';
+                const statusStr = (d.statusDisplay || d.status || 'ASSIGNED').replace(/_/g, ' ');
+                const reachingTime = d.reachingTime || d.preferredDate || d.assignedAt || d.pickupDate || 'Today, 5:00 PM';
+                const dest = d.dropAddress || d.customerLocation || d.destinationCity || 'Adopter Address';
 
                 let badgeClass = 'logistics-badge-transit';
                 if (statusStr.includes('DELIVERED') || statusStr.includes('COMPLETED')) {
@@ -13635,7 +13991,7 @@
                         <span class="px-2.5 py-1 rounded-full text-[10px] font-mono font-bold whitespace-nowrap inline-flex items-center text-center ${badgeClass}" style="white-space:nowrap !important;display:inline-flex !important;">${escapeHTML(statusStr)}</span>
                     </td>
                     <td class="p-4 whitespace-nowrap text-slate-300 font-mono text-xs">
-                        ${escapeHTML(schedDate)}
+                        ${escapeHTML(reachingTime)}
                     </td>
                     <td class="p-4 text-slate-300 min-w-[180px]">
                         <div class="truncate max-w-[200px]" title="${escapeHTML(dest)}">${escapeHTML(dest)}</div>

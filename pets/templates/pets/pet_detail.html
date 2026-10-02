@@ -186,15 +186,15 @@
             <nav class="hidden lg:flex nav-rail-pill" aria-label="Primary">
                 <a href="{% url 'home' %}">Home</a>
                 <a href="{% url 'pet_list' %}">Browse Pets</a>
-                <a href="{% url 'admin_shelters' %}">Shelter Network</a>
-                <a href="{% url 'admin_deliveries' %}">Track Delivery</a>
-                <a href="{% url 'admin_dashboard' %}">Admin Suite</a>
+                <a href="{% url 'profile' %}?role=shelter">Shelter Network</a>
+                <a href="{% url 'profile' %}?role=delivery">Track Delivery</a>
+                <a href="{% url 'profile' %}?role=admin">Admin Suite</a>
             </nav>
 
             <!-- ACTION CONTROLS -->
             <div class="flex items-center gap-3">
                 <a href="{% url 'pet_list' %}" class="btn-ui-secondary text-xs">← Back to List</a>
-                <a href="{% url 'adoption_form' 1 %}" class="btn-ui-pearl text-xs">Apply for Adoption 🐾</a>
+                <a href="{% url 'adoption_form_detail' 1 %}" class="btn-ui-pearl text-xs">Apply for Adoption 🐾</a>
             </div>
         </div>
     </header>
@@ -235,7 +235,7 @@
                             <h1 class="text-3xl font-extrabold text-white mt-1">Buddy 🐾</h1>
                             <p class="text-xs text-[#BAC8B1] font-bold mt-1">🏠 Managed by Kochi Rescue Shelter</p>
                         </div>
-                        <a href="{% url 'adoption_form' 1 %}" class="btn-ui-primary text-xs py-2.5 px-5">Adopt Buddy Now 🐾</a>
+                        <a href="{% url 'adoption_form_detail' 1 %}" class="btn-ui-primary text-xs py-2.5 px-5">Adopt Buddy Now 🐾</a>
                     </div>
 
                     <p class="text-xs text-[#BAC8B1] font-medium leading-relaxed">
@@ -302,7 +302,7 @@
             <div class="flex gap-4">
                 <a href="{% url 'home' %}" class="name-hover-link">Home</a>
                 <a href="{% url 'pet_list' %}" class="name-hover-link">Browse Pets</a>
-                <a href="{% url 'admin_dashboard' %}" class="name-hover-link">Admin Suite</a>
+                <a href="{% url 'profile' %}?role=admin" class="name-hover-link">Admin Suite</a>
             </div>
         </div>
     </footer>

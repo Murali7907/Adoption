@@ -167,6 +167,11 @@ class DeliveryPartner(models.Model):
     license_verified = models.BooleanField(default=True)
     rating = models.DecimalField(max_digits=3, decimal_places=2, default=4.80)
     is_active = models.BooleanField(default=True)
+    availability_status = models.CharField(
+        max_length=20,
+        choices=[('AVAILABLE', 'Available'), ('BUSY', 'Busy'), ('INACTIVE', 'Inactive')],
+        default='AVAILABLE'
+    )
 
     def get_active_delivery(self):
         """
@@ -180,14 +185,14 @@ class DeliveryPartner(models.Model):
         """
         Phase 29: Operational availability calculation:
         - INACTIVE: is_active=False or user inactive
-        - BUSY: Has an active delivery assignment
+        - BUSY: Has an active delivery assignment or set to BUSY
         - AVAILABLE: Active and no ongoing delivery assignment
         """
         if not self.is_active or (self.user and not self.user.is_active):
             return 'INACTIVE'
         if self.get_active_delivery() is not None:
             return 'BUSY'
-        return 'AVAILABLE'
+        return self.availability_status or 'AVAILABLE'
 
     def is_available_for_assignment(self):
         return self.get_availability_status() == 'AVAILABLE'
