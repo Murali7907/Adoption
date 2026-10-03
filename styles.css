@@ -2481,7 +2481,8 @@ html.light .mobile-nav-link.active span:last-child {
 #scroll-to-top-btn img {
     width: 100% !important;
     height: 100% !important;
-    object-fit: cover !important;
+    object-fit: contain !important;
+    padding: 6px !important;
     border-radius: 999px !important;
     display: block !important;
     transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
