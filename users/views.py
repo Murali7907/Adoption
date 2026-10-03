@@ -559,7 +559,10 @@ def profile_view(request):
         elif 'shelter_p' in locals() and shelter_p:
             active_sh = getattr(shelter_p.user, 'shelter_profile', None) or ShelterProfile.objects.filter(user=shelter_p.user).first()
 
-        if not active_sh:
+        if not active_sh and request.user.is_authenticated and not request.user.is_anonymous and role == 'shelter':
+            active_sh = getattr(request.user, 'shelter_profile', None) or ShelterProfile.objects.filter(user=request.user).first()
+
+        if not active_sh and not (request.user.is_authenticated and role == 'shelter'):
             active_sh = ShelterProfile.objects.first()
 
         if active_sh:
@@ -972,6 +975,10 @@ def profile_view(request):
         if role == 'delivery' and request.user.is_authenticated and not request.user.is_anonymous:
             assigned_pet_ids = DeliveryRequest.objects.filter(delivery_partner__user=request.user).values_list('adoption_request__pet_id', flat=True)
             pets_qs = Pet.objects.filter(id__in=assigned_pet_ids).select_related('shelter').order_by('-id')
+        elif role == 'shelter' and active_sh:
+            pets_qs = Pet.objects.filter(shelter=active_sh).select_related('shelter').order_by('-id')
+        elif role == 'shelter':
+            pets_qs = Pet.objects.none()
         else:
             pets_qs = Pet.objects.all().select_related('shelter').order_by('-id')
 
@@ -1117,7 +1124,14 @@ def profile_view(request):
     # 5. Financial Payment Transactions
     db_settlements = []
     try:
-        txns = PaymentTransaction.objects.select_related('adoption_request', 'adoption_request__pet', 'customer', 'adoption_request__shelter').all().order_by('-transaction_date')
+        if role == 'shelter' and active_sh:
+            txns = PaymentTransaction.objects.filter(adoption_request__shelter=active_sh).select_related('adoption_request', 'adoption_request__pet', 'customer', 'adoption_request__shelter').order_by('-transaction_date')
+        elif role == 'shelter':
+            txns = PaymentTransaction.objects.none()
+        elif role == 'adopter' and target_adopter_user:
+            txns = PaymentTransaction.objects.filter(customer=target_adopter_user).select_related('adoption_request', 'adoption_request__pet', 'customer', 'adoption_request__shelter').order_by('-transaction_date')
+        else:
+            txns = PaymentTransaction.objects.select_related('adoption_request', 'adoption_request__pet', 'customer', 'adoption_request__shelter').all().order_by('-transaction_date')
         for t in txns:
             pet_name = t.adoption_request.pet.name if (t.adoption_request and t.adoption_request.pet) else "Companion Pet"
             cust_name = t.customer.get_full_name() or t.customer.username if t.customer else "Adopter"
@@ -1152,7 +1166,16 @@ def profile_view(request):
     # 6. Database Adoption Requests
     db_adoptions = []
     try:
-        reqs = AdoptionRequest.objects.select_related('pet', 'customer', 'shelter', 'shelter__user', 'delivery', 'delivery__delivery_partner', 'delivery__delivery_partner__user').all().order_by('-id')
+        if role == 'shelter' and active_sh:
+            reqs = AdoptionRequest.objects.filter(shelter=active_sh).select_related('pet', 'customer', 'shelter', 'shelter__user', 'delivery', 'delivery__delivery_partner', 'delivery__delivery_partner__user').order_by('-id')
+        elif role == 'shelter':
+            reqs = AdoptionRequest.objects.none()
+        elif role == 'adopter' and target_adopter_user:
+            reqs = AdoptionRequest.objects.filter(customer=target_adopter_user).select_related('pet', 'customer', 'shelter', 'shelter__user', 'delivery', 'delivery__delivery_partner', 'delivery__delivery_partner__user').order_by('-id')
+        elif role == 'delivery' and request.user.is_authenticated:
+            reqs = AdoptionRequest.objects.filter(delivery__delivery_partner__user=request.user).select_related('pet', 'customer', 'shelter', 'shelter__user', 'delivery', 'delivery__delivery_partner', 'delivery__delivery_partner__user').order_by('-id')
+        else:
+            reqs = AdoptionRequest.objects.all().select_related('pet', 'customer', 'shelter', 'shelter__user', 'delivery', 'delivery__delivery_partner', 'delivery__delivery_partner__user').order_by('-id')
         for r in reqs:
             pet_name = r.pet.name if r.pet else "Companion Pet"
             cust_name = r.customer.get_full_name().strip() if (r.customer and r.customer.get_full_name().strip()) else (r.customer.username if r.customer else "Customer")
