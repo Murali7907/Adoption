@@ -12725,9 +12725,9 @@ html.theme-light #assign-driver-select option:disabled {
             tbody.innerHTML = filtered.map(p => {
                 const isShelterOrAdmin = KindHeartData.currentRole === 'shelter' || KindHeartData.currentRole === 'admin';
                 const petAdoptionReq = (KindHeartData.applications || []).find(a =>
-                    (String(a.petId) === String(p.id)) &&
-                    ['APPROVED','READY_FOR_HANDOVER','DELIVERY_SCHEDULED'].includes(
-                        String(a.raw_status || a.status || '').toUpperCase().replace(/ /g,'_'))
+                    (String(a.petId) === String(p.id) || (a.petName && a.petName.toLowerCase() === (p.name || '').toLowerCase())) &&
+                    !['REJECTED', 'CANCELLED', 'DELIVERED', 'COMPLETED', 'ADOPTED'].includes(
+                        String(a.raw_status || a.status || '').toUpperCase().replace(/ /g, '_'))
                 );
                 const isAssigned = petAdoptionReq && (
                     petAdoptionReq.is_delivery_assigned || 
@@ -13101,14 +13101,14 @@ html.theme-light #assign-driver-select option:disabled {
                         ${docsHtml}
                         ${(docs.length > 0) ? `
                         <div class="flex items-center justify-end gap-2 pt-2 border-t border-white/5 flex-wrap">
-                            <button type="button" onclick="adminVerifyAllShelterDocuments('${s.id}', 'under_review')" class="btn-apple-secondary text-[10px] !py-1 !px-2.5 text-blue-400 hover:bg-blue-500/10">
+                            <button type="button" ${(s.verification_status === 'VERIFIED' || (s.verificationStatus || '').toLowerCase() === 'verified') ? 'disabled' : `onclick="adminVerifyAllShelterDocuments('${s.id}', 'under_review')"`} class="btn-apple-secondary text-[10px] !py-1 !px-2.5 text-blue-400 hover:bg-blue-500/10 ${(s.verification_status === 'VERIFIED' || (s.verificationStatus || '').toLowerCase() === 'verified') ? 'opacity-40 cursor-not-allowed pointer-events-none' : ''}">
                                 Mark All Under Review
                             </button>
-                            <button type="button" onclick="adminVerifyAllShelterDocuments('${s.id}', 'reject')" class="btn-apple-secondary text-[10px] !py-1 !px-2.5 text-rose-400 hover:bg-rose-500/10">
+                            <button type="button" ${(s.verification_status === 'VERIFIED' || (s.verificationStatus || '').toLowerCase() === 'verified') ? 'disabled' : `onclick="adminVerifyAllShelterDocuments('${s.id}', 'reject')"`} class="btn-apple-secondary text-[10px] !py-1 !px-2.5 text-rose-400 hover:bg-rose-500/10 ${(s.verification_status === 'VERIFIED' || (s.verificationStatus || '').toLowerCase() === 'verified') ? 'opacity-40 cursor-not-allowed pointer-events-none' : ''}">
                                 Reject All Documents
                             </button>
-                            <button type="button" onclick="adminVerifyAllShelterDocuments('${s.id}', 'approve')" class="btn-apple-primary text-[10px] !py-1 !px-3 !bg-emerald-500 hover:!bg-emerald-600">
-                                <i data-lucide="check-check" class="w-3.5 h-3.5"></i> Verify All &amp; Approve Shelter
+                            <button type="button" ${(s.verification_status === 'VERIFIED' || (s.verificationStatus || '').toLowerCase() === 'verified') ? 'disabled' : `onclick="adminVerifyAllShelterDocuments('${s.id}', 'approve')"`} class="btn-apple-primary text-[10px] !py-1 !px-3 !bg-emerald-500 hover:!bg-emerald-600 ${(s.verification_status === 'VERIFIED' || (s.verificationStatus || '').toLowerCase() === 'verified') ? '!bg-emerald-600/40 text-emerald-300 opacity-60 cursor-not-allowed pointer-events-none' : ''}">
+                                <i data-lucide="check-check" class="w-3.5 h-3.5"></i> ${(s.verification_status === 'VERIFIED' || (s.verificationStatus || '').toLowerCase() === 'verified') ? '✓ Shelter Approved & Verified' : 'Verify All & Approve Shelter'}
                             </button>
                         </div>` : ''}
                     </div>

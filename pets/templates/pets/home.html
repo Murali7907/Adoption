@@ -865,10 +865,15 @@
         </div>
     </div>
 
-    <!-- ⬆️ SCROLL TO TOP ARROW BUTTON (WITH NEW BRAND LOGO) -->
-    <button id="scroll-to-top-btn" onclick="scrollToTop()" class="fixed z-40 w-12 h-12 rounded-full border border-amber-500/40 shadow-2xl backdrop-blur-xl flex items-center justify-center transition-all duration-300 opacity-0 pointer-events-none scale-75 hover:scale-110 active:scale-95 cursor-pointer overflow-hidden p-0 bg-black/50" style="right: 42px !important; bottom: 32px !important;" title="Scroll to Top" aria-label="Scroll to Top">
-        <img src="/kindheart_icon_dark.png" alt="Scroll to Top" class="w-full h-full object-contain p-1 rounded-full pointer-events-none drop-shadow-md block light:hidden" />
-        <img src="/kindheart_icon_light.png" alt="Scroll to Top" class="w-full h-full object-contain p-1 rounded-full pointer-events-none drop-shadow-md hidden light:block" />
+    <!-- ⬆️ SCROLL TO TOP ARROW BUTTON (WITH BRAND LOGO & ARROW) -->
+    <button id="scroll-to-top-btn" onclick="scrollToTop()" class="fixed z-40 w-12 h-12 rounded-full border border-amber-500/50 shadow-2xl backdrop-blur-xl flex items-center justify-center transition-all duration-300 opacity-0 pointer-events-none scale-75 hover:scale-110 active:scale-95 cursor-pointer overflow-hidden p-0 bg-black/60 hover:border-amber-400" style="right: 42px !important; bottom: 32px !important;" title="Scroll to Top" aria-label="Scroll to Top">
+        <div class="relative w-full h-full flex items-center justify-center">
+            <img src="/kindheart_icon_dark.png" alt="Scroll to Top Logo" class="w-full h-full object-contain p-1.5 rounded-full pointer-events-none opacity-80 block light:hidden" />
+            <img src="/kindheart_icon_light.png" alt="Scroll to Top Logo" class="w-full h-full object-contain p-1.5 rounded-full pointer-events-none opacity-80 hidden light:block" />
+            <div class="absolute inset-0 flex items-center justify-center bg-black/30 rounded-full">
+                <span class="text-amber-400 font-extrabold text-base drop-shadow-md">↑</span>
+            </div>
+        </div>
     </button>
 
     <!-- JavaScript Engine -->

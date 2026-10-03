@@ -3749,8 +3749,18 @@ def api_apply_adoption(request):
             adoption_request=adoption_req,
             description=f"Adoption application #{adoption_req.id} submitted for pet '{pet.name}' to shelter '{shelter.shelter_name}'."
         )
-    except Exception:
-        pass
+
+        if shelter and shelter.user:
+            cust_name = customer.get_full_name().strip() or customer.username
+            Message.objects.create(
+                sender=customer,
+                recipient=shelter.user,
+                shelter=shelter,
+                subject=f"🐾 New Adoption Application #{adoption_req.id} for {pet.name}",
+                body=f"New adoption application #{adoption_req.id} received from customer '{cust_name}' for pet '{pet.name}'. Please review and assign delivery partner."
+            )
+    except Exception as e:
+        print(f"Error creating shelter adoption notification message: {e}")
 
     return JsonResponse({
         'success': True,
