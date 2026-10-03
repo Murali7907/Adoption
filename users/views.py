@@ -3688,13 +3688,10 @@ def api_apply_adoption(request):
     except (Pet.DoesNotExist, ValueError):
         return JsonResponse({'success': False, 'error': f"Pet #{pet_id} not found"}, status=404)
 
-    if request.user.is_authenticated and not request.user.is_anonymous:
-        customer = request.user
-    else:
-        customer = User.objects.filter(profile__role='CUSTOMER').first() or User.objects.filter(is_superuser=False).first()
+    if not request.user.is_authenticated or request.user.is_anonymous:
+        return JsonResponse({'success': False, 'error': 'Authentication required. Please log in first.', 'redirect_url': '/users/login/'}, status=401)
 
-    if not customer:
-        return JsonResponse({'success': False, 'error': 'Adopter user profile required'}, status=400)
+    customer = request.user
 
     shelter = pet.shelter
     if not shelter:
@@ -3911,6 +3908,38 @@ def api_get_available_delivery_partners(request):
         return JsonResponse({'success': True, 'available_partners': available_list})
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+
+@csrf_exempt
+def api_shelter_verification_status(request):
+    """
+    Returns real-time verification status for the current logged in shelter user.
+    """
+    if not request.user.is_authenticated or request.user.is_anonymous:
+        return JsonResponse({'success': True, 'is_verified': False, 'verification_status': 'PENDING'})
+
+    user = request.user
+    shelter_rec = getattr(user, 'shelter_profile', None) or ShelterProfile.objects.filter(user=user).first()
+    profile_obj = getattr(user, 'profile', None)
+
+    is_ver = False
+    v_status = 'PENDING'
+
+    if shelter_rec:
+        v_status = shelter_rec.verification_status
+        is_ver = is_shelter_verified(shelter_rec)
+    elif profile_obj:
+        v_status = profile_obj.verification_status
+        is_ver = (profile_obj.verification_status == 'VERIFIED' and profile_obj.is_verified)
+
+    return JsonResponse({
+        'success': True,
+        'is_verified': is_ver,
+        'verification_status': v_status,
+        'shelter_id': shelter_rec.id if shelter_rec else None,
+        'shelter_name': shelter_rec.shelter_name if shelter_rec else ''
+    })
+
 
 
 

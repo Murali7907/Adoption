@@ -44,6 +44,7 @@ urlpatterns = [
     path('api/shelter/update-pet-status/', views.api_update_pet_status, name='api_update_pet_status'),
     path('api/delivery/toggle-availability/', views.api_delivery_toggle_availability, name='api_delivery_toggle_availability'),
     path('api/delivery/available-partners/', views.api_get_available_delivery_partners, name='api_get_available_delivery_partners'),
+    path('api/shelter/verification-status/', views.api_shelter_verification_status, name='api_shelter_verification_status'),
 ]
 
 

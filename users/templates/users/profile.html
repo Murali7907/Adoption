@@ -16464,6 +16464,22 @@ html.theme-light #assign-driver-select option:disabled {
             return Boolean(isVer) && vStatus === 'VERIFIED';
         }
 
+        async function checkLiveShelterVerification() {
+            if (isCurrentShelterVerified()) return true;
+            try {
+                const resp = await fetch('/users/api/shelter/verification-status/');
+                const res = await resp.json();
+                if (res.success && res.is_verified) {
+                    if (KindHeartData.currentUser) {
+                        KindHeartData.currentUser.isVerified = true;
+                        KindHeartData.currentUser.verificationStatus = 'VERIFIED';
+                    }
+                    return true;
+                }
+            } catch (e) {}
+            return isCurrentShelterVerified();
+        }
+
         function showShelterVerificationRequiredModal(feature) {
             const titleEl = document.getElementById('shelter-gated-title');
             const descEl = document.getElementById('shelter-gated-desc');
@@ -16514,8 +16530,9 @@ html.theme-light #assign-driver-select option:disabled {
         // =========================================================
         // 🚚 SHELTER: ADD DELIVERY CONTROLLERS
         // =========================================================
-        function openShelterAddDeliveryModal() {
-            if (!isCurrentShelterVerified()) {
+        async function openShelterAddDeliveryModal() {
+            const verified = await checkLiveShelterVerification();
+            if (!verified) {
                 showShelterVerificationRequiredModal('delivery');
                 return;
             }
@@ -16656,8 +16673,9 @@ html.theme-light #assign-driver-select option:disabled {
         // =========================================================
         // 🐾 SHELTER: ADD PET CONTROLLERS
         // =========================================================
-        function openShelterAddPetModal() {
-            if (!isCurrentShelterVerified()) {
+        async function openShelterAddPetModal() {
+            const verified = await checkLiveShelterVerification();
+            if (!verified) {
                 showShelterVerificationRequiredModal('pet');
                 return;
             }
@@ -16674,7 +16692,8 @@ html.theme-light #assign-driver-select option:disabled {
 
         async function submitShelterCreatePet(e) {
             e.preventDefault();
-            if (!isCurrentShelterVerified()) {
+            const verified = await checkLiveShelterVerification();
+            if (!verified) {
                 showShelterVerificationRequiredModal('pet');
                 return;
             }

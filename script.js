@@ -595,20 +595,13 @@ function handleAuthSubmit(event) {
    4. 📋 ADOPTION APPLICATION MODAL ENGINE
    --------------------------------------------------------- */
 function openAdoptionModal(petName = 'Bruno') {
-    if (!isUserLoggedIn) {
-        pendingAdoptionPet = petName;
-        openAuthModal('login');
-        showToast(`🔒 Please log in to start the adoption application for ${petName}.`);
+    const isLoggedIn = (typeof window !== 'undefined' && (window.isUserLoggedIn === true || window.isUserLoggedIn === 'true'));
+    if (!isLoggedIn) {
+        window.location.href = '/users/login/';
         return;
     }
 
-    const modal = document.getElementById('adoption-modal');
-    if (!modal) return;
-    
-    const petField = document.getElementById('adopt-pet-name');
-    if (petField) petField.value = petName;
-    
-    modal.classList.add('is-open');
+    window.location.href = '/users/profile/?role=customer#find-a-pet';
 }
 
 function closeAdoptionModal() {
@@ -617,9 +610,14 @@ function closeAdoptionModal() {
 }
 
 function handleAdoptionSubmit(event) {
-    event.preventDefault();
+    if (event) event.preventDefault();
+    const isLoggedIn = (typeof window !== 'undefined' && (window.isUserLoggedIn === true || window.isUserLoggedIn === 'true'));
+    if (!isLoggedIn) {
+        window.location.href = '/users/login/';
+        return;
+    }
     closeAdoptionModal();
-    showToast('🐾 Adoption request submitted successfully! We will contact you soon.');
+    window.location.href = '/users/profile/?role=customer#find-a-pet';
 }
 
 /* ---------------------------------------------------------
