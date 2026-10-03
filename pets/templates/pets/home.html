@@ -726,8 +726,12 @@
         <footer class="footer-kindheart-blurred w-full mt-8 sm:mt-12 py-6 sm:py-8 text-center">
             <div class="footer-centered-content max-w-4xl mx-auto px-6 text-center flex flex-col items-center justify-center">
                 <!-- 1. Centered Brand Name with Space Above & Below -->
-                <a href="#top" class="footer-brand-wrap inline-flex items-center justify-center gap-2 text-xl sm:text-2xl font-extrabold tracking-tight text-white font-heading hover:opacity-90 transition-opacity mx-auto mb-3 sm:mb-4"
+                <a href="#top" class="footer-brand-wrap inline-flex items-center justify-center gap-2.5 text-xl sm:text-2xl font-extrabold tracking-tight text-white font-heading hover:opacity-90 transition-opacity mx-auto mb-3 sm:mb-4"
                     onclick="event.preventDefault(); scrollToTop();">
+                    <div class="w-8 h-8 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center shrink-0 p-1 overflow-hidden">
+                        <img src="/kindheart_icon_dark.png" alt="KindHeart Logo" class="w-full h-full object-contain block light:hidden" />
+                        <img src="/kindheart_icon_light.png" alt="KindHeart Logo" class="w-full h-full object-contain hidden light:block" />
+                    </div>
                     <span class="font-heading font-extrabold tracking-tight text-white">Kind<span class="text-[#FF8F1C]">Heart</span></span>
                 </a>
 
