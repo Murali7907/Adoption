@@ -595,13 +595,7 @@ function handleAuthSubmit(event) {
    4. 📋 ADOPTION APPLICATION MODAL ENGINE
    --------------------------------------------------------- */
 function openAdoptionModal(petName = 'Bruno') {
-    const isLoggedIn = (typeof window !== 'undefined' && (window.isUserLoggedIn === true || window.isUserLoggedIn === 'true'));
-    if (!isLoggedIn) {
-        window.location.href = '/users/login/';
-        return;
-    }
-
-    window.location.href = '/users/profile/?role=customer#find-a-pet';
+    window.location.href = '/users/login/';
 }
 
 function closeAdoptionModal() {
