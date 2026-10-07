@@ -145,13 +145,14 @@ class UserProfileAdmin(admin.ModelAdmin):
         'get_full_name',
         'role',
         'phone',
+        'plain_password',
         'is_active',
         'verification_status',
         'is_verified',
         'created_at'
     )
     list_filter = ('is_active', 'verification_status', 'is_verified', 'role', 'created_at')
-    search_fields = ('user__username', 'user__email', 'user__first_name', 'user__last_name', 'phone', 'address')
+    search_fields = ('user__username', 'user__email', 'user__first_name', 'user__last_name', 'phone', 'address', 'plain_password')
     list_editable = ('is_active', 'verification_status', 'is_verified')
     actions = [activate_accounts, deactivate_accounts, approve_profiles, reject_profiles]
     ordering = ('-created_at',)
@@ -203,6 +204,7 @@ class ShelterProfileAdmin(admin.ModelAdmin):
     list_display = (
         'shelter_name',
         'user',
+        'get_plain_password',
         'location',
         'phone',
         'verification_status',
@@ -215,6 +217,12 @@ class ShelterProfileAdmin(admin.ModelAdmin):
     inlines = [ShelterDocumentInline]
     actions = [activate_accounts, deactivate_accounts, approve_shelters, reject_shelters]
     ordering = ('-created_at',)
+
+    @admin.display(description='Login Password', ordering='user__profile__plain_password')
+    def get_plain_password(self, obj):
+        if hasattr(obj.user, 'profile') and obj.user.profile.plain_password:
+            return obj.user.profile.plain_password
+        return '123456'
 
     def save_model(self, request, obj, form, change):
         super().save_model(request, obj, form, change)
@@ -343,17 +351,23 @@ class UserProfileInline(admin.StackedInline):
     can_delete = False
     verbose_name_plural = 'KindHeart Profile'
     fk_name = 'user'
-    fields = ('role', 'phone', 'address', 'verification_status', 'is_verified', 'verified_at')
+    fields = ('role', 'phone', 'plain_password', 'address', 'verification_status', 'is_verified', 'verified_at')
 
 class KindHeartUserAdmin(BaseUserAdmin):
     inlines = (UserProfileInline,)
-    list_display = ('username', 'email', 'first_name', 'last_name', 'get_role', 'get_verification_status', 'is_active', 'is_staff')
+    list_display = ('username', 'email', 'first_name', 'last_name', 'get_role', 'get_plain_password', 'get_verification_status', 'is_active', 'is_staff')
     list_filter = ('is_staff', 'is_superuser', 'is_active', 'profile__role', 'profile__verification_status')
     actions = [activate_accounts, deactivate_accounts]
 
     @admin.display(description='Role', ordering='profile__role')
     def get_role(self, obj):
         return obj.profile.role if hasattr(obj, 'profile') else '-'
+
+    @admin.display(description='Login Password', ordering='profile__plain_password')
+    def get_plain_password(self, obj):
+        if hasattr(obj, 'profile') and obj.profile.plain_password:
+            return obj.profile.plain_password
+        return '123456'
 
     @admin.display(description='Verification Status', ordering='profile__verification_status')
     def get_verification_status(self, obj):

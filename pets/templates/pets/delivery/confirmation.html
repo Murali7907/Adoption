@@ -866,10 +866,10 @@
                     body: formData
                 });
                 const res = await resp.json();
-                if (res.status === 'success') {
+                if (res.success || res.status === 'success' || res.status === 'COMPLETED') {
                     window.location.href = "{% url 'delivery_dashboard' %}";
                 } else {
-                    if (errBanner) { errBanner.textContent = "Proof upload error: " + (res.message || "Could not save photo"); errBanner.classList.remove('hidden'); }
+                    if (errBanner) { errBanner.textContent = "Proof upload error: " + (res.message || res.error || "Could not save photo"); errBanner.classList.remove('hidden'); }
                 }
             } catch(err) {
                 if (errBanner) { errBanner.textContent = "Server error uploading proof: " + err.message; errBanner.classList.remove('hidden'); }

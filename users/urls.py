@@ -45,6 +45,9 @@ urlpatterns = [
     path('api/delivery/toggle-availability/', views.api_delivery_toggle_availability, name='api_delivery_toggle_availability'),
     path('api/delivery/available-partners/', views.api_get_available_delivery_partners, name='api_get_available_delivery_partners'),
     path('api/shelter/verification-status/', views.api_shelter_verification_status, name='api_shelter_verification_status'),
+    path('api/appointment/reschedule/', views.api_reschedule_appointment, name='api_reschedule_appointment'),
+    path('api/appointment/confirm-reschedule/', views.api_confirm_rescheduled_appointment, name='api_confirm_rescheduled_appointment'),
+    path('api/favorite/toggle/', views.api_toggle_favorite, name='api_toggle_favorite'),
 ]
 
 

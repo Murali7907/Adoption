@@ -2,8 +2,10 @@ import json
 from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from users.views import profile_view, is_shelter_verified
-from users.models import ShelterProfile
-from pets.models import DeliveryRequest, DeliveryPartner, Pet
+from users.models import ShelterProfile, Message
+from pets.models import DeliveryRequest, DeliveryPartner, Pet, AdoptionRequest, AuditLog
+from django.contrib.auth.models import User
+from django.db.models import Q
 
 # Core Public Views
 def home_view(request):
@@ -72,7 +74,85 @@ def add_pet_view(request):
 
 def adoption_form_view(request, pet_id=None):
     if request.method == 'POST':
-        return redirect('customer_requests')
+        if not request.user.is_authenticated:
+            return redirect('/users/login/?next=' + request.path)
+
+        p_id = pet_id or request.POST.get('pet_id') or request.POST.get('petId') or 1
+        clean_pet_id = str(p_id).replace('P', '').replace('PET-', '').strip()
+
+        try:
+            pet = Pet.objects.get(id=int(clean_pet_id))
+        except (Pet.DoesNotExist, ValueError):
+            pet = Pet.objects.first()
+
+        if pet:
+            shelter = pet.shelter or ShelterProfile.objects.first()
+            customer = request.user
+            notes = request.POST.get('reason') or request.POST.get('notes') or f"Adoption application submitted by {customer.get_full_name() or customer.username}."
+
+            adoption_req, created = AdoptionRequest.objects.get_or_create(
+                pet=pet,
+                customer=customer,
+                shelter=shelter,
+                defaults={
+                    'status': 'UNDER_REVIEW',
+                    'notes': notes
+                }
+            )
+
+            if not created and adoption_req.status in ['CANCELLED', 'REJECTED']:
+                adoption_req.status = 'UNDER_REVIEW'
+                adoption_req.save()
+
+            pet.status = 'PENDING_ADOPTION'
+            pet.save(update_fields=['status'])
+
+            try:
+                AuditLog.objects.create(
+                    user=customer,
+                    user_role='Adopter',
+                    action='ADOPTION_REQUEST_CREATED',
+                    module='Adoption Management',
+                    adoption_request=adoption_req,
+                    description=f"Adoption application #{adoption_req.id} submitted for pet '{pet.name}'."
+                )
+
+                cust_name = customer.get_full_name().strip() or customer.username
+                cust_profile = getattr(customer, 'profile', None)
+                cust_phone = getattr(cust_profile, 'phone', '') or customer.username
+                cust_place = getattr(cust_profile, 'address', '') or "Kochi, Kerala"
+
+                if shelter:
+                    shelter_users = set()
+                    if shelter.user:
+                        shelter_users.add(shelter.user)
+                    for u in User.objects.filter(Q(profile__role__iexact='SHELTER') | Q(shelter_profile=shelter)):
+                        shelter_users.add(u)
+
+                    for s_user in shelter_users:
+                        Message.objects.create(
+                            sender=customer,
+                            recipient=s_user,
+                            shelter=shelter,
+                            subject=f"🐾 New Adoption Application #{adoption_req.id} for {pet.name}",
+                            body=f"New adoption application #{adoption_req.id} received from customer '{cust_name}' (Phone: {cust_phone}, Location: {cust_place}) for pet '{pet.name}'. Review application and verify eligibility."
+                        )
+
+                admins = User.objects.filter(Q(is_superuser=True) | Q(is_staff=True) | Q(profile__role__iexact='ADMIN'))
+                for admin_user in admins:
+                    if admin_user != customer and (not shelter or admin_user != shelter.user):
+                        Message.objects.create(
+                            sender=customer,
+                            recipient=admin_user,
+                            shelter=shelter,
+                            subject=f"🐾 New Adoption Application #{adoption_req.id} for {pet.name}",
+                            body=f"New adoption application #{adoption_req.id} submitted by customer '{cust_name}' for pet '{pet.name}' at shelter '{shelter.shelter_name if shelter else 'Facility'}'."
+                        )
+            except Exception as e:
+                print(f"Error creating adoption notification message: {e}")
+
+        return redirect('/users/profile/?role=customer#orders')
+
     return render(request, 'pets/adoption_form.html')
 
 

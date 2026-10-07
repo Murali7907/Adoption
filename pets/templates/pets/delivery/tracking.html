@@ -848,11 +848,11 @@
                     })
                 });
                 const res = await resp.json();
-                if (res.status === 'success') {
+                if (res.success || res.status === 'success' || res.status === 'COMPLETED' || res.status === 'IN_TRANSIT') {
                     if (typeof showToast === 'function') showToast(res.message || "Delivery status updated successfully!");
                     window.location.reload();
                 } else {
-                    if (typeof showToast === 'function') showToast("Failed to update status: " + (res.message || "Unauthorized or invalid delivery ID"));
+                    if (typeof showToast === 'function') showToast("Failed to update status: " + (res.message || res.error || "Unauthorized or invalid delivery ID"));
                 }
             } catch(e) {
                 if (typeof showToast === 'function') showToast("Server error communicating with delivery status endpoint: " + e.message);

@@ -131,6 +131,15 @@ class AdoptionRequest(models.Model):
     status = models.CharField(max_length=25, choices=ADOPTION_STATUS_CHOICES, default='PENDING')
     notes = models.TextField(blank=True, null=True)
 
+    # Adoption Appointment & Rescheduling Fields
+    appointment_date = models.DateField(blank=True, null=True)
+    appointment_time = models.CharField(max_length=50, blank=True, null=True, default='11:00 AM')
+    appointment_status = models.CharField(max_length=30, default='SCHEDULED') # SCHEDULED, RESCHEDULE_REQUESTED, RESCHEDULED, CONFIRMED
+    reschedule_requested_date = models.DateField(blank=True, null=True)
+    reschedule_requested_time = models.CharField(max_length=50, blank=True, null=True)
+    appointment_notes = models.TextField(blank=True, null=True)
+    appointment_history = models.JSONField(default=list, blank=True)
+
     def __str__(self):
         return f"{self.customer.username} -> {self.pet.name} [{self.status}]"
 

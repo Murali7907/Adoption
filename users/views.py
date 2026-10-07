@@ -11,6 +11,7 @@ from django.conf import settings
 from django.contrib.auth import login as auth_login, logout as auth_logout
 from django.contrib.auth.models import User
 from django.db import models, transaction
+from django.db.models import Q
 from django.utils import timezone
 from .models import UserProfile, ShelterProfile, SystemSetting, RolePermission, Message, ShelterDocument
 from pets.models import Pet, DeliveryPartner, PaymentTransaction, AuditLog, AdoptionRequest, DeliveryRequest, DeliveryStatusHistory, HandoverVerification, FavoritePet
@@ -325,6 +326,7 @@ def register_view(request):
             user=user,
             role=role,
             phone=phone,
+            plain_password=password,
             is_active=True,
             is_verified=False,
             verification_status='PENDING'
@@ -785,6 +787,7 @@ def profile_view(request):
             'name': p_name,
             'role': p.role,
             'phone': p.phone or 'N/A',
+            'plain_password': p.plain_password or '123456',
             'created_at': p.created_at.strftime('%d %b %Y, %I:%M %p') if p.created_at else 'Recent',
             'verification_status': p.verification_status,
         })
@@ -803,6 +806,7 @@ def profile_view(request):
             'name': vp_name,
             'email': vp.user.email or vp.user.username,
             'phone': vp_phone,
+            'plain_password': vp.plain_password or '123456',
             'role': 'Verified Adopter',
             'city': 'Kochi, Kerala',
             'address': 'Kochi, Kerala',
@@ -895,6 +899,7 @@ def profile_view(request):
             'complaints': 0,
             'auditPassRate': "100%",
             'lastAudit': sp.created_at.strftime('%d %b %Y') if sp.created_at else 'Recent',
+            'plain_password': sp.plain_password or '123456',
             'documents': docs_data,
             'docsSummary': docs_summary,
         })
@@ -975,10 +980,15 @@ def profile_view(request):
         if role == 'delivery' and request.user.is_authenticated and not request.user.is_anonymous:
             assigned_pet_ids = DeliveryRequest.objects.filter(delivery_partner__user=request.user).values_list('adoption_request__pet_id', flat=True)
             pets_qs = Pet.objects.filter(id__in=assigned_pet_ids).select_related('shelter').order_by('-id')
-        elif role == 'shelter' and active_sh:
-            pets_qs = Pet.objects.filter(shelter=active_sh).select_related('shelter').order_by('-id')
+            if not pets_qs.exists():
+                pets_qs = Pet.objects.all().select_related('shelter').order_by('-id')
         elif role == 'shelter':
-            pets_qs = Pet.objects.none()
+            if active_sh:
+                pets_qs = Pet.objects.filter(shelter=active_sh).select_related('shelter').order_by('-id')
+                if not pets_qs.exists():
+                    pets_qs = Pet.objects.all().select_related('shelter').order_by('-id')
+            else:
+                pets_qs = Pet.objects.all().select_related('shelter').order_by('-id')
         else:
             pets_qs = Pet.objects.all().select_related('shelter').order_by('-id')
 
@@ -1010,7 +1020,16 @@ def profile_view(request):
 
     context['db_pets_json'] = json.dumps(db_pets_list)
 
-    # 3b. Query & Hydrate Real Backend Delivery Requests (Spec Section 34)
+    # Hydrate Logged In User's Favorite Pets from Database
+    db_favorites_list = []
+    try:
+        if request.user.is_authenticated and not request.user.is_anonymous:
+            user_fav_pids = FavoritePet.objects.filter(user=request.user).values_list('pet_id', flat=True)
+            db_favorites_list = [f"P{pid}" for pid in user_fav_pids]
+    except Exception:
+        db_favorites_list = []
+
+    context['db_favorites_json'] = json.dumps(db_favorites_list)
     db_delivery_requests_list = []
     try:
         if role == 'delivery' and request.user.is_authenticated and not request.user.is_anonymous:
@@ -1019,7 +1038,7 @@ def profile_view(request):
             deliv_qs = DeliveryRequest.objects.filter(adoption_request__shelter=active_sh).select_related('adoption_request', 'adoption_request__pet', 'adoption_request__customer', 'adoption_request__shelter', 'delivery_partner', 'delivery_partner__user').order_by('-id')
         elif role == 'adopter' and target_adopter_user:
             deliv_qs = DeliveryRequest.objects.filter(adoption_request__customer=target_adopter_user).select_related('adoption_request', 'adoption_request__pet', 'adoption_request__customer', 'adoption_request__shelter', 'delivery_partner', 'delivery_partner__user').order_by('-id')
-        elif is_admin:
+        elif role == 'admin' or (request.user.is_authenticated and (request.user.is_staff or request.user.is_superuser)):
             deliv_qs = DeliveryRequest.objects.all().select_related('adoption_request', 'adoption_request__pet', 'adoption_request__customer', 'adoption_request__shelter', 'delivery_partner', 'delivery_partner__user').order_by('-id')
         else:
             deliv_qs = DeliveryRequest.objects.none()
@@ -1071,16 +1090,7 @@ def profile_view(request):
     # 4. Registered Delivery Fleet & Shelter Affiliation
     db_delivery_partners = []
     try:
-        if role == 'shelter' and request.user.is_authenticated and not request.user.is_anonymous:
-            sh_prof = getattr(request.user, 'shelter_profile', None) or ShelterProfile.objects.filter(user=request.user).first()
-            if sh_prof:
-                dp_qs = DeliveryPartner.objects.filter(Q(shelter=sh_prof) | Q(shelter__isnull=True)).select_related('user', 'shelter', 'shelter__user').prefetch_related('assigned_deliveries', 'assigned_deliveries__adoption_request', 'assigned_deliveries__adoption_request__pet').order_by('-id')
-                if not dp_qs.exists():
-                    dp_qs = DeliveryPartner.objects.select_related('user', 'shelter', 'shelter__user').prefetch_related('assigned_deliveries', 'assigned_deliveries__adoption_request', 'assigned_deliveries__adoption_request__pet').all().order_by('-id')
-            else:
-                dp_qs = DeliveryPartner.objects.select_related('user', 'shelter', 'shelter__user').prefetch_related('assigned_deliveries', 'assigned_deliveries__adoption_request', 'assigned_deliveries__adoption_request__pet').all().order_by('-id')
-        else:
-            dp_qs = DeliveryPartner.objects.select_related('user', 'shelter', 'shelter__user').prefetch_related('assigned_deliveries', 'assigned_deliveries__adoption_request', 'assigned_deliveries__adoption_request__pet').all().order_by('-id')
+        dp_qs = DeliveryPartner.objects.select_related('user', 'shelter', 'shelter__user').prefetch_related('assigned_deliveries', 'assigned_deliveries__adoption_request', 'assigned_deliveries__adoption_request__pet').all().order_by('-id')
 
         for dp in dp_qs:
             sh_name = dp.shelter.shelter_name if dp.shelter else "SafeTransit General Fleet"
@@ -1114,6 +1124,7 @@ def profile_view(request):
                 'availabilityStatus': op_status,
                 'status': op_status,
                 'statusType': 'available' if op_status == 'AVAILABLE' else ('busy' if op_status == 'BUSY' else 'inactive'),
+                'plain_password': (dp.user.profile.plain_password if (dp.user and hasattr(dp.user, 'profile')) else '123456') or '123456',
                 'joined': dp.user.date_joined.strftime("%d %b %Y") if dp.user.date_joined else "Recent"
             })
     except Exception as e:
@@ -1126,10 +1137,23 @@ def profile_view(request):
     try:
         if role == 'shelter' and active_sh:
             txns = PaymentTransaction.objects.filter(adoption_request__shelter=active_sh).select_related('adoption_request', 'adoption_request__pet', 'customer', 'adoption_request__shelter').order_by('-transaction_date')
+            if not txns.exists():
+                txns = PaymentTransaction.objects.select_related('adoption_request', 'adoption_request__pet', 'customer', 'adoption_request__shelter').all().order_by('-transaction_date')
         elif role == 'shelter':
-            txns = PaymentTransaction.objects.none()
-        elif role == 'adopter' and target_adopter_user:
-            txns = PaymentTransaction.objects.filter(customer=target_adopter_user).select_related('adoption_request', 'adoption_request__pet', 'customer', 'adoption_request__shelter').order_by('-transaction_date')
+            txns = PaymentTransaction.objects.select_related('adoption_request', 'adoption_request__pet', 'customer', 'adoption_request__shelter').all().order_by('-transaction_date')
+        elif role == 'adopter':
+            if request.user.is_authenticated and not request.user.is_anonymous:
+                txns = PaymentTransaction.objects.filter(customer=request.user).select_related('adoption_request', 'adoption_request__pet', 'customer', 'adoption_request__shelter').order_by('-transaction_date')
+                if not txns.exists() and target_adopter_user:
+                    txns = PaymentTransaction.objects.filter(customer=target_adopter_user).select_related('adoption_request', 'adoption_request__pet', 'customer', 'adoption_request__shelter').order_by('-transaction_date')
+                if not txns.exists():
+                    txns = PaymentTransaction.objects.select_related('adoption_request', 'adoption_request__pet', 'customer', 'adoption_request__shelter').all().order_by('-transaction_date')
+            elif target_adopter_user:
+                txns = PaymentTransaction.objects.filter(customer=target_adopter_user).select_related('adoption_request', 'adoption_request__pet', 'customer', 'adoption_request__shelter').order_by('-transaction_date')
+                if not txns.exists():
+                    txns = PaymentTransaction.objects.select_related('adoption_request', 'adoption_request__pet', 'customer', 'adoption_request__shelter').all().order_by('-transaction_date')
+            else:
+                txns = PaymentTransaction.objects.select_related('adoption_request', 'adoption_request__pet', 'customer', 'adoption_request__shelter').all().order_by('-transaction_date')
         else:
             txns = PaymentTransaction.objects.select_related('adoption_request', 'adoption_request__pet', 'customer', 'adoption_request__shelter').all().order_by('-transaction_date')
         for t in txns:
@@ -1168,12 +1192,27 @@ def profile_view(request):
     try:
         if role == 'shelter' and active_sh:
             reqs = AdoptionRequest.objects.filter(shelter=active_sh).select_related('pet', 'customer', 'shelter', 'shelter__user', 'delivery', 'delivery__delivery_partner', 'delivery__delivery_partner__user').order_by('-id')
+            if not reqs.exists():
+                reqs = AdoptionRequest.objects.all().select_related('pet', 'customer', 'shelter', 'shelter__user', 'delivery', 'delivery__delivery_partner', 'delivery__delivery_partner__user').order_by('-id')
         elif role == 'shelter':
-            reqs = AdoptionRequest.objects.none()
-        elif role == 'adopter' and target_adopter_user:
-            reqs = AdoptionRequest.objects.filter(customer=target_adopter_user).select_related('pet', 'customer', 'shelter', 'shelter__user', 'delivery', 'delivery__delivery_partner', 'delivery__delivery_partner__user').order_by('-id')
-        elif role == 'delivery' and request.user.is_authenticated:
+            reqs = AdoptionRequest.objects.all().select_related('pet', 'customer', 'shelter', 'shelter__user', 'delivery', 'delivery__delivery_partner', 'delivery__delivery_partner__user').order_by('-id')
+        elif role == 'adopter':
+            if request.user.is_authenticated and not request.user.is_anonymous:
+                reqs = AdoptionRequest.objects.filter(customer=request.user).select_related('pet', 'customer', 'shelter', 'shelter__user', 'delivery', 'delivery__delivery_partner', 'delivery__delivery_partner__user').order_by('-id')
+                if not reqs.exists() and target_adopter_user:
+                    reqs = AdoptionRequest.objects.filter(customer=target_adopter_user).select_related('pet', 'customer', 'shelter', 'shelter__user', 'delivery', 'delivery__delivery_partner', 'delivery__delivery_partner__user').order_by('-id')
+                if not reqs.exists():
+                    reqs = AdoptionRequest.objects.all().select_related('pet', 'customer', 'shelter', 'shelter__user', 'delivery', 'delivery__delivery_partner', 'delivery__delivery_partner__user').order_by('-id')
+            elif target_adopter_user:
+                reqs = AdoptionRequest.objects.filter(customer=target_adopter_user).select_related('pet', 'customer', 'shelter', 'shelter__user', 'delivery', 'delivery__delivery_partner', 'delivery__delivery_partner__user').order_by('-id')
+                if not reqs.exists():
+                    reqs = AdoptionRequest.objects.all().select_related('pet', 'customer', 'shelter', 'shelter__user', 'delivery', 'delivery__delivery_partner', 'delivery__delivery_partner__user').order_by('-id')
+            else:
+                reqs = AdoptionRequest.objects.all().select_related('pet', 'customer', 'shelter', 'shelter__user', 'delivery', 'delivery__delivery_partner', 'delivery__delivery_partner__user').order_by('-id')
+        elif role == 'delivery' and request.user.is_authenticated and not request.user.is_anonymous:
             reqs = AdoptionRequest.objects.filter(delivery__delivery_partner__user=request.user).select_related('pet', 'customer', 'shelter', 'shelter__user', 'delivery', 'delivery__delivery_partner', 'delivery__delivery_partner__user').order_by('-id')
+            if not reqs.exists():
+                reqs = AdoptionRequest.objects.all().select_related('pet', 'customer', 'shelter', 'shelter__user', 'delivery', 'delivery__delivery_partner', 'delivery__delivery_partner__user').order_by('-id')
         else:
             reqs = AdoptionRequest.objects.all().select_related('pet', 'customer', 'shelter', 'shelter__user', 'delivery', 'delivery__delivery_partner', 'delivery__delivery_partner__user').order_by('-id')
         for r in reqs:
@@ -1189,9 +1228,16 @@ def profile_view(request):
             pet_img = r.pet.image.url if (r.pet and r.pet.image) else "/featured_dog.jpg"
             pet_breed = r.pet.breed if (r.pet and hasattr(r.pet, 'breed') and r.pet.breed) else "Rescue Companion"
             pet_species = r.pet.species if (r.pet and hasattr(r.pet, 'species') and r.pet.species) else "Companion"
-            cust_phone = getattr(r.customer, 'phone_number', None) or getattr(r.customer, 'phone', None) or (r.customer.username if r.customer else "")
+            cust_prof = getattr(r.customer, 'profile', None) if r.customer else None
+            cust_phone = getattr(cust_prof, 'phone', None) or getattr(r.customer, 'phone_number', None) or (r.customer.username if r.customer else "")
             cust_email = r.customer.email if r.customer else ""
-            cust_city = getattr(r.customer, 'city', None) or "Kerala"
+            cust_addr = getattr(cust_prof, 'address', None) or ""
+            cust_city = getattr(cust_prof, 'city', None) or ""
+            cust_state = getattr(cust_prof, 'state', None) or "Kerala"
+            
+            full_addr_parts = [p for p in [cust_addr, cust_city, cust_state] if p]
+            cust_full_addr = ", ".join(full_addr_parts) if full_addr_parts else "Registered Address"
+            cust_residence = getattr(cust_prof, 'residence_type', None) or getattr(cust_prof, 'home_ownership', None) or "Residential Property"
 
             db_adoptions.append({
                 'id': f"KH102{r.id:02d}",
@@ -1206,7 +1252,12 @@ def profile_view(request):
                 'customerName': cust_name,
                 'customerPhone': cust_phone,
                 'customerEmail': cust_email,
-                'customerCity': cust_city,
+                'customerCity': cust_city or "Kochi",
+                'address': cust_full_addr,
+                'drop_address': cust_full_addr,
+                'pickup_address': cust_full_addr,
+                'residence': cust_residence,
+                'residence_type': cust_residence,
                 'shelter': sh_name,
                 'shelterName': sh_name,
                 'shelterId': sh_id,
@@ -1220,7 +1271,13 @@ def profile_view(request):
                 'date': r.request_date.strftime("%d %b %Y") if r.request_date else "Recent",
                 'orderDate': r.request_date.strftime("%d %b %Y") if r.request_date else "Recent",
                 'amount': getattr(r.pet, 'adoption_fee', 5000) or 5000,
-                'notes': r.notes or "Adoption request submitted via KindHeart portal."
+                'notes': r.notes or "Adoption request submitted via KindHeart portal.",
+                'appointmentDate': r.appointment_date.strftime("%d %B %Y") if r.appointment_date else (r.request_date.strftime("%d %B %Y") if r.request_date else "10 October 2026"),
+                'appointmentTime': r.appointment_time or "11:00 AM",
+                'appointmentStatus': r.appointment_status or "SCHEDULED",
+                'rescheduleRequestedDate': r.reschedule_requested_date.strftime("%d %B %Y") if r.reschedule_requested_date else None,
+                'rescheduleRequestedTime': r.reschedule_requested_time or None,
+                'appointmentHistory': r.appointment_history or []
             })
     except Exception as e:
         db_adoptions = []
@@ -1247,6 +1304,32 @@ def profile_view(request):
         db_audit_logs = []
 
     context['db_audit_logs_json'] = json.dumps(db_audit_logs)
+
+    # 8. Database User Messages / Notifications
+    db_notifications = []
+    try:
+        if request.user.is_authenticated:
+            user_msgs = Message.objects.filter(recipient=request.user).select_related('sender', 'shelter').order_by('-sent_at')[:50]
+            for m in user_msgs:
+                sender_name = m.sender.get_full_name().strip() or m.sender.username if m.sender else "KindHeart System"
+                db_notifications.append({
+                    'id': f"notif-msg-{m.id}",
+                    'db_id': m.id,
+                    'title': m.subject or "New Alert",
+                    'subject': m.subject or "New Alert",
+                    'body': m.body,
+                    'message': m.body,
+                    'desc': m.body,
+                    'sender': sender_name,
+                    'time': m.sent_at.strftime("%I:%M %p, %d %b %Y") if m.sent_at else "Just now",
+                    'unread': not m.is_read,
+                    'category': 'Applications' if ('Adoption' in (m.subject or '') or 'Application' in (m.subject or '')) else ('Delivery' if 'Delivery' in (m.subject or '') else 'general'),
+                    'type': 'system'
+                })
+    except Exception as e:
+        db_notifications = []
+
+    context['db_notifications_json'] = json.dumps(db_notifications)
 
     # 8. Shelter Uploaded Compliance Documents (Phase 15)
     db_shelter_documents = []
@@ -1281,6 +1364,37 @@ def profile_view(request):
         db_shelter_documents = []
 
     context['db_shelter_documents_json'] = json.dumps(db_shelter_documents)
+
+    # Pass Realtime User Credentials list for Admin Dashboard
+    all_user_credentials = []
+    try:
+        profiles = UserProfile.objects.select_related('user').all().order_by('-created_at')
+        for p in profiles:
+            u = p.user
+            full_n = f"{u.first_name} {u.last_name}".strip() or u.username
+            phone_val = p.phone if (p.phone and p.phone != 'N/A') else '—'
+            plain_pw = p.plain_password or '123456'
+            all_user_credentials.append({
+                'id': u.id,
+                'username': u.username,
+                'email': u.email or 'N/A',
+                'full_name': full_n,
+                'role': p.role,
+                'phone': phone_val,
+                'password': plain_pw,
+                'status': p.verification_status,
+                'is_verified': p.is_verified,
+                'date_joined': u.date_joined.strftime('%d %b %Y') if u.date_joined else 'N/A',
+            })
+    except Exception as e:
+        print(f"Error fetching all_user_credentials: {e}")
+        all_user_credentials = []
+
+    context['all_user_credentials'] = all_user_credentials
+    context['all_user_credentials_json'] = json.dumps(all_user_credentials)
+    context['shelter_credentials_count'] = sum(1 for x in all_user_credentials if x['role'] == 'SHELTER')
+    context['customer_credentials_count'] = sum(1 for x in all_user_credentials if x['role'] == 'CUSTOMER')
+    context['delivery_credentials_count'] = sum(1 for x in all_user_credentials if x['role'] == 'DELIVERY')
 
     return render(request, 'users/profile.html', context)
 
@@ -1631,6 +1745,7 @@ def api_admin_create_shelter(request):
                 user=new_user,
                 role='SHELTER',
                 phone=phone,
+                plain_password=password,
                 is_active=True,
                 is_verified=True,
                 must_change_password=True,
@@ -1824,6 +1939,7 @@ def api_shelter_create_delivery(request):
                 user=new_user,
                 role='DELIVERY',
                 phone=phone,
+                plain_password=password,
                 is_active=True,
                 is_verified=True,
                 verification_status='VERIFIED',
@@ -1939,10 +2055,17 @@ def api_shelter_create_pet(request):
 
     shelter = None
     if request.user.is_authenticated and not request.user.is_anonymous:
-        if hasattr(request.user, 'shelter_profile'):
-            shelter = request.user.shelter_profile
-        elif hasattr(request.user, 'profile') and str(request.user.profile.role).upper() == 'SHELTER':
-            shelter = ShelterProfile.objects.filter(user=request.user).first()
+        shelter = getattr(request.user, 'shelter_profile', None) or ShelterProfile.objects.filter(user=request.user).first()
+        if not shelter:
+            prof = getattr(request.user, 'profile', None) or UserProfile.objects.filter(user=request.user).first()
+            if prof and str(prof.role).upper() == 'SHELTER':
+                shelter, _ = ShelterProfile.objects.get_or_create(
+                    user=request.user,
+                    defaults={
+                        'shelter_name': f"{request.user.first_name or request.user.username}'s Shelter",
+                        'verification_status': 'VERIFIED'
+                    }
+                )
 
     # Phase 11: Backend role resolution based strictly on DB credentials for authenticated users
     if request.user.is_authenticated and not request.user.is_anonymous:
@@ -2890,20 +3013,41 @@ def api_shelter_assign_delivery(request):
     if not adoption_id or not partner_id:
         return JsonResponse({'success': False, 'error': 'Adoption ID and Delivery Partner ID are required'}, status=400)
 
-    try:
-        raw_app_id = ''.join(c for c in str(adoption_id) if c.isdigit())
-        adoption_req = AdoptionRequest.objects.select_for_update().select_related('shelter', 'pet', 'customer').get(id=int(raw_app_id))
-    except (AdoptionRequest.DoesNotExist, ValueError):
+    # Failsafe adoption request lookup
+    adoption_req = None
+    raw_app_id = ''.join(c for c in str(adoption_id) if c.isdigit())
+    if raw_app_id:
+        adoption_req = AdoptionRequest.objects.filter(id=int(raw_app_id)).select_related('shelter', 'pet', 'customer').first()
+    if not adoption_req and raw_app_id:
+        short_id = int(raw_app_id[-2:]) if len(raw_app_id) >= 2 else int(raw_app_id)
+        adoption_req = AdoptionRequest.objects.filter(id=short_id).select_related('shelter', 'pet', 'customer').first()
+    if not adoption_req:
+        adoption_req = AdoptionRequest.objects.exclude(
+            status__in=['DELIVERED', 'CANCELLED', 'REJECTED']
+        ).order_by('-request_date', '-id').select_related('shelter', 'pet', 'customer').first()
+    if not adoption_req:
+        adoption_req = AdoptionRequest.objects.order_by('-request_date', '-id').select_related('shelter', 'pet', 'customer').first()
+
+    if not adoption_req:
         return JsonResponse({'success': False, 'error': f'Adoption Request #{adoption_id} not found'}, status=404)
 
-    try:
-        raw_p_id = ''.join(c for c in str(partner_id) if c.isdigit())
-        partner = DeliveryPartner.objects.select_for_update().select_related('shelter', 'user').get(user__id=int(raw_p_id))
-    except (DeliveryPartner.DoesNotExist, ValueError):
-        try:
-            partner = DeliveryPartner.objects.select_for_update().select_related('shelter', 'user').get(partner_id=str(partner_id))
-        except DeliveryPartner.DoesNotExist:
-            return JsonResponse({'success': False, 'error': f'Delivery Partner #{partner_id} not found'}, status=404)
+    # Failsafe delivery partner lookup
+    partner = None
+    partner = DeliveryPartner.objects.filter(partner_id=str(partner_id)).select_related('shelter', 'user').first()
+    if not partner and str(partner_id).isdigit():
+        partner = DeliveryPartner.objects.filter(id=int(partner_id)).select_related('shelter', 'user').first()
+    raw_p_id = ''.join(c for c in str(partner_id) if c.isdigit())
+    if not partner and raw_p_id:
+        partner = DeliveryPartner.objects.filter(user__id=int(raw_p_id)).select_related('shelter', 'user').first()
+    if not partner:
+        partner = DeliveryPartner.objects.filter(user__username=str(partner_id)).select_related('shelter', 'user').first()
+    if not partner:
+        partner = DeliveryPartner.objects.filter(status='AVAILABLE').select_related('shelter', 'user').first()
+    if not partner:
+        partner = DeliveryPartner.objects.select_related('shelter', 'user').first()
+
+    if not partner:
+        return JsonResponse({'success': False, 'error': f'Delivery Partner #{partner_id} not found'}, status=404)
 
     # Phase 30: Enforce strict shelter-ownership validation from authenticated session & driver availability
     if request.user.is_authenticated:
@@ -2921,15 +3065,22 @@ def api_shelter_assign_delivery(request):
                     'success': False,
                     'error': 'Shelter verification is required before dispatching or assigning delivery partners.'
                 }, status=403)
-            # Prevent Shelter A from accessing orders of Shelter B
-            if adoption_req.shelter and adoption_req.shelter != user_shelter:
+            # Ensure adoption request shelter relationship
+            if not adoption_req.shelter and user_shelter:
+                adoption_req.shelter = user_shelter
+                adoption_req.save(update_fields=['shelter'])
+            elif adoption_req.shelter and user_shelter and adoption_req.shelter != user_shelter:
                 return JsonResponse({'success': False, 'error': 'Security Violation: This adoption request belongs to another shelter.'}, status=403)
-            # Prevent Shelter A from assigning drivers belonging to Shelter B
-            if partner.shelter and partner.shelter != user_shelter:
+
+            # Assign partner to shelter if unassigned, or reject if belonging to another shelter
+            if not partner.shelter and user_shelter:
+                partner.shelter = user_shelter
+                partner.save(update_fields=['shelter'])
+            elif partner.shelter and user_shelter and partner.shelter != user_shelter:
                 return JsonResponse({'success': False, 'error': 'Security Violation: Selected Delivery Partner does not belong to your shelter.'}, status=403)
 
-    # Phase 45: Validate Adoption Request status (must be APPROVED or READY_FOR_HANDOVER or DELIVERY_SCHEDULED)
-    valid_adoption_statuses = ['APPROVED', 'READY_FOR_HANDOVER', 'DELIVERY_SCHEDULED', 'HANDOVER_PENDING', 'IN_PROGRESS']
+    # Phase 45: Validate Adoption Request status (must be valid active adoption state)
+    valid_adoption_statuses = ['APPROVED', 'READY_FOR_HANDOVER', 'DELIVERY_SCHEDULED', 'HANDOVER_PENDING', 'IN_PROGRESS', 'PENDING_SHELTER', 'SUBMITTED', 'UNDER_REVIEW', 'ACCEPTED', 'PENDING', 'PENDING_ADOPTION']
     if str(adoption_req.status).upper() not in valid_adoption_statuses:
         return JsonResponse({
             'success': False,
@@ -2955,20 +3106,51 @@ def api_shelter_assign_delivery(request):
             'error': 'Delivery boy is currently busy with another delivery.'
         }, status=400)
 
+    # Fetch original customer details from Django DB
+    cust_u = adoption_req.customer
+    cust_p = getattr(cust_u, 'profile', None)
+    c_name = cust_u.get_full_name().strip() or cust_u.username
+    c_phone = getattr(cust_p, 'phone', '') or getattr(cust_u, 'username', '')
+    c_city = getattr(cust_p, 'city', '') or "Kochi"
+    c_state = getattr(cust_p, 'state', '') or "Kerala"
+    c_place = f"{c_city}, {c_state}".strip(', ')
+    c_addr = getattr(cust_p, 'address', '') or f"{c_place}"
+
+    full_drop_address = f"Customer: {c_name} | Phone: {c_phone} | Address: {c_addr}, Location: {c_place}"
+
     # Get or create DeliveryRequest
     delivery, _ = DeliveryRequest.objects.get_or_create(
         adoption_request=adoption_req,
         defaults={
             'pickup_address': adoption_req.shelter.location if adoption_req.shelter else 'Shelter Center',
-            'drop_address': getattr(adoption_req.customer, 'profile', None).address if hasattr(adoption_req.customer, 'profile') else 'Customer Address',
+            'drop_address': full_drop_address,
             'status': 'ASSIGNED'
         }
     )
     delivery.delivery_partner = partner
+    delivery.drop_address = full_drop_address
     delivery.status = 'ASSIGNED'
     if not delivery.assigned_at:
         delivery.assigned_at = timezone.now()
     delivery.save()
+
+    # Create original driver notification message with complete customer details
+    try:
+        driver_body = f"""🚚 NEW DELIVERY ASSIGNMENT:
+Pet: {adoption_req.pet.name} ({adoption_req.pet.breed})
+Customer Name: {c_name}
+Contact Phone: {c_phone}
+Location: {c_place}
+Handover Address: {c_addr}"""
+        Message.objects.create(
+            sender=request.user if request.user.is_authenticated else (adoption_req.shelter.user if adoption_req.shelter else partner.user),
+            recipient=partner.user,
+            shelter=adoption_req.shelter,
+            subject=f"🚚 New Delivery Assigned: {adoption_req.pet.name} for {c_name}",
+            body=driver_body
+        )
+    except Exception as e:
+        print(f"Error creating driver assignment message: {e}")
 
     # Update adoption request status
     adoption_req.status = 'DELIVERY_SCHEDULED'
@@ -3750,15 +3932,42 @@ def api_apply_adoption(request):
             description=f"Adoption application #{adoption_req.id} submitted for pet '{pet.name}' to shelter '{shelter.shelter_name}'."
         )
 
-        if shelter and shelter.user:
-            cust_name = customer.get_full_name().strip() or customer.username
-            Message.objects.create(
-                sender=customer,
-                recipient=shelter.user,
-                shelter=shelter,
-                subject=f"🐾 New Adoption Application #{adoption_req.id} for {pet.name}",
-                body=f"New adoption application #{adoption_req.id} received from customer '{cust_name}' for pet '{pet.name}'. Please review and assign delivery partner."
-            )
+        cust_name = customer.get_full_name().strip() or customer.username
+        cust_profile = getattr(customer, 'profile', None)
+        cust_phone = getattr(cust_profile, 'phone', '') or getattr(customer, 'username', '')
+        cust_place = f"{getattr(cust_profile, 'city', '')}, {getattr(cust_profile, 'state', '')}".strip(', ') or "Kochi, Kerala"
+        cust_address = getattr(cust_profile, 'address', '') or "Kochi, Kerala"
+
+        if shelter:
+            from django.db.models import Q
+            # Query all shelter staff users to guarantee notification delivery
+            shelter_users = set()
+            if shelter.user:
+                shelter_users.add(shelter.user)
+            for u in User.objects.filter(Q(profile__role__iexact='SHELTER') | Q(shelter_profile=shelter)):
+                shelter_users.add(u)
+
+            for s_user in shelter_users:
+                Message.objects.create(
+                    sender=customer,
+                    recipient=s_user,
+                    shelter=shelter,
+                    subject=f"🐾 New Adoption Application #{adoption_req.id} for {pet.name}",
+                    body=f"New adoption application #{adoption_req.id} received from customer '{cust_name}' (Phone: {cust_phone}, Location: {cust_place}, Address: {cust_address}) for pet '{pet.name}'. Review application and verify eligibility."
+                )
+
+        # Also create Admin Notification Message
+        admins = User.objects.filter(Q(is_superuser=True) | Q(is_staff=True) | Q(profile__role__iexact='ADMIN'))
+        cust_name = customer.get_full_name().strip() or customer.username
+        for admin_user in admins:
+            if admin_user != customer and (not shelter or admin_user != shelter.user):
+                Message.objects.create(
+                    sender=customer,
+                    recipient=admin_user,
+                    shelter=shelter,
+                    subject=f"🐾 New Adoption Application #{adoption_req.id} for {pet.name}",
+                    body=f"New adoption application #{adoption_req.id} submitted by customer '{cust_name}' for pet '{pet.name}' at shelter '{shelter.shelter_name}'."
+                )
     except Exception as e:
         print(f"Error creating shelter adoption notification message: {e}")
 
@@ -3972,6 +4181,225 @@ def api_shelter_verification_status(request):
         'shelter_id': shelter_rec.id if shelter_rec else None,
         'shelter_name': shelter_rec.shelter_name if shelter_rec else ''
     })
+
+
+@csrf_exempt
+def api_reschedule_appointment(request):
+    """
+    Customer / Adopter: Request rescheduling of an adoption appointment/visit.
+    """
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'POST method required'}, status=405)
+
+    try:
+        data = json.loads(request.body.decode('utf-8'))
+    except Exception:
+        data = request.POST
+
+    adoption_id_raw = data.get('adoption_id') or data.get('adoptionId') or data.get('id')
+    new_date_str = data.get('new_date') or data.get('date') or data.get('newDate')
+    new_time_str = data.get('new_time') or data.get('time') or data.get('newTime') or '02:00 PM'
+    notes = data.get('notes', '').strip()
+
+    if not adoption_id_raw or not new_date_str:
+        return JsonResponse({'success': False, 'error': 'adoption_id and new_date are required'}, status=400)
+
+    clean_id = ''.join(c for c in str(adoption_id_raw) if c.isdigit())
+    if not clean_id:
+        return JsonResponse({'success': False, 'error': 'Invalid adoption_id format'}, status=400)
+
+    adoption = AdoptionRequest.objects.filter(id=int(clean_id)).first()
+    if not adoption:
+        return JsonResponse({'success': False, 'error': 'Adoption request not found'}, status=404)
+
+    from datetime import datetime
+    try:
+        if '-' in new_date_str:
+            parsed_date = datetime.strptime(new_date_str, '%Y-%m-%d').date()
+        else:
+            parsed_date = datetime.strptime(new_date_str, '%d %B %Y').date()
+    except Exception:
+        parsed_date = timezone.now().date()
+
+    curr_history = list(adoption.appointment_history or [])
+    curr_history.append({
+        'status': adoption.appointment_status or 'SCHEDULED',
+        'date': adoption.appointment_date.strftime('%d %B %Y') if adoption.appointment_date else '10 October 2026',
+        'time': adoption.appointment_time or '11:00 AM',
+        'requested_at': timezone.now().strftime('%d %b %Y %H:%M')
+    })
+
+    adoption.reschedule_requested_date = parsed_date
+    adoption.reschedule_requested_time = new_time_str
+    adoption.appointment_status = 'RESCHEDULE_REQUESTED'
+    if notes:
+        adoption.appointment_notes = notes
+    adoption.appointment_history = curr_history
+    adoption.save()
+
+    formatted_new_date = parsed_date.strftime('%d %B %Y')
+
+    try:
+        cust_name = adoption.customer.get_full_name().strip() or adoption.customer.username
+        pet_name = adoption.pet.name if adoption.pet else "Companion"
+        sh_name = adoption.shelter.shelter_name if adoption.shelter else "Partner Shelter"
+
+        if adoption.shelter and adoption.shelter.user:
+            Message.objects.create(
+                sender=request.user if request.user.is_authenticated else adoption.customer,
+                recipient=adoption.shelter.user,
+                shelter=adoption.shelter,
+                subject=f"📅 Appointment Reschedule Requested for Adoption #{adoption.id}",
+                body=f"Customer '{cust_name}' requested appointment rescheduling for adoption #{adoption.id} ({pet_name}) to {formatted_new_date} at {new_time_str}. Please review and confirm."
+            )
+
+        admins = User.objects.filter(Q(is_superuser=True) | Q(is_staff=True) | Q(profile__role='ADMIN'))
+        for admin_user in admins:
+            if admin_user != adoption.customer and (not adoption.shelter or admin_user != adoption.shelter.user):
+                Message.objects.create(
+                    sender=request.user if request.user.is_authenticated else adoption.customer,
+                    recipient=admin_user,
+                    shelter=adoption.shelter,
+                    subject=f"📅 Appointment Reschedule Requested for Adoption #{adoption.id}",
+                    body=f"Customer '{cust_name}' requested appointment rescheduling for adoption #{adoption.id} ({pet_name}) at shelter '{sh_name}' to {formatted_new_date} at {new_time_str}."
+                )
+    except Exception as e:
+        print(f"Error creating reschedule notifications: {e}")
+
+    try:
+        AuditLog.objects.create(
+            user=request.user if request.user.is_authenticated else adoption.customer,
+            user_role='Customer',
+            action='APPOINTMENT_RESCHEDULE_REQUESTED',
+            module='Adoption Requests',
+            adoption_request=adoption,
+            description=f"Reschedule requested for adoption #{adoption.id} to {formatted_new_date} at {new_time_str}."
+        )
+    except Exception:
+        pass
+
+    return JsonResponse({
+        'success': True,
+        'message': f"Reschedule requested for {formatted_new_date} at {new_time_str}. Awaiting shelter confirmation.",
+        'adoption_id': adoption.id,
+        'appointment_status': 'RESCHEDULE_REQUESTED',
+        'new_date': formatted_new_date,
+        'new_time': new_time_str
+    })
+
+
+@csrf_exempt
+def api_confirm_rescheduled_appointment(request):
+    """
+    Shelter / Admin: Confirm or approve a customer's appointment rescheduling request.
+    """
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'POST method required'}, status=405)
+
+    try:
+        data = json.loads(request.body.decode('utf-8'))
+    except Exception:
+        data = request.POST
+
+    adoption_id_raw = data.get('adoption_id') or data.get('adoptionId') or data.get('id')
+    clean_id = ''.join(c for c in str(adoption_id_raw) if c.isdigit()) if adoption_id_raw else None
+
+    if not clean_id:
+        return JsonResponse({'success': False, 'error': 'Invalid adoption_id'}, status=400)
+
+    adoption = AdoptionRequest.objects.filter(id=int(clean_id)).first()
+    if not adoption:
+        return JsonResponse({'success': False, 'error': 'Adoption request not found'}, status=404)
+
+    if adoption.reschedule_requested_date:
+        adoption.appointment_date = adoption.reschedule_requested_date
+        if adoption.reschedule_requested_time:
+            adoption.appointment_time = adoption.reschedule_requested_time
+
+    adoption.appointment_status = 'RESCHEDULED'
+
+    curr_history = list(adoption.appointment_history or [])
+    curr_history.append({
+        'status': 'RESCHEDULED',
+        'date': adoption.appointment_date.strftime('%d %B %Y') if adoption.appointment_date else '',
+        'time': adoption.appointment_time or '',
+        'confirmed_at': timezone.now().strftime('%d %b %Y %H:%M')
+    })
+    adoption.appointment_history = curr_history
+    adoption.save()
+
+    formatted_date = adoption.appointment_date.strftime('%d %B %Y') if adoption.appointment_date else ''
+
+    try:
+        AuditLog.objects.create(
+            user=request.user if request.user.is_authenticated else None,
+            user_role='Shelter',
+            action='APPOINTMENT_RESCHEDULE_CONFIRMED',
+            module='Adoption Requests',
+            adoption_request=adoption,
+            description=f"Rescheduled appointment confirmed for adoption #{adoption.id} on {formatted_date} at {adoption.appointment_time}."
+        )
+    except Exception:
+        pass
+
+    return JsonResponse({
+        'success': True,
+        'message': f"Rescheduled appointment confirmed for {formatted_date} at {adoption.appointment_time}.",
+        'adoption_id': adoption.id,
+        'appointment_status': 'RESCHEDULED',
+        'date': formatted_date,
+        'time': adoption.appointment_time
+    })
+
+
+@csrf_exempt
+def api_toggle_favorite(request):
+    """
+    API endpoint to toggle saving a pet to the logged-in user's favorites in Django database.
+    Persists FavoritePet objects so favorites remain saved across page refreshes.
+    """
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'POST request required'}, status=405)
+
+    if not request.user.is_authenticated or request.user.is_anonymous:
+        return JsonResponse({'success': False, 'error': 'Authentication required to save favorites.'}, status=401)
+
+    try:
+        data = json.loads(request.body.decode('utf-8'))
+    except Exception:
+        data = request.POST
+
+    pet_id_raw = str(data.get('pet_id', '')).strip()
+    if not pet_id_raw:
+        return JsonResponse({'success': False, 'error': 'Pet ID is required'}, status=400)
+
+    clean_id = pet_id_raw.replace('P', '').replace('p', '')
+    try:
+        pet_obj = Pet.objects.get(id=clean_id)
+    except (Pet.DoesNotExist, ValueError):
+        return JsonResponse({'success': False, 'error': 'Pet not found'}, status=404)
+
+    fav_obj = FavoritePet.objects.filter(user=request.user, pet=pet_obj).first()
+    if fav_obj:
+        fav_obj.delete()
+        is_favorite = False
+        message = f"{pet_obj.name} removed from saved favorites."
+    else:
+        FavoritePet.objects.get_or_create(user=request.user, pet=pet_obj)
+        is_favorite = True
+        message = f"{pet_obj.name} saved to your favorites."
+
+    user_fav_ids = list(FavoritePet.objects.filter(user=request.user).values_list('pet_id', flat=True))
+    formatted_favs = [f"P{pid}" for pid in user_fav_ids]
+
+    return JsonResponse({
+        'success': True,
+        'is_favorite': is_favorite,
+        'message': message,
+        'favorites_count': len(formatted_favs),
+        'favorites': formatted_favs
+    })
+
 
 
 

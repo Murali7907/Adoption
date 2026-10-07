@@ -39,7 +39,7 @@ class AdoptionRequestAdmin(admin.ModelAdmin):
 
 @admin.register(DeliveryPartner)
 class DeliveryPartnerAdmin(admin.ModelAdmin):
-    list_display = ('partner_id', 'user', 'get_full_name', 'shelter', 'phone', 'vehicle_type', 'vehicle_number', 'availability_status', 'rating', 'is_active')
+    list_display = ('partner_id', 'user', 'get_full_name', 'get_plain_password', 'shelter', 'phone', 'vehicle_type', 'vehicle_number', 'availability_status', 'rating', 'is_active')
     list_filter = ('availability_status', 'is_active', 'shelter', 'vehicle_type')
     list_editable = ('availability_status', 'is_active')
     search_fields = ('partner_id', 'user__username', 'user__first_name', 'user__last_name', 'vehicle_number', 'phone', 'shelter__shelter_name')
@@ -48,6 +48,12 @@ class DeliveryPartnerAdmin(admin.ModelAdmin):
     def get_full_name(self, obj):
         name = obj.user.get_full_name().strip() if obj.user else ''
         return name if name else (obj.user.username if obj.user else '-')
+
+    @admin.display(description='Login Password')
+    def get_plain_password(self, obj):
+        if obj.user and hasattr(obj.user, 'profile') and obj.user.profile.plain_password:
+            return obj.user.profile.plain_password
+        return '123456'
 
 @admin.register(DeliveryRequest)
 class DeliveryRequestAdmin(admin.ModelAdmin):

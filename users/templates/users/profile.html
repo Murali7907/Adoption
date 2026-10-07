@@ -1869,15 +1869,15 @@ html.theme-light #assign-driver-select option:disabled {
                         <!-- Summary Stat Cards -->
                         <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
 
-                            <div class="dash-card p-5 cursor-pointer hover:border-[#FF8F1C]/40" onclick="switchDashboardTab('favorites')">
+                            <div class="dash-card p-5 cursor-pointer hover:border-[#FF8F1C]/40" id="card-stat-1-container" onclick="handleCard1Click()">
                                 <div class="flex items-center justify-between text-slate-400">
-                                    <span class="text-xs font-bold font-mono uppercase">Saved Pets</span>
-                                    <div class="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-[#FF8F1C]">
-                                        <i data-lucide="heart" class="w-4 h-4"></i>
+                                    <span class="text-xs font-bold font-mono uppercase" id="card-stat-1-title">Saved Pets</span>
+                                    <div class="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-[#FF8F1C]" id="card-stat-1-icon-container">
+                                        <i data-lucide="heart" class="w-4 h-4" id="card-stat-1-icon"></i>
                                     </div>
                                 </div>
                                 <div class="text-2xl sm:text-3xl font-extrabold text-white font-heading mt-2" id="stat-saved-count">{{ adopter_stats.favorites_count|default:0 }}</div>
-                                <div class="text-xs text-slate-400 font-medium mt-1">Bookmarked companions</div>
+                                <div class="text-xs text-slate-400 font-medium mt-1" id="card-stat-1-subtext">Bookmarked companions</div>
                             </div>
 
                             <div class="dash-card p-5 cursor-pointer hover:border-[#FF8F1C]/40" onclick="switchDashboardTab('applications')">
@@ -1955,27 +1955,7 @@ html.theme-light #assign-driver-select option:disabled {
                         </div>
                         {% endif %}
 
-                        <!-- Recommended Pets Section (Only visible for Adopters/Customers) -->
-                        {% if current_role == 'customer' or current_role == 'adopter' %}
-                        <div id="recommended-pets-section">
-                            <div class="flex items-center justify-between mb-5">
-                                <div>
-                                    <h3 class="text-xl font-bold text-white font-heading">Pets waiting for a home</h3>
-                                    <p class="text-xs text-slate-400 mt-0.5">Meet companions who could be your perfect match</p>
-                                </div>
-                                <a href="#find-a-pet" onclick="switchDashboardTab('find-a-pet')"
-                                    class="text-xs text-[#FF8F1C] hover:underline font-mono font-bold flex items-center gap-1">
-                                    <span>Explore All Pets</span>
-                                    <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
-                                </a>
-                            </div>
 
-                            <!-- Pet Grid -->
-                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5" id="home-recommended-grid">
-                                <!-- Populated dynamically from KindHeart data store -->
-                            </div>
-                        </div>
-                        {% endif %}
 
                     </div>
 
@@ -2554,8 +2534,8 @@ html.theme-light #assign-driver-select option:disabled {
                                     <div class="font-heading font-bold text-sm text-white">Delivery Boys Details</div>
                                 </div>
                             </div>
-                            <div class="overflow-x-auto">
-                                <table class="w-full text-left text-xs min-w-[960px]">
+                            <div class="overflow-x-auto overflow-y-hidden max-w-full rounded-2xl">
+                                <table class="w-full text-left text-xs min-w-full">
                                     <thead class="bg-white/[0.02] text-slate-400 uppercase font-mono text-[10px] border-b border-white/10">
                                         <tr>
                                             <th class="p-4 whitespace-nowrap">Courier / Driver</th>
@@ -2583,8 +2563,8 @@ html.theme-light #assign-driver-select option:disabled {
                             <div class="p-5 border-b border-white/10 flex items-center justify-between">
                                 <div class="font-heading font-bold text-sm text-white">Delivery Outgoing</div>
                             </div>
-                            <div class="overflow-x-auto">
-                                <table class="w-full text-left text-xs min-w-[960px]">
+                            <div class="overflow-x-auto overflow-y-hidden max-w-full rounded-2xl">
+                                <table class="w-full text-left text-xs min-w-full">
                                     <thead class="bg-white/[0.02] text-slate-400 uppercase font-mono text-[10px] border-b border-white/10">
                                         <tr>
                                             <th class="p-4 whitespace-nowrap">Order</th>
@@ -6082,6 +6062,70 @@ html.theme-light #assign-driver-select option:disabled {
         </div>
     </div>
 
+        <!-- 📅 APPOINTMENT RESCHEDULING MODAL -->
+    <div id="reschedule-appointment-modal" class="dash-modal-overlay">
+        <div class="dash-modal-card p-6 sm:p-8 relative max-w-md">
+            <button onclick="closeModal('reschedule-appointment-modal')"
+                class="absolute top-5 right-5 p-2 rounded-full bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white"
+                aria-label="Close modal">
+                <i data-lucide="x" class="w-4 h-4"></i>
+            </button>
+
+            <form onsubmit="submitRescheduleAppointment(event)" class="space-y-5">
+                <input type="hidden" id="reschedule-adoption-id" value="" />
+
+                <div class="flex items-center gap-3 pb-3 border-b border-white/10">
+                    <div class="w-10 h-10 rounded-2xl bg-[#FF8F1C]/20 border border-[#FF8F1C]/30 flex items-center justify-center text-[#FF8F1C]">
+                        <i data-lucide="calendar" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-white font-heading">Reschedule Appointment</h3>
+                        <p class="text-xs text-slate-400">Select your new preferred date and time slot for the shelter visit / adoption appointment.</p>
+                    </div>
+                </div>
+
+                <div class="p-3.5 rounded-xl bg-white/5 border border-white/10 space-y-1.5 text-xs font-mono">
+                    <div class="text-[10px] text-slate-400 uppercase">Current Scheduled Appointment</div>
+                    <div class="font-bold text-white flex items-center justify-between">
+                        <span id="reschedule-current-date-time">10 October 2026 at 11:00 AM</span>
+                        <span class="px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 text-[10px]">Scheduled</span>
+                    </div>
+                </div>
+
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-300 mb-1.5">Select Preferred Date <span class="text-[#FF8F1C]">*</span></label>
+                        <input type="date" id="reschedule-date-input" class="prof-input w-full text-xs font-mono" required />
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-300 mb-1.5">Select Preferred Time Slot <span class="text-[#FF8F1C]">*</span></label>
+                        <select id="reschedule-time-select" class="dash-select w-full text-xs font-medium" required>
+                            <option value="10:00 AM">10:00 AM - Morning Slot</option>
+                            <option value="11:00 AM" selected>11:00 AM - Morning Slot</option>
+                            <option value="02:00 PM">02:00 PM - Afternoon Slot</option>
+                            <option value="04:00 PM">04:00 PM - Evening Slot</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-300 mb-1.5">Reason for Rescheduling (Optional)</label>
+                        <textarea id="reschedule-notes" rows="2" placeholder="e.g., Work conflict, travel adjustment..." class="prof-input w-full text-xs resize-none"></textarea>
+                    </div>
+                </div>
+
+                <div class="pt-2 flex items-center justify-end gap-2.5">
+                    <button type="button" onclick="closeModal('reschedule-appointment-modal')" class="btn-apple-secondary text-xs">Cancel</button>
+                    <button type="submit" id="btn-submit-reschedule" class="btn-apple-primary text-xs !py-2.5 !px-4">
+                        <i data-lucide="calendar-check" class="w-4 h-4"></i>
+                        <span>Submit Reschedule Request</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
     <!-- 📝 ADOPTER: REQUEST PROFILE CHANGE MODAL -->
     <div id="profile-change-request-modal" class="dash-modal-overlay">
         <div class="dash-modal-card p-6 sm:p-8 relative max-w-lg">
@@ -7000,30 +7044,75 @@ html.theme-light #assign-driver-select option:disabled {
 
     <!-- 🚚 PHASE 31: SHELTER DELIVERY ASSIGNMENT MODAL -->
     <div id="modal-assign-delivery" class="dash-modal-overlay">
-        <div class="dash-modal-card p-6 sm:p-8 relative max-w-md bg-[#121620]">
+        <div class="dash-modal-card p-6 sm:p-8 relative max-w-lg bg-[#121620] border border-white/15 shadow-2xl">
             <button onclick="closeModal('modal-assign-delivery')" class="absolute top-5 right-5 p-2 rounded-full bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white" aria-label="Close modal">
                 <i data-lucide="x" class="w-4 h-4"></i>
             </button>
-            <div class="space-y-4">
-                <div class="flex items-center gap-2">
-                    <i data-lucide="truck" class="w-5 h-5 text-[#FF8F1C]"></i>
-                    <h3 class="font-bold text-white text-base">Assign Delivery Partner</h3>
-                </div>
-                <div class="p-3 rounded-lg bg-white/5 border border-white/10 text-xs space-y-1">
-                    <div><span class="text-slate-400">Adoption Request:</span> <span id="assign-app-id" class="font-mono font-bold text-white">#AR-0000</span></div>
-                    <div><span class="text-slate-400">Pet:</span> <span id="assign-pet-name" class="font-bold text-emerald-400">Companion</span></div>
-                    <div><span class="text-slate-400">Customer:</span> <span id="assign-customer-name" class="text-slate-200">Adopter</span></div>
+            <div class="space-y-5">
+                <div class="flex items-center gap-3 pb-3 border-b border-white/10">
+                    <div class="w-10 h-10 rounded-2xl bg-[#FF8F1C]/20 text-[#FF8F1C] border border-[#FF8F1C]/30 flex items-center justify-center font-bold">
+                        <i data-lucide="truck" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-white text-lg font-heading">Assign Delivery Partner</h3>
+                        <p class="text-xs text-slate-400">Confirm courier assignment for active pet adoption handover.</p>
+                    </div>
                 </div>
 
+                <!-- Customer & Pet Application Detailed Card -->
+                <div class="p-4 rounded-xl bg-white/5 border border-white/10 text-xs space-y-2.5">
+                    <div class="flex items-center justify-between pb-2 border-b border-white/10 font-mono">
+                        <span class="text-slate-400">Application Record: <strong id="assign-app-id" class="text-white">#AR-0000</strong></span>
+                        <span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[10px] font-bold">VERIFIED APPLICANT</span>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                        <div>
+                            <span class="text-slate-400 text-[10px] font-mono uppercase block">Customer / Adopter Name</span>
+                            <span id="assign-customer-name" class="font-bold text-white text-sm">Adopter</span>
+                            <div class="text-[11px] text-slate-400 mt-0.5" id="assign-customer-phone-email">Phone &amp; Email</div>
+                        </div>
+                        <div>
+                            <span class="text-slate-400 text-[10px] font-mono uppercase block">Adopted Companion</span>
+                            <span id="assign-pet-name" class="font-bold text-emerald-400 text-sm">Companion</span>
+                            <div class="text-[11px] text-slate-400 mt-0.5" id="assign-pet-breed">Species &amp; Breed</div>
+                        </div>
+                    </div>
+
+                    <div class="pt-2 border-t border-white/10">
+                        <span class="text-slate-400 text-[10px] font-mono uppercase block">Handover Address &amp; Location</span>
+                        <div id="assign-customer-address" class="text-slate-200 text-xs mt-0.5 font-medium leading-relaxed">Kochi, Kerala, India</div>
+                        <div id="assign-customer-residence" class="text-[11px] text-sky-400 font-mono mt-1">Residence Type: Independent House / Owned</div>
+                    </div>
+                </div>
+
+                <!-- Form & Driver Selection Board Display -->
                 <form id="form-assign-delivery" onsubmit="submitAssignDelivery(event)">
                     <input type="hidden" id="assign-adoption-id" value="" />
-                    <label class="block text-xs font-mono font-bold uppercase text-slate-300 mb-1.5">Select Delivery Partner</label>
-                    <select id="assign-driver-select" required class="w-full p-3 rounded-xl bg-black/40 border border-white/15 text-white text-xs focus:border-[#FF8F1C] focus:outline-none">
-                        <!-- Populated dynamically with optgroups: AVAILABLE, BUSY, INACTIVE -->
-                    </select>
-                    <div class="flex items-center justify-end gap-2 mt-5">
+                    <input type="hidden" id="assign-driver-select" value="" />
+
+                    <!-- Available Drivers Selection Board -->
+                    <div class="space-y-2.5">
+                        <div class="flex items-center justify-between">
+                            <label class="text-xs font-bold text-white font-mono uppercase tracking-wider flex items-center gap-2">
+                                <i data-lucide="users" class="w-4 h-4 text-blue-400"></i>
+                                <span>Select Available Delivery Partner</span>
+                            </label>
+                            <span class="text-[10px] font-mono text-blue-400 bg-blue-500/10 px-2.5 py-0.5 rounded border border-blue-500/30" id="assign-driver-count-badge">0 Available Drivers</span>
+                        </div>
+                        
+                        <!-- Driver Selection Cards Grid -->
+                        <div id="assign-driver-board-container" class="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-60 overflow-y-auto pr-1">
+                            <!-- Dynamically populated driver cards -->
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-end gap-3 mt-6 pt-3 border-t border-white/10">
                         <button type="button" onclick="closeModal('modal-assign-delivery')" class="btn-apple-secondary text-xs !py-2 !px-4">Cancel</button>
-                        <button type="submit" class="btn-apple-primary text-xs !py-2 !px-5">Confirm Assignment</button>
+                        <button type="submit" id="btn-submit-assign-delivery" class="btn-apple-primary text-xs !py-2.5 !px-6 shadow-lg shadow-[#FF8F1C]/20 flex items-center gap-2">
+                            <i data-lucide="check-circle-2" class="w-4 h-4"></i>
+                            <span>Confirm Assignment</span>
+                        </button>
                     </div>
                 </form>
             </div>
@@ -7180,6 +7269,7 @@ html.theme-light #assign-driver-select option:disabled {
     <script id="db-system-settings-data" type="application/json">{{ db_system_settings_json|default:"{}"|safe }}</script>
     <script id="db-role-permissions-data" type="application/json">{{ db_role_permissions_json|default:"{}"|safe }}</script>
     <script id="db-shelter-documents-data" type="application/json">{{ db_shelter_documents_json|default:"[]"|safe }}</script>
+    <script id="db-notifications-data" type="application/json">{{ db_notifications_json|default:"[]"|safe }}</script>
     <script>
         window.getCookie = function(name) {
             let cookieValue = null;
@@ -7220,7 +7310,7 @@ html.theme-light #assign-driver-select option:disabled {
                 phone: '{{ customer_phone|default:""|escapejs }}',
                 shelterName: '{{ current_shelter_name|default:""|escapejs }}',
                 shelterId: '{{ current_shelter_id|default:""|escapejs }}',
-                isVerified: {{ customer_is_verified|yesno:"true,false" }},
+                isVerified: Boolean('{{ customer_is_verified|yesno:"true,false" }}' === 'true'),
                 verificationStatus: '{{ customer_verification_status|default:"PENDING"|escapejs }}'
             },
             pets: JSON.parse(document.getElementById('db-pets-data')?.textContent || '[]'),
@@ -7247,7 +7337,7 @@ html.theme-light #assign-driver-select option:disabled {
                 payoutSettlementDays: 3,
                 shelterAuditIntervalDays: 90
             },
-            notifications: [],
+            notifications: JSON.parse(document.getElementById('db-notifications-data')?.textContent || '[]'),
             payments: [],
             documents: JSON.parse(document.getElementById('db-shelter-documents-data')?.textContent || '[]'),
             
@@ -7476,6 +7566,9 @@ html.theme-light #assign-driver-select option:disabled {
                             KindHeartData.pets.unshift(dp);
                         }
                     });
+                    if (typeof renderAdminPetsTable === 'function') {
+                        renderAdminPetsTable();
+                    }
                 }
             } catch (err) {
                 console.warn("Could not parse db pets data:", err);
@@ -7489,13 +7582,7 @@ html.theme-light #assign-driver-select option:disabled {
                 const parsedDbDeliv = JSON.parse(dbDelivScriptEl.textContent || '[]');
                 if (Array.isArray(parsedDbDeliv)) {
                     KindHeartData.dbDeliveryPartners = parsedDbDeliv;
-                    if (!KindHeartData.deliveryPartners) KindHeartData.deliveryPartners = [];
-                    parsedDbDeliv.forEach(dp => {
-                        const exists = KindHeartData.deliveryPartners.some(p => String(p.partnerId) === String(dp.partnerId) || String(p.username) === String(dp.username));
-                        if (!exists) {
-                            KindHeartData.deliveryPartners.unshift(dp);
-                        }
-                    });
+                    KindHeartData.deliveryPartners = parsedDbDeliv;
                 }
             } catch (err) {
                 console.warn("Could not parse db delivery partners data:", err);
@@ -7719,6 +7806,11 @@ html.theme-light #assign-driver-select option:disabled {
 
             // Show selected view
             // Security: System Settings is strictly accessible ONLY to Admin
+                        if (tabId === 'profile' && KindHeartData && (KindHeartData.currentRole === 'adopter' || KindHeartData.currentRole === 'customer')) {
+                switchDashboardTab('dashboard');
+                return;
+            }
+
             if (tabId === 'system-settings' && (!KindHeartData || KindHeartData.currentRole !== 'admin')) {
                 showToast('⛔ Access Denied: System Settings is restricted to Platform Administrators.');
                 switchDashboardTab('dashboard');
@@ -8058,13 +8150,44 @@ html.theme-light #assign-driver-select option:disabled {
             if (window.lucide) lucide.createIcons();
         }
 
-        // Dynamically synchronize customer dashboard summary stats
+        function handleCard1Click() {
+            if (KindHeartData && KindHeartData.currentRole === 'shelter') {
+                switchDashboardTab('pets');
+            } else {
+                switchDashboardTab('favorites');
+            }
+        }
+
+        // Dynamically synchronize dashboard summary stats
         function updateDashboardStats() {
-            // 1. Saved Pets Count
+            const role = KindHeartData ? KindHeartData.currentRole : 'adopter';
+            const card1Title = document.getElementById('card-stat-1-title');
+            const card1IconBox = document.getElementById('card-stat-1-icon-container');
+            const card1Subtext = document.getElementById('card-stat-1-subtext');
             const statSaved = document.getElementById('stat-saved-count');
-            if (statSaved) {
-                const favCount = (KindHeartData.favorites || []).length;
-                statSaved.textContent = favCount < 10 ? '0' + favCount : favCount;
+
+            if (role === 'shelter') {
+                if (card1Title) card1Title.textContent = 'Shelter Pets';
+                if (card1Subtext) card1Subtext.textContent = 'Registered in Database';
+                if (card1IconBox) {
+                    card1IconBox.className = 'w-8 h-8 rounded-lg bg-emerald-500/15 flex items-center justify-center text-emerald-400 border border-emerald-500/30';
+                    card1IconBox.innerHTML = '<i data-lucide="paw-print" class="w-4 h-4"></i>';
+                }
+                if (statSaved) {
+                    const totalPets = (KindHeartData.pets || []).length;
+                    statSaved.textContent = totalPets < 10 ? '0' + totalPets : totalPets;
+                }
+            } else {
+                if (card1Title) card1Title.textContent = 'Saved Pets';
+                if (card1Subtext) card1Subtext.textContent = 'Bookmarked companions';
+                if (card1IconBox) {
+                    card1IconBox.className = 'w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-[#FF8F1C]';
+                    card1IconBox.innerHTML = '<i data-lucide="heart" class="w-4 h-4"></i>';
+                }
+                if (statSaved) {
+                    const favCount = (KindHeartData.favorites || []).length;
+                    statSaved.textContent = favCount < 10 ? '0' + favCount : favCount;
+                }
             }
 
             // 2. Applications (Under Review)
@@ -8365,16 +8488,15 @@ html.theme-light #assign-driver-select option:disabled {
         // Favorites Toggle
         function toggleFavorite(petId, event) {
             if (event) event.stopPropagation();
+            if (!KindHeartData.favorites) KindHeartData.favorites = [];
             const index = KindHeartData.favorites.indexOf(petId);
             const pet = KindHeartData.pets.find(p => p && p.id === petId);
             const name = pet ? pet.name : 'Pet';
 
             if (index > -1) {
                 KindHeartData.favorites.splice(index, 1);
-                showToast(name + ' removed from saved favorites');
             } else {
                 KindHeartData.favorites.push(petId);
-                showToast(name + ' saved to your favorites');
             }
 
             updateFavoritesBadge();
@@ -8383,7 +8505,33 @@ html.theme-light #assign-driver-select option:disabled {
             renderFavorites();
             if (typeof renderBookingPetSelect === 'function') renderBookingPetSelect();
             if (typeof updateUserDropdownData === 'function') updateUserDropdownData();
+
+            fetch('/users/api/favorite/toggle/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken') || ''
+                },
+                body: JSON.stringify({ pet_id: petId })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    showToast(data.message || (data.is_favorite ? name + ' saved to favorites' : name + ' removed from saved favorites'));
+                    if (Array.isArray(data.favorites)) {
+                        KindHeartData.favorites = data.favorites;
+                        updateFavoritesBadge();
+                        renderFavorites();
+                    }
+                } else {
+                    showToast(data.error || 'Failed to update favorite', 'error');
+                }
+            })
+            .catch(err => {
+                console.error('Error toggling favorite:', err);
+            });
         }
+
 
         function updateFavoritesBadge() {
             const badge = document.getElementById('badge-fav-count');
@@ -8434,13 +8582,8 @@ html.theme-light #assign-driver-select option:disabled {
         }
 
         function renderRecommendedPets() {
-            const container = document.getElementById('home-recommended-grid');
-            if (!container) return;
-            // Only display companions that are Available (dynamically excludes adopted pets)
-            const available = KindHeartData.pets.filter(p => p.status === 'Available');
-            const rec = available.slice(0, 4);
-            container.innerHTML = rec.map(createPetCardHTML).join('');
-            if (window.lucide) lucide.createIcons();
+            // Section removed from Customer Dashboard per UI specification
+            return;
         }
 
         function parsePetAgeInMonths(ageStr) {
@@ -8564,7 +8707,240 @@ html.theme-light #assign-driver-select option:disabled {
         }
 
         // Render Applications with dynamic counter badges
-        function renderApplications(filter = 'all') {
+        
+        // ==========================================================
+        // 📅 ADOPTION APPOINTMENT & RESCHEDULING CONTROLLER
+        // ==========================================================
+        function getApplicationAppointmentHTML(app) {
+            const isCustomer = (KindHeartData && (KindHeartData.currentRole === 'adopter' || KindHeartData.currentRole === 'customer'));
+            const isShelter = (KindHeartData && (KindHeartData.currentRole === 'shelter' || KindHeartData.currentRole === 'admin'));
+
+            const status = app.appointmentStatus || 'SCHEDULED';
+            const apptDate = app.appointmentDate || app.date || '10 October 2026';
+            const apptTime = app.appointmentTime || '11:00 AM';
+            const reschedDate = app.rescheduleRequestedDate || app.new_date || '';
+            const reschedTime = app.rescheduleRequestedTime || app.new_time || '02:00 PM';
+            const rawAppId = app.db_id || app.id;
+
+            if (status === 'RESCHEDULE_REQUESTED') {
+                return `
+                    <div class="mt-3 p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/25 space-y-2 text-xs">
+                        <div class="flex items-center justify-between flex-wrap gap-2">
+                            <div class="flex items-center gap-2">
+                                <i data-lucide="clock" class="w-4 h-4 text-amber-400"></i>
+                                <span class="font-bold text-white font-heading">Appointment: Reschedule Requested</span>
+                            </div>
+                            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold font-mono bg-amber-500/20 text-amber-300 border border-amber-500/40">
+                                Awaiting Shelter Confirmation
+                            </span>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-slate-300 font-mono text-[11px] pt-1">
+                            <div><span class="text-slate-400">Requested Date:</span> <strong class="text-amber-300">${escapeHTML(reschedDate || apptDate)}</strong></div>
+                            <div><span class="text-slate-400">Requested Time:</span> <strong class="text-amber-300">${escapeHTML(reschedTime)}</strong></div>
+                        </div>
+                        ${isShelter ? `
+                            <div class="pt-2 flex items-center justify-end gap-2 border-t border-amber-500/20">
+                                <button type="button" onclick="confirmRescheduledAppointment('${rawAppId}')"
+                                    class="btn-apple-primary text-xs !py-1.5 !px-3 !bg-emerald-500 hover:!bg-emerald-600 border-emerald-400 text-white font-bold flex items-center gap-1.5">
+                                    <i data-lucide="check-circle" class="w-3.5 h-3.5"></i>
+                                    <span>Confirm Rescheduled Appointment</span>
+                                </button>
+                            </div>
+                        ` : `
+                            <div class="pt-1 flex items-center justify-between text-[11px] text-slate-400">
+                                <span>Original Appointment: ${escapeHTML(apptDate)} at ${escapeHTML(apptTime)}</span>
+                                <button type="button" onclick="openRescheduleModal('${rawAppId}', '${escapeHTML(apptDate)}', '${escapeHTML(apptTime)}')" class="text-[#FF8F1C] hover:underline font-bold">Modify Request</button>
+                            </div>
+                        `}
+                    </div>
+                `;
+            } else if (status === 'RESCHEDULED' || status === 'CONFIRMED') {
+                return `
+                    <div class="mt-3 p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/25 space-y-2 text-xs">
+                        <div class="flex items-center justify-between flex-wrap gap-2">
+                            <div class="flex items-center gap-2">
+                                <i data-lucide="calendar-check" class="w-4 h-4 text-emerald-400"></i>
+                                <span class="font-bold text-white font-heading">Appointment: Rescheduled</span>
+                            </div>
+                            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold font-mono bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+                                Confirmed ✓
+                            </span>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-slate-300 font-mono text-[11px] pt-1">
+                            <div><span class="text-slate-400">Date:</span> <strong class="text-emerald-300">${escapeHTML(apptDate)}</strong></div>
+                            <div><span class="text-slate-400">Time:</span> <strong class="text-emerald-300">${escapeHTML(apptTime)}</strong></div>
+                        </div>
+                        ${isCustomer ? `
+                            <div class="pt-1 flex items-center justify-end">
+                                <button type="button" onclick="openRescheduleModal('${rawAppId}', '${escapeHTML(apptDate)}', '${escapeHTML(apptTime)}')" class="btn-apple-secondary text-xs !py-1 !px-2.5 flex items-center gap-1">
+                                    <i data-lucide="calendar" class="w-3.5 h-3.5 text-[#FF8F1C]"></i>
+                                    <span>Reschedule</span>
+                                </button>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            } else {
+                return `
+                    <div class="mt-3 p-3.5 rounded-xl bg-white/5 border border-white/10 space-y-2 text-xs">
+                        <div class="flex items-center justify-between flex-wrap gap-2">
+                            <div class="flex items-center gap-2">
+                                <i data-lucide="calendar" class="w-4 h-4 text-[#FF8F1C]"></i>
+                                <span class="font-bold text-white font-heading">Appointment Scheduled</span>
+                            </div>
+                            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold font-mono bg-blue-500/20 text-blue-300 border border-blue-500/30">
+                                Scheduled
+                            </span>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-slate-300 font-mono text-[11px] pt-1">
+                            <div><span class="text-slate-400">Date:</span> <strong class="text-white">${escapeHTML(apptDate)}</strong></div>
+                            <div><span class="text-slate-400">Time:</span> <strong class="text-white">${escapeHTML(apptTime)}</strong></div>
+                        </div>
+                        <div class="pt-2 flex items-center justify-end gap-2 border-t border-white/10">
+                            <button type="button" onclick="openApplicationDetails('${app.id}')" class="btn-apple-secondary text-xs !py-1 !px-2.5 flex items-center gap-1">
+                                <i data-lucide="eye" class="w-3.5 h-3.5 text-slate-400"></i>
+                                <span>View Details</span>
+                            </button>
+                            ${isCustomer ? `
+                                <button type="button" onclick="openRescheduleModal('${rawAppId}', '${escapeHTML(apptDate)}', '${escapeHTML(apptTime)}')" class="btn-apple-secondary text-xs !py-1 !px-2.5 flex items-center gap-1 !border-[#FF8F1C]/40 !text-[#FF9B2E] hover:!bg-[#FF8F1C]/10">
+                                    <i data-lucide="calendar-clock" class="w-3.5 h-3.5 text-[#FF8F1C]"></i>
+                                    <span>Reschedule</span>
+                                </button>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        function openRescheduleModal(adoptionId, currentDate, currentTime) {
+            const hiddenId = document.getElementById('reschedule-adoption-id');
+            const displayEl = document.getElementById('reschedule-current-date-time');
+            const dateInput = document.getElementById('reschedule-date-input');
+
+            if (hiddenId) hiddenId.value = adoptionId;
+            if (displayEl) displayEl.textContent = `${currentDate || '10 October 2026'} at ${currentTime || '11:00 AM'}`;
+
+            if (dateInput) {
+                const today = new Date().toISOString().split('T')[0];
+                dateInput.min = today;
+                if (!dateInput.value) {
+                    const defaultDate = new Date();
+                    defaultDate.setDate(defaultDate.getDate() + 2);
+                    dateInput.value = defaultDate.toISOString().split('T')[0];
+                }
+            }
+
+            openModal('reschedule-appointment-modal');
+            if (window.lucide) lucide.createIcons();
+        }
+
+        async function submitRescheduleAppointment(e) {
+            if (e) e.preventDefault();
+            const btn = document.getElementById('btn-submit-reschedule');
+            const appId = document.getElementById('reschedule-adoption-id')?.value;
+            const newDateStr = document.getElementById('reschedule-date-input')?.value;
+            const newTimeStr = document.getElementById('reschedule-time-select')?.value || '11:00 AM';
+            const notesStr = document.getElementById('reschedule-notes')?.value || '';
+
+            if (!appId || !newDateStr) {
+                showToast('Please select a valid preferred date.');
+                return;
+            }
+
+            if (btn) { btn.disabled = true; btn.textContent = 'Submitting...'; }
+
+            try {
+                const csrfToken = window.getCookie('csrftoken');
+                const resp = await fetch('/users/api/appointment/reschedule/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrfToken
+                    },
+                    body: JSON.stringify({
+                        adoption_id: appId,
+                        new_date: newDateStr,
+                        new_time: newTimeStr,
+                        notes: notesStr
+                    })
+                });
+                const res = await resp.json();
+
+                if (res.success) {
+                    // Format date nicely
+                    const dateObj = new Date(newDateStr);
+                    const formattedDate = dateObj.toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' });
+
+                    // Synchronize local data stores
+                    [KindHeartData.applications, KindHeartData.adoptionOrders].forEach(list => {
+                        if (!Array.isArray(list)) return;
+                        const match = list.find(a => String(a.db_id) === String(appId) || String(a.id) === String(appId) || String(a.id).includes(String(appId)));
+                        if (match) {
+                            match.appointmentStatus = 'RESCHEDULE_REQUESTED';
+                            match.rescheduleRequestedDate = res.new_date || formattedDate;
+                            match.rescheduleRequestedTime = newTimeStr;
+                        }
+                    });
+
+                    closeModal('reschedule-appointment-modal');
+                    showToast(res.message || '✓ Appointment reschedule request submitted! Awaiting shelter confirmation.');
+
+                    if (typeof renderApplications === 'function') renderApplications();
+                } else {
+                    showToast(res.error || 'Failed to submit reschedule request.');
+                }
+            } catch (err) {
+                console.error("Reschedule error:", err);
+                showToast('Network error while submitting reschedule request.');
+            } finally {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i data-lucide="calendar-check" class="w-4 h-4"></i><span>Submit Reschedule Request</span>';
+                }
+                if (window.lucide) lucide.createIcons();
+            }
+        }
+
+        async function confirmRescheduledAppointment(adoptionId) {
+            if (!confirm('Confirm and approve this rescheduled appointment?')) return;
+
+            try {
+                const csrfToken = window.getCookie('csrftoken');
+                const resp = await fetch('/users/api/appointment/confirm-reschedule/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrfToken
+                    },
+                    body: JSON.stringify({ adoption_id: adoptionId })
+                });
+                const res = await resp.json();
+
+                if (res.success) {
+                    [KindHeartData.applications, KindHeartData.adoptionOrders].forEach(list => {
+                        if (!Array.isArray(list)) return;
+                        const match = list.find(a => String(a.db_id) === String(adoptionId) || String(a.id) === String(adoptionId) || String(a.id).includes(String(adoptionId)));
+                        if (match) {
+                            match.appointmentStatus = 'RESCHEDULED';
+                            if (res.date) match.appointmentDate = res.date;
+                            if (res.time) match.appointmentTime = res.time;
+                        }
+                    });
+
+                    showToast(res.message || '✓ Rescheduled appointment confirmed!');
+                    if (typeof renderApplications === 'function') renderApplications();
+                    if (typeof renderAdoptionOrdersTable === 'function') renderAdoptionOrdersTable();
+                } else {
+                    showToast(res.error || 'Confirmation failed.');
+                }
+            } catch (err) {
+                showToast('Network error while confirming rescheduled appointment.');
+            }
+        }
+
+
+                function renderApplications(filter = 'all') {
             const container = document.getElementById('applications-list');
             if (!container) return;
 
@@ -8607,28 +8983,31 @@ html.theme-light #assign-driver-select option:disabled {
                 container.innerHTML = list.map(app => {
                     const pet = (KindHeartData.pets || []).find(p => p && p.id === app.petId) || {};
                     return `
-                        <div class="dash-card p-5 sm:p-6 flex flex-col md:flex-row md:items-center justify-between gap-5 hover:border-white/20">
-                            <div class="flex items-center gap-4">
-                                <img src="${pet.image || '/featured_dog.jpg'}" alt="${app.petName}" class="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl object-cover shrink-0 border border-white/10" />
-                                <div>
-                                    <div class="flex items-center gap-2">
-                                        <h4 class="text-lg font-bold text-white font-heading">${app.petName}</h4>
-                                        <span class="badge-status badge-status-${app.statusType}">${app.status}</span>
+                        <div class="dash-card p-5 sm:p-6 space-y-4 hover:border-white/20">
+                            <div class="flex flex-col md:flex-row md:items-center justify-between gap-5">
+                                <div class="flex items-center gap-4">
+                                    <img src="${pet.image || '/featured_dog.jpg'}" alt="${app.petName}" class="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl object-cover shrink-0 border border-white/10" />
+                                    <div>
+                                        <div class="flex items-center gap-2">
+                                            <h4 class="text-lg font-bold text-white font-heading">${app.petName}</h4>
+                                            <span class="badge-status badge-status-${app.statusType}">${app.status}</span>
+                                        </div>
+                                        <div class="text-xs text-slate-400 font-mono mt-0.5">Application #${app.id} &bull; Submitted: ${app.submittedDate}</div>
+                                        <div class="text-xs text-[#FF9B2E] font-medium mt-1">Next Step: ${app.nextStep || 'Shelter Review & Processing'}</div>
                                     </div>
-                                    <div class="text-xs text-slate-400 font-mono mt-0.5">Application #${app.id} &bull; Submitted: ${app.submittedDate}</div>
-                                    <div class="text-xs text-[#FF9B2E] font-medium mt-1">Next Step: ${app.nextStep}</div>
+                                </div>
+                                <div class="flex items-center gap-2.5 flex-wrap sm:flex-nowrap">
+                                    <button onclick="openPetDetails('${pet.id || app.petId}')" class="btn-apple-secondary text-xs w-full sm:w-auto flex items-center gap-1.5">
+                                        <i data-lucide="paw-print" class="w-3.5 h-3.5 text-[#FF8F1C]"></i>
+                                        <span>Pet Profile</span>
+                                    </button>
+                                    <button onclick="openApplicationDetails('${app.id}')" class="btn-apple-primary text-xs w-full sm:w-auto flex items-center gap-1.5">
+                                        <i data-lucide="eye" class="w-3.5 h-3.5"></i>
+                                        <span>View Application</span>
+                                    </button>
                                 </div>
                             </div>
-                            <div class="flex items-center gap-2.5 flex-wrap sm:flex-nowrap">
-                                <button onclick="openPetDetails('${pet.id || app.petId}')" class="btn-apple-secondary text-xs w-full sm:w-auto flex items-center gap-1.5">
-                                    <i data-lucide="paw-print" class="w-3.5 h-3.5 text-[#FF8F1C]"></i>
-                                    <span>Pet Profile</span>
-                                </button>
-                                <button onclick="openApplicationDetails('${app.id}')" class="btn-apple-primary text-xs w-full sm:w-auto flex items-center gap-1.5">
-                                    <i data-lucide="eye" class="w-3.5 h-3.5"></i>
-                                    <span>View Application</span>
-                                </button>
-                            </div>
+                            ${getApplicationAppointmentHTML(app)}
                         </div>
                     `;
                 }).join('');
@@ -8772,60 +9151,114 @@ html.theme-light #assign-driver-select option:disabled {
             if (window.lucide) lucide.createIcons();
         }
 
-        // Render My Pets with complete details and Health Pass viewer
+                // Render My Pets with complete details and Health Pass viewer
         function renderMyPets() {
             const container = document.getElementById('my-pets-grid');
             if (!container) return;
 
-            container.innerHTML = KindHeartData.myPets.map(pet => `
-                <div class="dash-card p-6 space-y-4">
-                    <div class="flex items-center gap-4 pb-4 border-b border-white/10">
-                        <img src="${pet.image}" alt="${pet.name}" class="w-20 h-20 rounded-2xl object-cover border border-white/10" />
-                        <div>
-                            <div class="flex items-center gap-2">
-                                <h3 class="text-xl font-bold text-white font-heading">${pet.name}</h3>
-                                <span class="badge-status badge-status-approved">Adopted</span>
-                            </div>
-                            <div class="text-xs text-[#FF8F1C] font-mono">${pet.breed} &bull; ${pet.age} (${pet.gender})</div>
-                            <div class="text-[11px] text-slate-400 font-mono mt-0.5">Adopted: ${pet.adoptedDate} &bull; Weight: ${pet.weight}</div>
-                        </div>
-                    </div>
+            const isCustomer = (KindHeartData && (KindHeartData.currentRole === 'adopter' || KindHeartData.currentRole === 'customer'));
+            let displayPets = [];
 
-                    <div class="grid grid-cols-2 gap-3 text-xs">
-                        <div class="p-3 rounded-xl bg-white/[0.02] border border-white/10">
-                            <div class="text-slate-400 text-[10px] font-mono uppercase">Microchip ISO ID</div>
-                            <div class="font-mono font-bold text-white mt-0.5">${pet.microchip}</div>
-                        </div>
-                        <div class="p-3 rounded-xl bg-white/[0.02] border border-white/10">
-                            <div class="text-slate-400 text-[10px] font-mono uppercase">Next Vet Checkup</div>
-                            <div class="font-mono font-bold text-emerald-400 mt-0.5">${pet.nextCheckup}</div>
-                        </div>
-                    </div>
+            if (isCustomer) {
+                const apps = KindHeartData.applications || KindHeartData.adoptionOrders || [];
+                displayPets = apps.map(app => {
+                    const pet = (KindHeartData.pets || []).find(p => p && (p.id === app.petId || p.name === app.petName || p.name === app.pet)) || {};
+                    return {
+                        id: pet.id || app.petId || 'P101',
+                        name: app.petName || app.pet || pet.name || 'Companion Pet',
+                        image: pet.image || app.petImage || '/featured_dog.jpg',
+                        breed: pet.breed || app.petBreed || 'Rescued Companion',
+                        species: pet.species || app.petSpecies || 'Companion',
+                        age: pet.age || '1.5 yrs',
+                        gender: pet.gender || 'Male',
+                        adoptedDate: app.submittedDate || app.date || 'Recent',
+                        weight: pet.weight || pet.size || 'Medium (12 kg)',
+                        microchip: pet.microchip || 'ISO-992014821',
+                        nextCheckup: app.appointmentDate ? `${app.appointmentDate} (${app.appointmentTime || '11:00 AM'})` : '10 October 2026 (11:00 AM)',
+                        records: ['Rabies Titer Verified', 'ISO Microchipped', 'Sterilized', 'Health Cleared'],
+                        diet: 'Royal Canin High-Protein Active Diet (2 cups/day + fresh water)',
+                        healthStatus: 'Health Pass Verified',
+                        status: app.status || 'Under Review',
+                        statusType: app.statusType || 'review',
+                        passportNo: `KH-PASSPORT-${app.db_id || app.id || '101'}`,
+                        issuingShelter: app.shelter || 'Partner Shelter'
+                    };
+                });
+            } else {
+                displayPets = KindHeartData.myPets || [];
+            }
 
-                    <div class="space-y-1.5 pt-1">
-                        <div class="text-[11px] font-bold font-mono text-slate-400 uppercase">Verified Medical Milestones</div>
-                        <div class="flex flex-wrap gap-1.5">
-                            ${pet.records.map(r => `<span class="px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-[11px] text-slate-300 font-mono">${r}</span>`).join('')}
+            if (!displayPets || displayPets.length === 0) {
+                container.innerHTML = `
+                    <div class="col-span-full dash-card p-12 text-center space-y-3">
+                        <div class="w-16 h-16 rounded-full bg-[#FF8F1C]/15 border border-[#FF8F1C]/30 flex items-center justify-center text-[#FF8F1C] mx-auto">
+                            <i data-lucide="paw-print" class="w-8 h-8"></i>
                         </div>
-                    </div>
-
-                    <div class="p-3 rounded-xl bg-white/[0.02] border border-white/10 text-xs space-y-1">
-                        <div class="text-slate-400 text-[10px] font-mono uppercase">Diet &amp; Daily Care Routine</div>
-                        <div class="text-slate-300">${pet.diet}</div>
-                    </div>
-
-                    <div class="pt-3 flex flex-wrap items-center justify-between gap-3 border-t border-white/10">
-                        <span class="text-xs text-emerald-400 font-bold flex items-center gap-1">
-                            <i data-lucide="shield-check" class="w-3.5 h-3.5"></i>
-                            <span>${pet.healthStatus}</span>
-                        </span>
-                        <button onclick="openHealthPassModal('${pet.name}')" class="btn-apple-primary text-xs !py-1.5 !px-3">
-                            <i data-lucide="file-check" class="w-3.5 h-3.5"></i>
-                            <span>View Health Pass</span>
+                        <h4 class="text-lg font-bold text-white font-heading">No Adopted Companions Yet</h4>
+                        <p class="text-xs text-slate-400 max-w-md mx-auto">Browse our registered shelter pets and submit an adoption request to welcome your new family member!</p>
+                        <button onclick="switchDashboardTab('find-a-pet')" class="btn-apple-primary text-xs !py-2.5 !px-5 inline-flex items-center gap-2">
+                            <i data-lucide="search" class="w-4 h-4"></i>
+                            <span>Find a Companion Pet</span>
                         </button>
                     </div>
-                </div>
-            `).join('');
+                `;
+            } else {
+                container.innerHTML = displayPets.map(pet => `
+                    <div class="dash-card p-6 space-y-4">
+                        <div class="flex items-center gap-4 pb-4 border-b border-white/10">
+                            <img src="${pet.image}" alt="${pet.name}" class="w-20 h-20 rounded-2xl object-cover border border-white/10" />
+                            <div>
+                                <div class="flex items-center gap-2 flex-wrap">
+                                    <h3 class="text-xl font-bold text-white font-heading">${pet.name}</h3>
+                                    <span class="badge-status badge-status-${pet.statusType || 'approved'}">${pet.status}</span>
+                                </div>
+                                <div class="text-xs text-[#FF8F1C] font-mono">${pet.breed} &bull; ${pet.age} (${pet.gender})</div>
+                                <div class="text-[11px] text-slate-400 font-mono mt-0.5">Applied / Adopted: ${pet.adoptedDate} &bull; Weight: ${pet.weight}</div>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3 text-xs">
+                            <div class="p-3 rounded-xl bg-white/[0.02] border border-white/10">
+                                <div class="text-slate-400 text-[10px] font-mono uppercase">Microchip ISO ID</div>
+                                <div class="font-mono font-bold text-white mt-0.5">${pet.microchip}</div>
+                            </div>
+                            <div class="p-3 rounded-xl bg-white/[0.02] border border-white/10">
+                                <div class="text-slate-400 text-[10px] font-mono uppercase">Appointment / Vet Visit</div>
+                                <div class="font-mono font-bold text-emerald-400 mt-0.5">${pet.nextCheckup}</div>
+                            </div>
+                        </div>
+
+                        <div class="space-y-1.5 pt-1">
+                            <div class="text-[11px] font-bold font-mono text-slate-400 uppercase">Verified Medical Milestones</div>
+                            <div class="flex flex-wrap gap-1.5">
+                                ${(pet.records || []).map(r => `<span class="px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-[11px] text-slate-300 font-mono">${r}</span>`).join('')}
+                            </div>
+                        </div>
+
+                        <div class="p-3 rounded-xl bg-white/[0.02] border border-white/10 text-xs space-y-1">
+                            <div class="text-slate-400 text-[10px] font-mono uppercase">Diet &amp; Daily Care Routine</div>
+                            <div class="text-slate-300">${pet.diet}</div>
+                        </div>
+
+                        <div class="pt-3 flex flex-wrap items-center justify-between gap-3 border-t border-white/10">
+                            <span class="text-xs text-emerald-400 font-bold flex items-center gap-1">
+                                <i data-lucide="shield-check" class="w-3.5 h-3.5"></i>
+                                <span>${pet.healthStatus}</span>
+                            </span>
+                            <div class="flex items-center gap-2">
+                                <button onclick="openPetDetails('${pet.id}')" class="btn-apple-secondary text-xs !py-1.5 !px-3">
+                                    <i data-lucide="paw-print" class="w-3.5 h-3.5 text-[#FF8F1C]"></i>
+                                    <span>Profile</span>
+                                </button>
+                                <button onclick="openHealthPassModal('${pet.name}')" class="btn-apple-primary text-xs !py-1.5 !px-3">
+                                    <i data-lucide="file-check" class="w-3.5 h-3.5"></i>
+                                    <span>Health Pass</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            }
             if (window.lucide) lucide.createIcons();
         }
 
@@ -11037,8 +11470,7 @@ html.theme-light #assign-driver-select option:disabled {
                     {
                         title: 'Navigation Hub',
                         links: [
-                            { id: 'profile', label: 'Adopter Profile', icon: 'user' },
-                            { id: 'notifications', label: 'Notifications', icon: 'bell' },
+                                                        { id: 'notifications', label: 'Notifications', icon: 'bell' },
                             { id: 'payments', label: 'Payments', icon: 'credit-card' },
                             { id: 'documents', label: 'Documents', icon: 'folder-check' },
                             { id: 'pet-care', label: 'Pet Care & Support', icon: 'book-heart' }
@@ -11111,7 +11543,7 @@ html.theme-light #assign-driver-select option:disabled {
                         title: 'Navigation Hub',
                         links: [
                             { id: 'dashboard', label: 'Dashboard', icon: 'truck' },
-                            { id: 'applications', label: 'Assigned Deliveries', icon: 'package-check' },
+                            { id: 'delivery-logistics', label: 'Assigned Deliveries', icon: 'package-check' },
                             { id: 'payments', label: 'Handover Payments', icon: 'wallet' },
                             { id: 'documents', label: 'Identity & Verification', icon: 'shield-check' },
                             { id: 'notifications', label: 'Dispatch Alerts', icon: 'bell' }
@@ -12723,26 +13155,51 @@ html.theme-light #assign-driver-select option:disabled {
             }
 
             tbody.innerHTML = filtered.map(p => {
+                const isShelterRole = KindHeartData.currentRole === 'shelter';
                 const isShelterOrAdmin = KindHeartData.currentRole === 'shelter' || KindHeartData.currentRole === 'admin';
                 const petAdoptionReq = (KindHeartData.applications || []).find(a =>
-                    (String(a.petId) === String(p.id) || (a.petName && a.petName.toLowerCase() === (p.name || '').toLowerCase())) &&
+                    (String(a.petId) === String(p.id) || 
+                     String(a.petId) === String(p.id).replace(/\D/g, '') ||
+                     String(a.db_id) === String(p.id) ||
+                     String(a.db_id) === String(p.id).replace(/\D/g, '') ||
+                     (a.petName && a.petName.toLowerCase() === (p.name || '').toLowerCase())) &&
                     !['REJECTED', 'CANCELLED', 'DELIVERED', 'COMPLETED', 'ADOPTED'].includes(
                         String(a.raw_status || a.status || '').toUpperCase().replace(/ /g, '_'))
                 );
+
+                let currentStatusTemp = (p.status || 'Available').trim();
+                const petAppTemp = (KindHeartData.applications || []).find(a =>
+                    (String(a.petId) === String(p.id) || String(a.db_id) === String(p.id) || (a.petName && a.petName.toLowerCase() === (p.name || '').toLowerCase()))
+                );
+                if (petAppTemp) {
+                    const rawSt = String(petAppTemp.raw_status || petAppTemp.status || '').toUpperCase().replace(/ /g, '_');
+                    if (['DELIVERED', 'COMPLETED', 'ADOPTED'].includes(rawSt)) {
+                        currentStatusTemp = 'Adopted';
+                    } else if (['PENDING_SHELTER', 'APPROVED', 'READY_FOR_HANDOVER', 'DELIVERY_SCHEDULED', 'IN_TRANSIT', 'OUT_FOR_DELIVERY', 'UNDER_REVIEW', 'ACCEPTED'].includes(rawSt)) {
+                        currentStatusTemp = 'Pending Adoption';
+                    }
+                }
+
+                const isPendingAdoption = currentStatusTemp === 'Pending Adoption' || (p.status || '').toLowerCase().includes('pending');
                 const isAssigned = petAdoptionReq && (
                     petAdoptionReq.is_delivery_assigned || 
                     Boolean(petAdoptionReq.assigned_driver) || 
                     String(petAdoptionReq.raw_status || petAdoptionReq.status || '').toUpperCase().replace(/ /g,'_') === 'DELIVERY_SCHEDULED'
                 );
-                const assignBtn = (isShelterOrAdmin && petAdoptionReq && !isAssigned)
-                    ? `<button type="button"
-                          onclick="openAssignDeliveryModal('${petAdoptionReq.db_id || petAdoptionReq.id}', '${(p.name||'').replace(/'/g,"\\'").replace(/"/g,'\\"')}', '${(petAdoptionReq.customer||'Customer').replace(/'/g,"\\'")}')"
-                          class="btn-apple-secondary text-xs !py-1 !px-2.5 inline-flex items-center gap-1 !border-blue-500/40 !text-blue-300 hover:!bg-blue-500/10"
-                          title="Assign Delivery Partner">
-                          <i data-lucide="truck" class="w-3 h-3"></i>
-                          <span>Assign</span>
-                        </button>`
-                    : '';
+
+                let assignBtn = '';
+                if (isShelterRole && (petAdoptionReq || isPendingAdoption)) {
+                    if (isAssigned) {
+                        assignBtn = `<span class="px-2.5 py-1 rounded text-[10px] font-mono text-emerald-400 border border-emerald-500/30 bg-emerald-500/10 flex items-center gap-1"><i data-lucide="check-circle-2" class="w-3 h-3"></i><span>Driver Assigned</span></span>`;
+                    } else {
+                        const targetAdoptionId = petAdoptionReq ? (petAdoptionReq.db_id || petAdoptionReq.id || petAdoptionReq.adoption_id) : (p.id ? String(p.id).replace(/\D/g, '') : '');
+                        const targetCustName = petAdoptionReq ? (petAdoptionReq.customer || petAdoptionReq.customerName || 'Adopter') : 'Adopter';
+                        assignBtn = `<button type="button" onclick="openAssignDeliveryModal('${escapeHTML(targetAdoptionId)}', '${escapeHTML(p.name)}', '${escapeHTML(targetCustName)}')" class="btn-apple-primary text-xs !py-1.5 !px-3 inline-flex items-center gap-1.5 shadow">
+                            <i data-lucide="truck" class="w-3.5 h-3.5"></i>
+                            <span>Assign Delivery Partner</span>
+                        </button>`;
+                    }
+                }
                 let currentStatus = (p.status || 'Available').trim();
                 const petApp = (KindHeartData.applications || []).find(a =>
                     (String(a.petId) === String(p.id) || String(a.db_id) === String(p.id) || (a.petName && a.petName.toLowerCase() === (p.name || '').toLowerCase()))
@@ -12964,6 +13421,24 @@ html.theme-light #assign-driver-select option:disabled {
             if (window.lucide) lucide.createIcons();
         }
 
+        function toggleAdminViewPassword(elementId, realPassword) {
+            const el = document.getElementById(elementId);
+            if (!el) return;
+            const isRevealed = el.dataset.isRevealed === 'true';
+            const btn = el.nextElementSibling || (el.parentElement ? el.parentElement.querySelector('button') : null);
+            
+            if (isRevealed) {
+                el.textContent = '••••••••';
+                el.dataset.isRevealed = 'false';
+                if (btn) btn.innerHTML = `<i data-lucide="eye" class="w-3.5 h-3.5"></i>`;
+            } else {
+                el.textContent = realPassword || '123456';
+                el.dataset.isRevealed = 'true';
+                if (btn) btn.innerHTML = `<i data-lucide="eye-off" class="w-3.5 h-3.5 text-amber-400"></i>`;
+            }
+            if (window.lucide) lucide.createIcons();
+        }
+
         function openShelterDetail(shelterId) {
             const s = (KindHeartData.shelters || []).find(item => item.id === shelterId);
             if (!s) return;
@@ -13061,34 +13536,77 @@ html.theme-light #assign-driver-select option:disabled {
                 : `<div class="p-4 rounded-xl bg-white/[0.02] border border-white/10 text-center text-slate-400 text-xs font-mono">No verification documents uploaded yet by this shelter.</div>`;
 
                 contentEl.innerHTML = `
-                    <!-- Key Info Row -->
+                    <!-- Key Info Cards Grid -->
                     <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                        <div class="p-3 rounded-xl bg-white/[0.03] border border-white/10">
-                            <div class="text-[10px] text-slate-400 font-mono uppercase tracking-wider mb-1">Location</div>
-                            <div class="font-semibold text-white text-xs">${city}</div>
+                        <div class="p-3 rounded-xl bg-white/[0.03] border border-white/10 flex flex-col justify-between">
+                            <div class="text-[10px] text-slate-400 font-mono uppercase tracking-wider mb-1 flex items-center gap-1.5">
+                                <i data-lucide="map-pin" class="w-3.5 h-3.5 text-blue-400 shrink-0"></i> Location
+                            </div>
+                            <div class="font-semibold text-white text-xs truncate" title="${city}">${city}</div>
                         </div>
-                        <div class="p-3 rounded-xl bg-white/[0.03] border border-white/10">
-                            <div class="text-[10px] text-slate-400 font-mono uppercase tracking-wider mb-1">License</div>
-                            <div class="font-mono font-bold text-white text-xs">${license}</div>
+                        <div class="p-3 rounded-xl bg-white/[0.03] border border-white/10 flex flex-col justify-between">
+                            <div class="text-[10px] text-slate-400 font-mono uppercase tracking-wider mb-1 flex items-center gap-1.5">
+                                <i data-lucide="shield-check" class="w-3.5 h-3.5 text-amber-400 shrink-0"></i> License
+                            </div>
+                            <div class="font-mono font-bold text-white text-xs truncate" title="${license}">${license}</div>
                         </div>
-                        <div class="p-3 rounded-xl bg-white/[0.03] border border-white/10">
-                            <div class="text-[10px] text-slate-400 font-mono uppercase tracking-wider mb-1">Audit Score</div>
+                        <div class="p-3 rounded-xl bg-white/[0.03] border border-white/10 flex flex-col justify-between">
+                            <div class="text-[10px] text-slate-400 font-mono uppercase tracking-wider mb-1 flex items-center gap-1.5">
+                                <i data-lucide="award" class="w-3.5 h-3.5 text-emerald-400 shrink-0"></i> Audit Score
+                            </div>
                             <div class="font-bold text-emerald-400 text-xs">${passRate} Pass</div>
                         </div>
-                        <div class="p-3 rounded-xl bg-white/[0.03] border border-white/10">
-                            <div class="text-[10px] text-slate-400 font-mono uppercase tracking-wider mb-1">Documents</div>
+                        <div class="p-3 rounded-xl bg-white/[0.03] border border-white/10 flex flex-col justify-between">
+                            <div class="text-[10px] text-slate-400 font-mono uppercase tracking-wider mb-1 flex items-center gap-1.5">
+                                <i data-lucide="file-check-2" class="w-3.5 h-3.5 text-purple-400 shrink-0"></i> Documents
+                            </div>
                             <div class="font-mono font-bold text-purple-400 text-xs">${docs.filter(d => d.verification_status === 'VERIFIED').length}/${docs.length} Verified</div>
                         </div>
                     </div>
-                    <!-- Contact Row -->
-                    <div class="flex flex-wrap gap-4 px-1 text-[11px] text-slate-400">
-                        <span>Contact: <strong class="text-slate-200">${s.contactPerson || 'Care Lead'}</strong></span>
-                        <span>Phone: <strong class="text-slate-200">${s.phone}</strong></span>
-                        <span>Adoptions: <strong class="text-white">${s.completedAdoptions || 0}</strong></span>
+
+                    <!-- Credentials & Contact Lead Card -->
+                    <div class="p-4 rounded-xl bg-white/[0.02] border border-white/10 space-y-3">
+                        <div class="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400 flex items-center justify-between pb-2.5 border-b border-white/10">
+                            <span class="flex items-center gap-2 text-white">
+                                <i data-lucide="user-check" class="w-4 h-4 text-emerald-400"></i>
+                                Account Credentials & Contact Lead
+                            </span>
+                            <span class="badge-status ${status.toLowerCase().includes('verif') ? 'badge-status-approved' : 'badge-status-review'} text-[9px]">${status}</span>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
+                            <div class="flex items-center justify-between p-2.5 rounded-lg bg-white/[0.02] border border-white/5">
+                                <span class="text-slate-400 font-medium">Contact Person:</span>
+                                <strong class="text-white font-semibold">${s.contactPerson || 'Care Lead'}</strong>
+                            </div>
+                            <div class="flex items-center justify-between p-2.5 rounded-lg bg-white/[0.02] border border-white/5">
+                                <span class="text-slate-400 font-medium">Phone Number:</span>
+                                <strong class="text-white font-mono font-semibold">${s.phone}</strong>
+                            </div>
+                            <div class="flex items-center justify-between p-2.5 rounded-lg bg-white/[0.02] border border-white/5">
+                                <span class="text-slate-400 font-medium">Email Address:</span>
+                                <strong class="text-slate-200 font-mono text-[11px] truncate max-w-[160px]" title="${s.email}">${s.email || 'shelter@kindheart.org'}</strong>
+                            </div>
+                            <div class="flex items-center justify-between p-2.5 rounded-lg bg-white/[0.02] border border-white/5">
+                                <span class="text-slate-400 font-medium">Login Password:</span>
+                                <div class="flex items-center gap-2 bg-black/40 px-2.5 py-1 rounded-md border border-amber-500/20">
+                                    <strong id="sh-pwd-${s.id}" class="text-amber-300 font-mono font-bold text-xs tracking-wider">••••••••</strong>
+                                    <button type="button" onclick="toggleAdminViewPassword('sh-pwd-${s.id}', '${s.plain_password || '123456'}')" class="text-slate-400 hover:text-amber-300 transition-colors p-0.5" title="Toggle Password Visibility">
+                                        <i data-lucide="eye" class="w-3.5 h-3.5"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between p-2.5 rounded-lg bg-white/[0.02] border border-white/5 sm:col-span-2">
+                                <span class="text-slate-400 font-medium flex items-center gap-1.5">
+                                    <i data-lucide="heart" class="w-3.5 h-3.5 text-rose-400"></i> Completed Adoptions:
+                                </span>
+                                <strong class="text-emerald-400 font-bold font-mono">${s.completedAdoptions || 0} Adoptions</strong>
+                            </div>
+                        </div>
                     </div>
 
-                    <!-- Verification Documents Section (Phase 9) -->
-                    <div class="space-y-2 pt-2 border-t border-white/5">
+                    <!-- Verification Documents Section -->
+                    <div class="space-y-2 pt-1">
                         <div class="flex items-center justify-between">
                             <div class="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
                                 <i data-lucide="file-check-2" class="w-3.5 h-3.5 text-purple-400"></i>
@@ -13113,8 +13631,8 @@ html.theme-light #assign-driver-select option:disabled {
                         </div>` : ''}
                     </div>
 
-                    <!-- Pets Section -->
-                    <div class="space-y-2">
+                    <!-- Companion Pets Section -->
+                    <div class="space-y-2 pt-1">
                         <div class="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
                             <i data-lucide="paw-print" class="w-3.5 h-3.5 text-[#FF8F1C]"></i>
                             Companion Pets (${shelterPets.length})
@@ -13358,23 +13876,32 @@ html.theme-light #assign-driver-select option:disabled {
                     <div class="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400">Contact Details</div>
                     <div class="p-3.5 rounded-xl bg-white/[0.03] border border-white/10 space-y-2">
                         <div class="flex items-start gap-2">
-                            <span class="text-slate-500 w-16 shrink-0">Email</span>
+                            <span class="text-slate-500 w-24 shrink-0">Email</span>
                             <span class="text-white font-mono text-[11px]">${c.email || '—'}</span>
                         </div>
                         <div class="flex items-start gap-2">
-                            <span class="text-slate-500 w-16 shrink-0">Phone</span>
+                            <span class="text-slate-500 w-24 shrink-0">Phone</span>
                             <span class="text-white font-mono text-[11px]">${c.phone || '—'}</span>
                         </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-slate-500 w-24 shrink-0">Login Password</span>
+                            <div class="flex items-center gap-2 bg-black/40 px-2.5 py-1 rounded-md border border-amber-500/20">
+                                <strong id="cust-pwd-${c.id}" class="text-amber-300 font-mono font-bold text-xs tracking-wider">••••••••</strong>
+                                <button type="button" onclick="toggleAdminViewPassword('cust-pwd-${c.id}', '${c.plain_password || '123456'}')" class="text-slate-400 hover:text-amber-300 transition-colors p-0.5" title="Toggle Password Visibility">
+                                    <i data-lucide="eye" class="w-3.5 h-3.5"></i>
+                                </button>
+                            </div>
+                        </div>
                         <div class="flex items-start gap-2">
-                            <span class="text-slate-500 w-16 shrink-0">Address</span>
+                            <span class="text-slate-500 w-24 shrink-0">Address</span>
                             <span class="text-slate-200 text-[11px] leading-relaxed">${address}</span>
                         </div>
                         <div class="flex items-start gap-2">
-                            <span class="text-slate-500 w-16 shrink-0">City</span>
+                            <span class="text-slate-500 w-24 shrink-0">City</span>
                             <span class="text-slate-200 text-[11px]">${city}</span>
                         </div>
                         <div class="flex items-start gap-2">
-                            <span class="text-slate-500 w-16 shrink-0">Registered</span>
+                            <span class="text-slate-500 w-24 shrink-0">Registered</span>
                             <span class="text-slate-200 font-mono text-[11px]">${registeredDate}</span>
                         </div>
                     </div>
@@ -13446,22 +13973,11 @@ html.theme-light #assign-driver-select option:disabled {
             const tbody = document.getElementById('admin-delivery-fleet-rows');
             if (!tbody) return;
 
-            let list = KindHeartData.deliveryPartners || [];
+            let list = (KindHeartData.dbDeliveryPartners && KindHeartData.dbDeliveryPartners.length > 0)
+                ? KindHeartData.dbDeliveryPartners 
+                : (KindHeartData.deliveryPartners || []);
 
-            // If logged in as shelter, show drivers belonging to this shelter
-            if (KindHeartData.currentRole === 'shelter') {
-                const myShelterName = (KindHeartData.currentUser?.shelterName || KindHeartData.currentUser?.name || '').toLowerCase();
-                const myUserId = String(KindHeartData.currentUser?.id || '');
-                const myShelterId = String(KindHeartData.currentUser?.shelterId || '');
-                list = list.filter(dp => {
-                    if (!dp) return false;
-                    const sId = String(dp.shelterId || '');
-                    const sName = (dp.shelterName || '').toLowerCase();
-                    return !dp.shelterName || 
-                           (sId && (sId === myUserId || sId === 'SH-' + myUserId || (myShelterId && sId === myShelterId))) ||
-                           (sName && myShelterName && (sName.includes(myShelterName) || myShelterName.includes(sName)));
-                });
-            }
+            // Display all registered delivery partners from database
 
             // Update KPI summary stats
             const totalCouriersEl = document.getElementById('stat-deliv-boys-count');
@@ -13593,7 +14109,14 @@ html.theme-light #assign-driver-select option:disabled {
                             </div>
                         </div>
                     </td>
-                    <td class="p-4 text-right whitespace-nowrap">
+                    <td class="p-4 text-right whitespace-nowrap space-x-2">
+                        ${(opStatus === 'AVAILABLE')
+                            ? `<button type="button" onclick="openAssignDeliveryForDriver('${escapeHTML(dp.partnerId || dp.id)}', '${escapeHTML(dp.name)}')" class="btn-apple-primary text-xs !py-1.5 !px-3 inline-flex items-center gap-1.5 shadow">
+                                    <i data-lucide="truck" class="w-3.5 h-3.5"></i>
+                                    <span>Assign Delivery</span>
+                               </button>`
+                            : `<span class="px-2.5 py-1 rounded text-[10px] font-mono text-amber-400 border border-amber-500/30 bg-amber-500/10">Driver Busy</span>`
+                        }
                         <button type="button" onclick="openCourierDetail('${escapeHTML(dp.partnerId || dp.id)}')" class="btn-apple-secondary text-xs !py-1.5 !px-3 inline-flex items-center gap-1.5">
                             <i data-lucide="eye" class="w-3.5 h-3.5"></i>
                             <span>View Details</span>
@@ -13683,6 +14206,15 @@ html.theme-light #assign-driver-select option:disabled {
                             <div class="text-white text-xs font-mono font-bold">${escapeHTML(dp.email || 'Not Provided')}</div>
                         </div>
                         <div class="p-3.5 rounded-xl bg-white/5 border border-white/10 space-y-1">
+                            <div class="text-[10px] uppercase font-mono text-slate-400">Login Password</div>
+                            <div class="flex items-center justify-between bg-black/40 px-2.5 py-1 rounded-md border border-amber-500/20">
+                                <strong id="dp-pwd-${dp.partnerId || dp.id}" class="text-amber-300 font-mono font-bold text-xs tracking-wider">••••••••</strong>
+                                <button type="button" onclick="toggleAdminViewPassword('dp-pwd-${dp.partnerId || dp.id}', '${dp.plain_password || '123456'}')" class="text-slate-400 hover:text-amber-300 transition-colors p-0.5" title="Toggle Password Visibility">
+                                    <i data-lucide="eye" class="w-3.5 h-3.5"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="p-3.5 rounded-xl bg-white/5 border border-white/10 space-y-1">
                             <div class="text-[10px] uppercase font-mono text-slate-400">Assigned Vehicle</div>
                             <div class="text-white text-xs font-bold">${escapeHTML(dp.vehicleType || 'Pet Taxi Van')}</div>
                         </div>
@@ -13731,47 +14263,161 @@ html.theme-light #assign-driver-select option:disabled {
         }
 
         // Phase 31: Open Delivery Assignment Modal with optgroups (AVAILABLE, BUSY, INACTIVE)
-        async function openAssignDeliveryModal(adoptionId, petName, customerName) {
-            document.getElementById('assign-adoption-id').value = adoptionId;
-            document.getElementById('assign-app-id').textContent = `#AR-${String(adoptionId).padStart(4, '0')}`;
-            document.getElementById('assign-pet-name').textContent = petName || 'Companion';
-            document.getElementById('assign-customer-name').textContent = customerName || 'Customer';
-
+        
+        // Renders driver selection board inside Assign Delivery Partner modal
+        function renderAvailableDriversBoard(targetPartnerId) {
+            const boardContainer = document.getElementById('assign-driver-board-container');
+            const countBadge = document.getElementById('assign-driver-count-badge');
             const selectEl = document.getElementById('assign-driver-select');
-            if (!selectEl) return;
-            selectEl.innerHTML = '<option value="" disabled selected>Loading available delivery partners...</option>';
+            if (!boardContainer) return;
 
-            openModal('modal-assign-delivery');
-
-            try {
-                const resp = await fetch('/users/api/delivery/available-partners/');
-                const res = await resp.json();
-                selectEl.innerHTML = '';
-
-                const available = (res.success && Array.isArray(res.available_partners)) ? res.available_partners : [];
-
-                if (available.length === 0) {
-                    const opt = document.createElement('option');
-                    opt.disabled = true;
-                    opt.selected = true;
-                    opt.value = "";
-                    opt.textContent = 'No delivery partners are currently available';
-                    selectEl.appendChild(opt);
-                } else {
-                    available.forEach((p, idx) => {
-                        const opt = document.createElement('option');
-                        opt.value = p.partnerId || p.username || p.id;
-                        opt.textContent = `🟢 ${p.name} (${p.vehicle || 'Pet Taxi'}) - ${p.shelterName || 'General Fleet'}`;
-                        if (idx === 0) opt.selected = true;
-                        selectEl.appendChild(opt);
-                    });
-                }
-            } catch (err) {
-                console.error("Error fetching available delivery partners:", err);
-                selectEl.innerHTML = '<option value="" disabled selected>Error loading available delivery partners</option>';
+            const partners = KindHeartData.dbDeliveryPartners || KindHeartData.deliveryPartners || [];
+            
+            // Available registered partners
+            let availablePartners = partners.filter(p => 
+                !p.availabilityStatus || 
+                ['AVAILABLE', 'ACTIVE', 'READY'].includes(String(p.availabilityStatus || p.status || '').toUpperCase())
+            );
+            if (availablePartners.length === 0) {
+                availablePartners = partners;
             }
 
+            if (countBadge) {
+                countBadge.textContent = `${availablePartners.length} Available Drivers`;
+            }
+
+            if (availablePartners.length === 0) {
+                boardContainer.innerHTML = `
+                    <div class="col-span-full p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs text-center space-y-1">
+                        <i data-lucide="alert-circle" class="w-5 h-5 mx-auto mb-1 text-amber-400"></i>
+                        <div class="font-bold">No Registered Delivery Drivers</div>
+                        <div class="text-[11px] text-amber-400/80">Register drivers in the Delivery Fleet section to assign handovers.</div>
+                    </div>
+                `;
+                if (selectEl) selectEl.value = '';
+                return;
+            }
+
+            // Determine default selected driver
+            let selectedId = targetPartnerId;
+            if (!selectedId || !partners.some(p => String(p.partnerId || p.id || p.username) === String(selectedId))) {
+                selectedId = availablePartners[0].partnerId || availablePartners[0].id || availablePartners[0].username || '';
+            }
+            if (selectEl) selectEl.value = selectedId;
+
+            boardContainer.innerHTML = availablePartners.map(p => {
+                const pId = String(p.partnerId || p.id || p.username || 'DP-0001');
+                const pName = p.name || p.username || 'Delivery Driver';
+                const pPhone = p.phone || p.contact_number || '+91 98470 11223';
+                const pVehicle = p.vehicle || p.vehicle_type || 'Pet Taxi Van';
+                const pStatus = String(p.availabilityStatus || p.status || 'AVAILABLE').toUpperCase();
+                const isSelected = String(pId) === String(selectedId);
+
+                const cardBorder = isSelected 
+                    ? 'border-blue-500 bg-blue-500/15 ring-2 ring-blue-500/50 shadow-lg shadow-blue-500/20' 
+                    : 'border-white/10 bg-white/5 hover:bg-white/10 hover:border-white/20';
+                
+                const checkBadge = isSelected
+                    ? `<div class="w-5 h-5 rounded-full bg-blue-500 text-white flex items-center justify-center font-bold text-xs shadow"><i data-lucide="check" class="w-3.5 h-3.5"></i></div>`
+                    : `<div class="w-5 h-5 rounded-full border border-white/30 bg-white/5 group-hover:border-blue-400 transition-colors"></div>`;
+
+                return `
+                    <div onclick="selectDriverForAssignment('${escapeHTML(pId)}')" class="p-3.5 rounded-xl border transition-all cursor-pointer space-y-2 relative group ${cardBorder}" id="driver-card-${escapeHTML(pId)}">
+                        <div class="flex items-center justify-between">
+                            <span class="px-2 py-0.5 rounded-full text-[9px] font-mono font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center gap-1">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                                <span>${pStatus}</span>
+                            </span>
+                            ${checkBadge}
+                        </div>
+                        <div class="flex items-center gap-2.5">
+                            <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-600 to-cyan-600 text-white font-bold text-xs flex items-center justify-center shrink-0 shadow">
+                                <i data-lucide="user-check" class="w-4 h-4"></i>
+                            </div>
+                            <div class="min-w-0 flex-1">
+                                <div class="font-bold text-white text-xs truncate">${pName}</div>
+                                <div class="text-[10px] text-blue-300 font-mono truncate">ID: ${pId} &bull; ${pPhone}</div>
+                                <div class="text-[10px] text-slate-400 font-mono truncate">${pVehicle}</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
             if (window.lucide) lucide.createIcons();
+        }
+
+        function selectDriverForAssignment(partnerId) {
+            const selectEl = document.getElementById('assign-driver-select');
+            if (selectEl) selectEl.value = partnerId;
+            renderAvailableDriversBoard(partnerId);
+        }
+
+        // Open Assign Delivery Modal pre-configured for specific delivery partner or adoption request
+        async function openAssignDeliveryModal(targetAdoptionId, targetPetName, targetCustName, targetPartnerId) {
+            const apps = KindHeartData.applications || KindHeartData.adoptionOrders || [];
+            let activeAdoption = apps.find(a => 
+                (targetAdoptionId && (String(a.db_id) === String(targetAdoptionId) || String(a.id) === String(targetAdoptionId) || String(a.adoption_id) === String(targetAdoptionId))) ||
+                (targetPetName && a.petName && a.petName.toLowerCase() === targetPetName.toLowerCase()) ||
+                (targetPetName && a.pet && a.pet.toLowerCase() === targetPetName.toLowerCase())
+            );
+
+            if (!activeAdoption) {
+                activeAdoption = apps.find(a => 
+                    !['DELIVERED', 'COMPLETED', 'REJECTED', 'CANCELLED'].includes(String(a.raw_status || a.status || '').toUpperCase().replace(/ /g, '_'))
+                ) || apps[0] || {};
+            }
+
+            const adoptionId = activeAdoption.db_id || activeAdoption.id || targetAdoptionId || '1';
+            const petName = activeAdoption.petName || activeAdoption.pet || targetPetName || 'Companion';
+            const petBreed = activeAdoption.petBreed || activeAdoption.petSpecies || 'Rescue Pet';
+            let custName = (activeAdoption.customerName && activeAdoption.customerName !== 'Adopter') ? activeAdoption.customerName : (activeAdoption.customer || targetCustName || 'Adopter');
+            let custPhone = activeAdoption.customerPhone || activeAdoption.phone || '';
+            let custEmail = activeAdoption.customerEmail || activeAdoption.email || '';
+            let custAddress = activeAdoption.address || activeAdoption.drop_address || activeAdoption.pickup_address || activeAdoption.customerCity || '';
+            let custResidence = activeAdoption.residence || activeAdoption.residence_type || 'Residential Property';
+
+            // Enrich customer details if empty or fallback
+            if ((!custPhone || !custAddress) && KindHeartData.customers) {
+                const foundCust = KindHeartData.customers.find(c => (c.name && c.name.toLowerCase() === custName.toLowerCase()) || c.username === custName);
+                if (foundCust) {
+                    if (!custPhone) custPhone = foundCust.phone || foundCust.username;
+                    if (!custEmail) custEmail = foundCust.email;
+                    if (!custAddress) custAddress = foundCust.address || foundCust.city;
+                }
+            }
+            if (!custPhone) custPhone = '+91 98470 11223';
+            if (!custEmail) custEmail = 'adopter@kindheart.org';
+            if (!custAddress) custAddress = 'Customer Registered Address';
+
+            // Populate Customer & Pet Application Detailed Card
+            const appIdEl = document.getElementById('assign-app-id');
+            const petNameEl = document.getElementById('assign-pet-name');
+            const petBreedEl = document.getElementById('assign-pet-breed');
+            const custNameEl = document.getElementById('assign-customer-name');
+            const custPhoneEmailEl = document.getElementById('assign-customer-phone-email');
+            const custAddrEl = document.getElementById('assign-customer-address');
+            const custResEl = document.getElementById('assign-customer-residence');
+            const adoptIdHidden = document.getElementById('assign-adoption-id');
+
+            if (appIdEl) appIdEl.textContent = `#AR-${String(adoptionId).padStart(4, '0')}`;
+            if (petNameEl) petNameEl.textContent = petName;
+            if (petBreedEl) petBreedEl.textContent = petBreed;
+            if (custNameEl) custNameEl.textContent = custName;
+            if (custPhoneEmailEl) custPhoneEmailEl.textContent = `Phone: ${custPhone} • Email: ${custEmail}`;
+            if (custAddrEl) custAddrEl.textContent = `Handover Address: ${custAddress}`;
+            if (custResEl) custResEl.textContent = `Residence Type: ${custResidence}`;
+            if (adoptIdHidden) adoptIdHidden.value = adoptionId;
+
+            // Render Driver Selection Board with available drivers
+            renderAvailableDriversBoard(targetPartnerId);
+
+            openModal('modal-assign-delivery');
+            if (window.lucide) lucide.createIcons();
+        }
+
+        async function openAssignDeliveryForDriver(partnerId, driverName) {
+            return openAssignDeliveryModal('', '', '', partnerId);
         }
 
         // Phase 31: Submit Delivery Partner Assignment
@@ -16760,10 +17406,19 @@ html.theme-light #assign-driver-select option:disabled {
                 if (res.success && res.pet) {
                     closeModal('shelter-add-pet-modal');
 
-                    // Prepend new pet to KindHeartData.pets
+                    // Prepend new pet to KindHeartData.pets and KindHeartData.myPets
                     if (KindHeartData.pets) {
                         KindHeartData.pets.unshift(res.pet);
                     }
+                    if (KindHeartData.myPets) {
+                        KindHeartData.myPets.unshift(res.pet);
+                    }
+
+                    // Reset filter states so newly registered pet is immediately visible
+                    currentAdminPetsSpecies = 'all';
+                    currentAdminPetsStatus = 'all';
+                    const searchInput = document.getElementById('admin-pets-search');
+                    if (searchInput) searchInput.value = '';
 
                     // Re-render pets table
                     if (typeof renderAdminPetsTable === 'function') renderAdminPetsTable();

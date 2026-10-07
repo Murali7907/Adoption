@@ -36,3 +36,10 @@ db.sqlite3
 .DS_Store
 # Environment variables & secrets
 .env
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+/playwright/.auth/
